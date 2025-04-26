@@ -1,0 +1,41 @@
+---
+// src/pages/index.astro
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import Features from '../components/Features.astro';
+import AboutSection from '../components/AboutSection.astro';
+// Testimonials component removed
+import CTASection from '../components/CTASection.astro';
+import { featuresData } from '../data/featuresData';
+// testimonialsData removed
+
+// Sample data for AboutSection
+const aboutContent = `
+  We are passionate about building modern web experiences.
+  Using Astro allows us to create performant, content-focused websites
+  with an excellent developer experience. This starter template provides
+  a solid foundation for your next project.
+`;
+---
+
+<Layout title="Welcome to My Astro Site">
+	<Hero
+		headline="Build Faster Websites"
+		subheadline="Leverage the power of Astro for unparalleled performance and developer experience."
+		ctaText="Get Started"
+		ctaHref="/docs"
+	/>
+	<Features features={featuresData} />
+	<AboutSection
+		headline="About This Project"
+		content={aboutContent}
+		imageUrl="/placeholder-image.jpg" /* Optional: Add a real image path later */
+		imageAlt="Abstract placeholder image"
+	/>
+	{/* Testimonials section removed */}
+	<CTASection
+		headline="Ready to Get Started?"
+		ctaText="Explore the Docs"
+		ctaHref="/docs"
+	/>
+</Layout>

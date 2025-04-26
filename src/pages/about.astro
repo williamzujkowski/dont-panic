@@ -1,0 +1,84 @@
+---
+// src/pages/about.astro
+import Layout from '../layouts/Layout.astro';
+import AboutSection from '../components/AboutSection.astro'; // Optional: Use if you want the structured component
+---
+<Layout title="About Us">
+  <div class="container">
+    <h1>About Our Awesome Project</h1>
+    <p class="tagline">Learn more about who we are and what we do.</p>
+
+    <!-- Option 1: Simple content directly in the page -->
+    <section class="about-content simple-about">
+      <h2>Our Mission</h2>
+      <p>
+        We are dedicated to creating amazing web experiences using modern technologies like Astro.
+        Our goal is to build fast, accessible, and maintainable websites that delight users and developers alike.
+      </p>
+
+      <h2>Our Story</h2>
+      <p>
+        Founded in 2025, our project started as a simple idea to explore the capabilities of Astro.
+        It has since grown into a platform showcasing best practices in web development, component design,
+        and content management.
+      </p>
+
+      <h2>Meet the Team (Placeholder)</h2>
+      <p>
+        We are a passionate group of developers, designers, and content creators. (Add team member details here later).
+      </p>
+    </section>
+
+    <!-- Option 2: Using the AboutSection component (Uncomment to use) -->
+    <!--
+    <AboutSection
+      headline="Our Mission"
+      content="We are dedicated to creating amazing web experiences using modern technologies like Astro. Our goal is to build fast, accessible, and maintainable websites that delight users and developers alike."
+      imageUrl="/placeholder-mission.jpg"
+    />
+    <AboutSection
+      headline="Our Story"
+      content="Founded in 2025, our project started as a simple idea to explore the capabilities of Astro. It has since grown into a platform showcasing best practices in web development, component design, and content management."
+      imageUrl="/placeholder-story.jpg"
+    />
+    -->
+
+  </div>
+</Layout>
+
+<style>
+  .container {
+    padding: 2rem 1rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    color: var(--color-primary);
+  }
+
+  .tagline {
+    text-align: center;
+    margin-bottom: 3rem;
+    font-size: 1.2rem;
+    color: var(--color-text-secondary);
+  }
+
+  .simple-about h2 {
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--color-accent); /* Or another appropriate color */
+    border-bottom: 2px solid var(--color-border);
+    padding-bottom: 0.5rem;
+  }
+
+  .simple-about p {
+    line-height: 1.7;
+    margin-bottom: 1rem;
+  }
+
+  /* Add styles for AboutSection component if you use it */
+  /* .about-section { margin-bottom: 3rem; } */
+</style>

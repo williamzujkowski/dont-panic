@@ -1,0 +1,37 @@
+---
+// src/layouts/Layout.astro
+interface Props {
+	title: string;
+}
+
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro'; // Import Footer
+import { navItems } from '../data/navItems'; // Import navItems from data file
+
+const { title } = Astro.props;
+const siteTitle = "My Astro Site"; // Define the site title
+const currentPath = Astro.url.pathname; // Get current path
+
+// navItems are now imported from src/data/navItems.ts
+---
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="Astro description" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<style is:global>
+			@import '../styles/global.css';
+		</style>
+	</head>
+	<body>
+		<Header siteTitle={siteTitle} navItems={navItems} currentPath={currentPath} />
+		<main>
+			<slot />
+		</main>
+		<Footer startYear={2023} /> {/* Pass startYear */}
+	</body>
+</html>

@@ -1,0 +1,39 @@
+---
+// src/components/Footer.astro
+interface Props {
+  startYear?: number; // Optional start year
+}
+
+const { startYear } = Astro.props;
+const currentYear = new Date().getFullYear();
+
+let yearDisplay = `${currentYear}`;
+if (startYear && startYear < currentYear) {
+  yearDisplay = `${startYear}-${currentYear}`;
+} else if (startYear && startYear > currentYear) {
+  // If startYear is in the future, just show current year for now
+  console.warn(`Footer startYear (${startYear}) is in the future.`);
+} else if (startYear === currentYear) {
+  // If startYear is the same as current year, just show current year
+  yearDisplay = `${currentYear}`;
+}
+---
+<footer role="contentinfo" class="site-footer">
+  <p>&copy; {yearDisplay} My Astro Site. All rights reserved.</p>
+</footer>
+
+<style>
+.site-footer {
+  padding: var(--spacing-lg) var(--spacing-md);
+  margin-top: var(--spacing-xxl); /* Add space above footer */
+  text-align: center;
+  background-color: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.site-footer p {
+  margin-bottom: 0; /* Remove default paragraph margin */
+}
+</style>

@@ -1,0 +1,107 @@
+---
+// src/pages/blog/index.astro
+import Layout from '../../layouts/Layout.astro';
+
+// Fetch all Markdown posts from the current directory
+// Ensure you don't fetch this index page itself if it were Markdown
+const posts = await Astro.glob('./*.md');
+
+// Sort posts by date, newest first
+posts.sort((a, b) => new Date(b.frontmatter.pubDate).valueOf() - new Date(a.frontmatter.pubDate).valueOf());
+---
+<Layout title="Awesome Blog">
+  <section class="blog-index container">
+    <h1>Awesome Blog</h1>
+    <p>Welcome to our collection of thoughts and insights.</p>
+
+    <ul class="post-list">
+      {posts.map((post) => (
+        <li class="post-item">
+          <article>
+            <h2><a href={post.url}>{post.frontmatter.title}</a></h2>
+            <p class="post-meta">Published on: <time datetime={new Date(post.frontmatter.pubDate).toISOString()}>{new Date(post.frontmatter.pubDate).toLocaleDateString('en-us', { year: 'numeric', month: 'short', day: 'numeric' })}</time></p>
+            <p>{post.frontmatter.description}</p>
+            <a href={post.url} class="read-more">Read post &rarr;</a>
+          </article>
+        </li>
+      ))}
+    </ul>
+  </section>
+</Layout>
+
+<style>
+  .blog-index {
+    padding: 2rem 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .blog-index h1 {
+    text-align: center;
+    margin-bottom: 1rem;
+    color: var(--color-primary); /* Use existing theme color */
+  }
+
+  .blog-index > p {
+    text-align: center;
+    margin-bottom: 3rem;
+    color: var(--color-text-secondary);
+    font-size: 1.1rem;
+  }
+
+  .post-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .post-item {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--color-border); /* Use existing theme color */
+  }
+
+  .post-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  .post-item h2 {
+    margin-bottom: 0.5rem;
+  }
+
+  .post-item h2 a {
+    text-decoration: none;
+    color: var(--color-text); /* Use existing theme color */
+    transition: color 0.3s ease;
+  }
+
+  .post-item h2 a:hover,
+  .post-item h2 a:focus {
+    color: var(--color-primary); /* Use existing theme color */
+  }
+
+  .post-meta {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 1rem;
+  }
+
+  .post-item p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+
+  .read-more {
+    display: inline-block;
+    text-decoration: none;
+    color: var(--color-primary); /* Use existing theme color */
+    font-weight: bold;
+    transition: transform 0.3s ease;
+  }
+
+  .read-more:hover,
+  .read-more:focus {
+    transform: translateX(4px);
+  }
+</style>

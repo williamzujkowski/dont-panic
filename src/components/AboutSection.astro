@@ -1,0 +1,69 @@
+---
+// src/components/AboutSection.astro
+export interface Props {
+  headline: string;
+  content: string;
+  imageUrl?: string;
+  imageAlt?: string; // Added alt text for accessibility
+}
+
+const { headline, content, imageUrl, imageAlt = 'Descriptive image for the about section' } = Astro.props;
+---
+
+<section class="about-section">
+  <div class="about-content">
+    <h2>{headline}</h2>
+    <!-- Use set:html for content to allow basic HTML later if needed -->
+    <div set:html={content} />
+  </div>
+  {imageUrl && (
+    <div class="about-image-wrapper">
+      <img src={imageUrl} alt={imageAlt} class="about-image" />
+    </div>
+  )}
+</section>
+
+<style>
+  .about-section {
+    padding: var(--section-padding-vertical) var(--section-padding-horizontal);
+    background-color: var(--color-background); /* Or --color-surface if alternating */
+    display: grid; /* Use grid for potential two-column layout */
+    gap: var(--spacing-lg);
+    align-items: center; /* Vertically align items if they have different heights */
+  }
+
+  /* Basic layout: Content first, then image */
+  /* We can adjust grid-template-columns in media queries for side-by-side layout */
+  @media (min-width: 768px) {
+    .about-section {
+      grid-template-columns: 1fr 1fr; /* Example: Two equal columns */
+      gap: var(--spacing-xl);
+    }
+
+    /* Optional: Reverse order on desktop */
+    /* .about-image-wrapper { order: -1; } */
+  }
+
+  .about-content h2 {
+    font-size: var(--font-size-h2);
+    margin-bottom: var(--spacing-md);
+    color: var(--color-text);
+  }
+
+  .about-content > div { /* Style the div containing the content */
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+
+  .about-image-wrapper {
+    margin: 0 auto; /* Center image wrapper if needed */
+    max-width: 500px; /* Constrain image size */
+  }
+
+  .about-image {
+    width: 100%;
+    height: auto; /* Maintain aspect ratio */
+    border-radius: var(--border-radius-medium);
+    box-shadow: var(--shadow-small);
+  }
+</style>
