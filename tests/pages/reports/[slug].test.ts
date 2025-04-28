@@ -37,20 +37,21 @@ const mockEntry: CollectionEntry<'reports'> = {
 
 // --- Mocking Astro Features ---
 
-// 1. Define the mock function and its default behavior *before* vi.mock
-const mockGetCollectionFn = vi.fn().mockResolvedValue([mockEntry]); // Mock for potential getStaticPaths usage
+// 1. Hoist the mock function creation
+const { mockGetCollectionFn } = vi.hoisted(() => {
+  return { mockGetCollectionFn: vi.fn() };
+});
 
-// 2. Mock the module and provide the mock function in the factory
+// 2. Mock the module and provide the hoisted mock function in the factory
 vi.mock('astro:content', async (importOriginal) => {
     const original = await importOriginal() as typeof import('astro:content');
     return {
         ...original,
-        getCollection: mockGetCollectionFn, // Use the pre-defined mock function
+        getCollection: mockGetCollectionFn, // Use the hoisted mock function
     };
 });
 
-// 3. Import the mocked function *after* vi.mock using a standard import
-import { getCollection } from 'astro:content';
+// 3. DO NOT import from 'astro:content' here anymore.
 
 
 // Mock Astro global/config
@@ -64,12 +65,11 @@ const mockAstroSite = new URL('http://test.com/test-base/');
 
 describe('Report Slug Page (src/pages/reports/[slug].astro)', () => {
 
-    beforeEach(() => { // No longer needs to be async
-        // Reset mocks before each test
-        // Use the imported 'getCollection' which IS the mock function 'mockGetCollectionFn'
-        vi.mocked(getCollection).mockClear();
-        // Re-apply default mock behavior if it might have been changed in a previous test
-        vi.mocked(getCollection).mockResolvedValue([mockEntry]);
+    beforeEach(() => {
+        // Reset mocks before each test using the hoisted reference
+        mockGetCollectionFn.mockClear();
+        // Re-apply default mock behavior
+        mockGetCollectionFn.mockResolvedValue([mockEntry]);
 
         // Mock Astro global
         // @ts-ignore
@@ -97,10 +97,10 @@ describe('Report Slug Page (src/pages/reports/[slug].astro)', () => {
         // @ts-ignore
         expect(globalThis.Astro.props.entry.slug).toBe(mockEntry.slug);
 
-        // Verify getCollection mock can be accessed and called (using static import)
-        const result = await getCollection('reports'); // Call the mock
-        expect(getCollection).toHaveBeenCalledWith('reports'); // Use imported mock directly
-        expect(result).toEqual([mockEntry]); // Check return value configured in vi.mock
+        // Verify getCollection mock can be accessed and called (using hoisted reference)
+        const result = await mockGetCollectionFn('reports'); // Call the hoisted mock
+        expect(mockGetCollectionFn).toHaveBeenCalledWith('reports');
+        expect(result).toEqual([mockEntry]); // Check return value set in beforeEach
     });
 
     /*

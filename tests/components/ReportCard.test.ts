@@ -153,16 +153,20 @@ describe('ReportCard Component Structure Test', () => {
 
     it('HYPOTHESIS: Should render CVSS score using ScoreDisplay mock structure', () => {
         const container = renderComponent({ report: mockReport });
-        const scoreDiv = container.querySelector('.score-display:has(span:first-child:contains("CVSS Score:"))'); // Find CVSS score div
-        expect(scoreDiv).toBeInTheDocument();
-        expect(scoreDiv).toHaveTextContent(mockReport.data.cvssScore!.toFixed(1));
+        // Find all score displays and check the one containing "CVSS"
+        const scoreDivs = container.querySelectorAll('.score-display');
+        const cvssDiv = Array.from(scoreDivs).find(div => div.textContent?.includes('CVSS Score:'));
+        expect(cvssDiv).toBeInTheDocument();
+        expect(cvssDiv).toHaveTextContent(mockReport.data.cvssScore!.toFixed(1));
     });
 
     it('HYPOTHESIS: Should render EPSS score using ScoreDisplay mock structure', () => {
         const container = renderComponent({ report: mockReport });
-        const scoreDiv = container.querySelector('.score-display:has(span:first-child:contains("EPSS Score:"))'); // Find EPSS score div
-        expect(scoreDiv).toBeInTheDocument();
-        expect(scoreDiv).toHaveTextContent(`${(mockReport.data.epssScore! * 100).toFixed(1)}%`);
+        // Find all score displays and check the one containing "EPSS"
+        const scoreDivs = container.querySelectorAll('.score-display');
+        const epssDiv = Array.from(scoreDivs).find(div => div.textContent?.includes('EPSS Score:'));
+        expect(epssDiv).toBeInTheDocument();
+        expect(epssDiv).toHaveTextContent(`${(mockReport.data.epssScore! * 100).toFixed(1)}%`);
     });
 
     it('HYPOTHESIS: Should render SeverityTag mock element with text if severity provided', () => {

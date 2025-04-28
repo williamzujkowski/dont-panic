@@ -29,9 +29,9 @@ describe('Footer Component Mock Test', () => { // Renamed describe block
     const footer = footerContainer.querySelector('footer[role="contentinfo"]');
     expect(footer).not.toBeNull();
 
-    // Check copyright text
+    // Check copyright text (allow for surrounding whitespace)
     const currentYear = new Date().getFullYear();
-    expect(footer?.textContent).toContain(`© ${currentYear} Don't Panic.`);
+    expect(footer?.textContent?.trim()).toContain(`© ${currentYear} Don't Panic.`); // Use trim()
 
     // Check GitHub link
     const link = footer?.querySelector('a');

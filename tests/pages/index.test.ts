@@ -31,20 +31,21 @@ const mockReports: CollectionEntry<'reports'>[] = [
 
 // --- Mocking Astro Features ---
 
-// 1. Define the mock function and its default behavior *before* vi.mock
-const mockGetCollectionFn = vi.fn().mockResolvedValue(mockReports);
+// 1. Hoist the mock function creation so it's available *before* imports
+const { mockGetCollectionFn } = vi.hoisted(() => {
+  return { mockGetCollectionFn: vi.fn() };
+});
 
-// 2. Mock the module and provide the mock function in the factory
+// 2. Mock the module and provide the hoisted mock function in the factory
 vi.mock('astro:content', async (importOriginal) => {
     const original = await importOriginal() as typeof import('astro:content');
     return {
         ...original,
-        getCollection: mockGetCollectionFn, // Use the pre-defined mock function
+        getCollection: mockGetCollectionFn, // Use the hoisted mock function
     };
 });
 
-// 3. Import the mocked function *after* vi.mock using a standard import
-import { getCollection } from 'astro:content';
+// 3. DO NOT import from 'astro:content' here anymore. Access the mock via the hoisted variable.
 
 
 // Mock Astro global/config
@@ -57,12 +58,11 @@ const mockAstroConfig = {
 
 describe('Index Page (src/pages/index.astro)', () => {
 
-    beforeEach(() => { // No longer needs to be async
-        // Reset mocks before each test
-        // Use the imported 'getCollection' which IS the mock function 'mockGetCollectionFn'
-        vi.mocked(getCollection).mockClear();
-        // Re-apply default mock behavior if it might have been changed in a previous test
-        vi.mocked(getCollection).mockResolvedValue(mockReports);
+    beforeEach(() => {
+        // Reset mocks before each test using the hoisted reference
+        mockGetCollectionFn.mockClear();
+        // Re-apply default mock behavior
+        mockGetCollectionFn.mockResolvedValue(mockReports);
 
         // Mock Astro global
         // @ts-ignore
@@ -76,14 +76,14 @@ describe('Index Page (src/pages/index.astro)', () => {
     // to Astro's build-time features and virtual modules like `astro:content`.
     // These tests would require Astro's dedicated testing utilities or E2E tests.
 
-    it('HYPOTHESIS: Mock setup works (getCollection can be called)', async () => {
-        // This test verifies the basic mock setup is in place by calling the statically imported mock.
+    it('HYPOTHESIS: Mock setup works (mockGetCollectionFn can be called)', async () => {
+        // This test verifies the basic mock setup is in place by calling the hoisted mock function.
 
-        // Call the mocked function (imported at the top level)
-        const result = await getCollection('reports');
+        // Call the hoisted mock function directly
+        const result = await mockGetCollectionFn('reports');
 
-        // Assert that the mock was called and returned the expected value (configured in vi.mock)
-        expect(getCollection).toHaveBeenCalledWith('reports'); // Use the imported mock directly
+        // Assert that the mock was called and returned the expected value
+        expect(mockGetCollectionFn).toHaveBeenCalledWith('reports');
         expect(result).toEqual(mockReports);
     });
 

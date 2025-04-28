@@ -47,7 +47,7 @@ describe('Hero Component Mock Test', () => { // Renamed describe block
 
     const ctaLink = section?.querySelector('a.cta-button');
     expect(ctaLink).not.toBeNull();
-    expect(ctaLink?.textContent).toBe(sampleProps.ctaText);
+    expect(ctaLink?.textContent?.trim()).toBe(sampleProps.ctaText); // Use trim()
     expect(ctaLink?.getAttribute('href')).toBe(sampleProps.ctaHref);
   });
 
@@ -58,6 +58,6 @@ describe('Hero Component Mock Test', () => { // Renamed describe block
 
     expect(section?.querySelector('p')).toBeNull(); // Subheadline <p> should not be present
     expect(section?.querySelector('h1')?.textContent).toBe(sampleProps.headline);
-    expect(section?.querySelector('a.cta-button')?.textContent).toBe(sampleProps.ctaText);
+    expect(section?.querySelector('a.cta-button')?.textContent?.trim()).toBe(sampleProps.ctaText); // Use trim()
   });
 });

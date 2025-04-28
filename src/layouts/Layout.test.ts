@@ -36,38 +36,34 @@ async function renderLayout(props: { title: string }, slots: Record<string, stri
 
   const container = document.createElement('div');
   container.innerHTML = html;
-  // Return the body element for easier querying of main content
-  return container.querySelector('body') as HTMLElement;
+  // Return the container div itself
+  return container;
 }
 
 
 describe('Layout Component Mock Test', () => { // Renamed describe block
 
   it('HYPOTHESIS: Renders header, main, and footer elements', async () => {
-    const layoutBody = await renderLayout({ title: 'Test Title' });
-    expect(layoutBody.querySelector('header')).not.toBeNull();
-    expect(layoutBody.querySelector('main')).not.toBeNull();
-    expect(layoutBody.querySelector('footer')).not.toBeNull();
+    const layoutContainer = await renderLayout({ title: 'Test Title' });
+    // Query within the container
+    expect(layoutContainer.querySelector('header')).not.toBeNull();
+    expect(layoutContainer.querySelector('main')).not.toBeNull();
+    expect(layoutContainer.querySelector('footer')).not.toBeNull();
   });
 
   it('HYPOTHESIS: Renders slot content inside main element', async () => {
     const slotHtml = '<h1>Slotted Content</h1>';
-    const layoutBody = await renderLayout({ title: 'Test Title' }, { default: slotHtml });
-    const mainElement = layoutBody.querySelector('main');
+    const layoutContainer = await renderLayout({ title: 'Test Title' }, { default: slotHtml });
+    const mainElement = layoutContainer.querySelector('main');
     expect(mainElement).not.toBeNull();
     expect(mainElement?.innerHTML).toContain(slotHtml);
   });
 
   it('HYPOTHESIS: Renders the correct page title in the head', async () => {
     const testTitle = 'My Layout Test';
-    // Need to render the full HTML to check head, so use innerHTML on a temp div
-    const tempDiv = document.createElement('div');
-    const layoutBody = await renderLayout({ title: testTitle }); // Render body first
-    // Reconstruct full HTML for head check (crude)
-    tempDiv.innerHTML = `
-      <!doctype html><html><head><title>${testTitle}</title></head>${layoutBody.outerHTML}</html>
-    `;
-    const titleElement = tempDiv.querySelector('title');
+    const layoutContainer = await renderLayout({ title: testTitle });
+    // Query within the container
+    const titleElement = layoutContainer.querySelector('title');
     expect(titleElement).not.toBeNull();
     expect(titleElement?.textContent).toBe(testTitle);
   });
