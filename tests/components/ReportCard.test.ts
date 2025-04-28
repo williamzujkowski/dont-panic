@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { screen, cleanup, getByRole, queryByText, getByText } from '@testing-library/dom'; // Import specific functions
+import { screen, cleanup, getByRole, queryByText, getByText } from '@testing-library/dom'; // Import specific functions including cleanup
 import '@testing-library/jest-dom/vitest'; // Import Jest DOM matchers for Vitest
 // import ReportCard from '../../src/components/ReportCard.astro'; // Cannot import .astro directly
 import type { CollectionEntry } from 'astro:content';
@@ -86,9 +86,12 @@ function renderComponent(props: { report: CollectionEntry<'reports'> }) {
     `;
 
     // Render the mock HTML into the testing DOM
-    document.body.innerHTML = html;
-    // Return the container (the link element itself in this case)
-    return document.body.firstChild as HTMLElement;
+    const container = document.createElement('div'); // Create a container div
+    container.innerHTML = html;
+    document.body.appendChild(container); // Append the container to the body
+
+    // Return the actual anchor element, not just the first child of the body
+    return container.querySelector('a') as HTMLElement;
 }
 
 

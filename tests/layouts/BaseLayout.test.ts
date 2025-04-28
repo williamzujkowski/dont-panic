@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { screen, cleanup, getByText } from '@testing-library/dom'; // Import specific functions
+import { screen, cleanup, getByText } from '@testing-library/dom'; // Import specific functions including cleanup
 import '@testing-library/jest-dom/vitest';
 // import BaseLayout from '../../src/layouts/BaseLayout.astro'; // Cannot import .astro directly
 
