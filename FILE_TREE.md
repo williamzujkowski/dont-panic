@@ -62,4 +62,12 @@ This document outlines the structure of the repository.
         - **styles/** - *CSS styles*
             - global.css
     - **tests/** - *Test files*
+        - **components/**
+            - ReportCard.test.ts
+        - **pages/**
+            - index.test.ts
+            # - reports/
+            #   - '[slug].test.ts' # Placeholder for future test
+        # - setup.ts # Optional setup file
         - .gitkeep
+    - vitest.config.ts # Vitest configuration

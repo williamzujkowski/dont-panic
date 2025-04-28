@@ -124,6 +124,13 @@ graph TD
 3.  Start the development server: `npm run dev`
 4.  Open your browser to `http://localhost:4321` (or the port specified in the console).
 
+## Testing
+
+This project uses [Vitest](https://vitest.dev/) for testing.
+
+- Run all tests: `npm run test`
+- Run tests in watch mode: `npm run test:watch`
+
 ## Contributing
 
 Contributions to improve this template are welcome! Please see the CONTRIBUTING.md file for guidelines.

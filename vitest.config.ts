@@ -3,12 +3,12 @@ import { getViteConfig } from 'astro/config';
 
 export default getViteConfig({
   test: {
-    /* for example, use happy-dom to run tests */
-    /* (requires installing happy-dom as a dev dependency) */
-    environment: 'happy-dom',
-    globals: true, // Use Vitest globals (describe, it, expect)
-    // Optional: Setup file for global configurations or mocks
+    // Configure Vitest environment (e.g., happy-dom, jsdom)
+    environment: 'happy-dom', // Or 'jsdom'
+    // Optional: Setup files for global configurations or mocks
     // setupFiles: ['./tests/setup.ts'],
-    // Removed server.deps.inline as it didn't resolve the issue
+    // Optional: Glob patterns for test files
+    // include: ['tests/**/*.test.ts'],
+    globals: true, // Use global APIs (describe, it, expect, etc.)
   },
 });
