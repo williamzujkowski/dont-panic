@@ -214,6 +214,7 @@ Follow these principles and standards for comprehensive testing of Astro compone
 * Test component rendering with different props (valid, invalid, edge cases, optional). Test slot rendering. Test event handling/emission if applicable (for interactive islands).
 * Verify error handling (e.g., component behavior with invalid props).
 * Use descriptive test names (`it('should render the headline when headline prop is provided')`).
+*   **Note:** Directly testing `.astro` components/pages that use Astro's virtual modules (like `astro:content`) or complex rendering logic within Vitest's standard environment can be difficult. Focus component tests on structure/props using mock HTML rendering (like the helpers in `BaseLayout.test.ts` or `ReportCard.test.ts`) or consider E2E tests (Playwright) for full page/integration validation.
 ```typescript
 // Example (using Vitest syntax with a testing library like @testing-library/react or similar concept for Astro)
 import { render, screen } from '@testing-library/react'; // Use appropriate library for Astro component testing
