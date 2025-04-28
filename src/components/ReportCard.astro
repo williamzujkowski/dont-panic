@@ -14,35 +14,36 @@ const { report } = Astro.props;
 const base = Astro.config?.base ?? '/';
 const reportUrl = `${base}reports/${report.slug}/`;
 ---
-<a href={reportUrl} class="block p-6 bg-surface rounded-md border border-border hover:shadow-sm hover:border-primary transition-all duration-200 ease-in-out group">
+<a href={reportUrl} class="flex flex-col h-full p-4 bg-surface rounded-md border border-border hover:shadow-md hover:border-primary transition-all duration-200 ease-in-out group"> {/* Use flex-col and h-full */}
 	{/* CVE ID */}
-	<h3 class="text-lg font-semibold mb-1 text-primary group-hover:text-primary-dark">{report.data.cveId}</h3>
+	<h3 class="text-base font-semibold mb-1 text-primary group-hover:text-primary-dark">{report.data.cveId}</h3> {/* Slightly smaller CVE ID */}
 	{/* Title (smaller) */}
-	<p class="text-sm text-text-secondary mb-2 line-clamp-2">{report.data.title}</p>
+	<p class="text-sm text-text-secondary mb-2 line-clamp-2 flex-grow">{report.data.title}</p> {/* Added flex-grow */}
 
 	{/* Date */}
-	<p class="text-xs text-text-muted mb-3">
+	<p class="text-xs text-text-muted mb-2"> {/* Reduced margin */}
 		Published: <time datetime={report.data.publishDate.toISOString()}>
-			{report.data.publishDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })} {/* Short month */}
+			{report.data.publishDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
 		</time>
 	</p>
 
 	{/* Scores */}
-	<div class="flex flex-col gap-1 text-xs mb-3">
+	<div class="flex flex-col gap-0.5 text-xs mb-2"> {/* Reduced gap and margin */}
 		<ScoreDisplay type="CVSS" score={report.data.cvssScore} />
 		<ScoreDisplay type="EPSS" score={report.data.epssScore} />
 	</div>
 
 	{/* Tags Row */}
-	<div class="flex flex-wrap gap-1 mb-3">
-		{report.data.severity && <SeverityTag severity={report.data.severity} />}
+	<div class="flex flex-wrap gap-1 mb-2"> {/* Reduced margin */}
+		{/* Use explicit severity if available, otherwise fallback to cvssSeverity */}
+		{(report.data.severity || report.data.cvssSeverity) && <SeverityTag severity={report.data.severity || report.data.cvssSeverity} />}
 		{report.data.isZeroDay && <ZeroDayTag isZeroDay={report.data.isZeroDay} />}
 	</div>
 
 	{/* Original Tags (smaller) */}
 	{report.data.tags && report.data.tags.length > 0 && (
 		<div class="text-xs mt-auto pt-2 border-t border-border/50"> {/* Push tags to bottom */}
-			{report.data.tags.slice(0, 5).map(tag => ( // Limit tags shown
+			{report.data.tags.slice(0, 4).map(tag => ( // Limit tags shown further
 				<span class="inline-block bg-secondary/10 text-secondary rounded px-1.5 py-0.5 mr-1 mb-1 text-[0.7rem]"> {/* Smaller tags */}
 					#{tag}
 				</span>

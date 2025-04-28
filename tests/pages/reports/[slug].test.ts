@@ -16,12 +16,16 @@ const mockEntry: CollectionEntry<'reports'> = {
     body: 'Mock body content',
     collection: 'reports',
     data: {
+        cveId: "CVE-2024-XXXX",
         title: "Sample Vulnerability Report: CVE-2024-XXXX",
-        pubDate: new Date("2024-07-15T00:00:00.000Z"),
+        publishDate: new Date("2024-07-15T00:00:00.000Z"),
         description: "A brief description of the sample vulnerability.",
-        cvss: 9.8,
-        epss: 0.85,
-        tags: ["sample", "critical", "web"]
+        cvssScore: 9.8,
+        cvssSeverity: "Critical", // Added based on schema update
+        epssScore: 0.85,
+        tags: ["sample", "critical", "web"],
+        severity: "Critical", // Added based on UI guide
+        isZeroDay: false // Added based on UI guide
     },
     // Mock the render function to return a simple structure
     render: async () => ({

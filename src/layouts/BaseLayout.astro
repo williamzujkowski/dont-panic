@@ -25,34 +25,34 @@ const faviconUrl = `${base}favicon.svg`; // Construct base-aware favicon URL
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="description" content={description} />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" /> {/* Added initial-scale */}
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="icon" type="image/svg+xml" href={faviconUrl} />
 		<meta name="generator" content={Astro.generator} />
-		<title>{pageTitle}</title> {/* Use consistent variable */}
+		<title>{pageTitle}</title>
 
 		{/* Canonical URL */}
-		<link rel="canonical" href={canonicalURL.href} /> {/* Ensure .href */}
+		<link rel="canonical" href={canonicalURL.href} />
 
 		{/* Open Graph / Facebook */}
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content={canonicalURL.href} /> {/* Ensure .href */}
-		<meta property="og:title" content={pageTitle} /> {/* Use consistent variable */}
+		<meta property="og:url" content={canonicalURL.href} />
+		<meta property="og:title" content={pageTitle} />
 		<meta property="og:description" content={description} />
 		{/* <meta property="og:image" content={new URL(image, Astro.url)} /> */}
 
 		{/* Twitter */}
 		<meta property="twitter:card" content="summary_large_image" />
-		<meta property="twitter:url" content={canonicalURL.href} /> {/* Ensure .href */}
-		<meta property="twitter:title" content={pageTitle} /> {/* Use consistent variable */}
+		<meta property="twitter:url" content={canonicalURL.href} />
+		<meta property="twitter:title" content={pageTitle} />
 		<meta property="twitter:description" content={description} />
 		{/* <meta property="twitter:image" content={new URL(image, Astro.url)} /> */}
 
 	</head>
-	<body class="bg-background text-text min-h-screen flex flex-col antialiased font-sans"> {/* Added font-sans */}
-		{/* Replaced inline header/footer with components */}
+	<body class="bg-background text-text min-h-screen flex flex-col antialiased font-sans">
+		{/* Use Header and Footer Components */}
 		<Header siteTitle="Don't Panic" navItems={[]} currentPath={Astro.url.pathname} />
 
-		<main class="flex-grow container mx-auto px-4 py-8 w-full max-w-4xl"> {/* Added max-width */}
+		<main class="flex-grow container mx-auto px-4 py-8 w-full max-w-4xl">
 			<slot /> {/* Page content will be injected here */}
 		</main>
 

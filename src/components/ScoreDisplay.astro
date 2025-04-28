@@ -41,3 +41,46 @@ if (score !== null && score !== undefined) {
     )}
   </div>
 )}
+---
+// src/components/ScoreDisplay.astro
+interface Props {
+  type: 'CVSS' | 'EPSS';
+  score: number | null | undefined;
+  link?: string | null; // Optional link (e.g., to NVD/FIRST)
+}
+
+const { type, score, link } = Astro.props;
+
+let scoreText: string | null = null;
+let scoreClass = 'text-text-muted'; // Default color
+let label = `${type} Score:`;
+
+if (score !== null && score !== undefined) {
+  if (type === 'CVSS') {
+    scoreText = score.toFixed(1);
+    if (score >= 9.0) scoreClass = 'text-red-600 dark:text-red-400 font-bold';
+    else if (score >= 7.0) scoreClass = 'text-orange-600 dark:text-orange-400 font-semibold';
+    else if (score >= 4.0) scoreClass = 'text-yellow-600 dark:text-yellow-400';
+    else scoreClass = 'text-blue-600 dark:text-blue-400';
+    label = 'CVSS Score:';
+  } else if (type === 'EPSS') {
+    scoreText = `${(score * 100).toFixed(1)}%`;
+     if (score >= 0.7) scoreClass = 'text-purple-600 dark:text-purple-400 font-semibold'; // High likelihood
+     else if (score >= 0.3) scoreClass = 'text-orange-600 dark:text-orange-400'; // Medium likelihood
+     else scoreClass = 'text-green-600 dark:text-green-400'; // Lower likelihood
+    label = 'EPSS Score:';
+  }
+}
+---
+{scoreText && (
+  <div class="score-display text-sm">
+    <span class="font-medium">{label}</span>
+    {link ? (
+      <a href={link} target="_blank" rel="noopener noreferrer" class:list={[scoreClass, "hover:underline ml-1"]} title={`View ${type} details`}>
+        {scoreText}
+      </a>
+    ) : (
+      <span class:list={[scoreClass, "ml-1"]}>{scoreText}</span>
+    )}
+  </div>
+)}

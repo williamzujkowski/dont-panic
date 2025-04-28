@@ -10,12 +10,12 @@ const reportsCollection = defineCollection({
     publishDate: z.coerce.date(), // Renamed from pubDate
 
     // CVSS Information
-    cvssScore: z.number().min(0).max(10).optional(), // Renamed from cvss
-    cvssVector: z.string().optional(), // e.g., "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
-    cvssSeverity: z.enum(["Low", "Medium", "High", "Critical"]).optional(), // Renamed from cvssSeverity, inferred or set
+    cvssScore: z.number().min(0).max(10).optional(),
+    cvssVector: z.string().optional(),
+    cvssSeverity: z.enum(["Low", "Medium", "High", "Critical"]).optional(), // This might be inferred or explicitly set
 
     // Additional Scoring
-    epssScore: z.number().min(0).max(1).optional(), // Renamed from epss
+    epssScore: z.number().min(0).max(1).optional(),
 
     // Classification
     cwe: z.string().optional(), // e.g., "CWE-287"
@@ -45,7 +45,7 @@ const reportsCollection = defineCollection({
     show_toc: z.boolean().default(true),
 
     // Added based on UI Guide
-    severity: z.enum(["Low", "Medium", "High", "Critical"]).optional(), // Explicit severity
+    severity: z.enum(["Low", "Medium", "High", "Critical"]).optional(), // Explicit severity, potentially overriding inferred cvssSeverity
     isZeroDay: z.boolean().optional().default(false), // Is it a zero-day?
   }),
 });

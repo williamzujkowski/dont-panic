@@ -10,19 +10,22 @@ const mockAstroConfig = {
     base: '/test-base/'
 };
 
-// Mock CollectionEntry data
+// Mock CollectionEntry data reflecting new schema and UI guide fields
 const mockReport: CollectionEntry<'reports'> = {
     id: 'sample-cve.md',
     slug: 'sample-cve',
     body: 'Mock body content',
     collection: 'reports',
     data: {
-        title: "Sample Vulnerability Report: CVE-2024-XXXX",
-        pubDate: new Date("2024-07-15T00:00:00.000Z"),
+        cveId: "CVE-2024-9999", // Added cveId
+        title: "Sample Vulnerability Report: CVE-2024-9999",
+        publishDate: new Date("2024-07-15T00:00:00.000Z"), // Renamed
         description: "A brief description of the sample vulnerability.",
-        cvss: 9.8,
-        epss: 0.85,
-        tags: ["sample", "critical", "web"]
+        cvssScore: 9.8, // Renamed
+        epssScore: 0.85, // Renamed
+        tags: ["sample", "critical", "web"],
+        severity: "Critical", // Added
+        isZeroDay: true // Added
     },
     render: async () => ({
         Content: () => '', // Mock Content component
@@ -37,9 +40,10 @@ const mockReportMinimal: CollectionEntry<'reports'> = {
     body: 'Minimal body',
     collection: 'reports',
     data: {
+        cveId: "CVE-2024-0000", // Added cveId
         title: "Minimal Report",
-        pubDate: new Date("2024-07-16T00:00:00.000Z"),
-        // No description, cvss, epss, tags
+        publishDate: new Date("2024-07-16T00:00:00.000Z"), // Renamed
+        // No description, scores, tags, severity, isZeroDay
     },
     render: async () => ({
         Content: () => '',
@@ -53,33 +57,38 @@ const mockReportMinimal: CollectionEntry<'reports'> = {
 // This simulates the output for basic structure testing.
 function renderComponent(props: { report: CollectionEntry<'reports'> }) {
     const { report } = props;
-    const reportUrl = `${mockAstroConfig.base}reports/${report.slug}/`; // Use mocked base
+    const reportUrl = `${mockAstroConfig.base}reports/${report.slug}/`;
 
-    const descriptionHtml = report.data.description
-        ? `<p class="text-sm text-text-secondary mb-3 line-clamp-2">${report.data.description}</p>`
-        : '';
-    const cvssHtml = report.data.cvss
-        ? `<span class="inline-block bg-red-100 text-red-800 rounded px-2 py-0.5">CVSS: ${report.data.cvss.toFixed(1)}</span>`
-        : '';
-    const epssHtml = report.data.epss
-        ? `<span class="inline-block bg-yellow-100 text-yellow-800 rounded px-2 py-0.5">EPSS: ${(report.data.epss * 100).toFixed(1)}%</span>`
-        : '';
+    // Mock ScoreDisplay output
+    const cvssScoreHtml = report.data.cvssScore !== undefined ? `<div class="score-display text-sm">CVSS: ${report.data.cvssScore.toFixed(1)}</div>` : '';
+    const epssScoreHtml = report.data.epssScore !== undefined ? `<div class="score-display text-sm">EPSS: ${(report.data.epssScore * 100).toFixed(1)}%</div>` : '';
+
+    // Mock SeverityTag output
+    const severityTagHtml = report.data.severity ? `<span class="severity-tag">${report.data.severity}</span>` : '';
+    // Mock ZeroDayTag output
+    const zeroDayTagHtml = report.data.isZeroDay ? `<span class="zero-day-tag">ZERO-DAY</span>` : '';
+
+    // Mock Original Tags output
     const tagsHtml = report.data.tags && report.data.tags.length > 0
-        ? `<div class="text-xs">${report.data.tags.map(tag => `<span class="inline-block bg-secondary/10 text-secondary rounded px-2 py-0.5 mr-1 mb-1">#${tag}</span>`).join('')}</div>`
+        ? `<div class="text-xs mt-auto pt-2 border-t border-border/50">${report.data.tags.slice(0, 4).map(tag => `<span class="tag">#${tag}</span>`).join('')}</div>`
         : '';
 
     const html = `
-      <a href="${reportUrl}" class="block p-6 bg-surface rounded-md border border-border hover:shadow-sm hover:border-primary transition-all duration-200 ease-in-out group">
-        <h3 class="text-lg font-semibold mb-2 text-primary group-hover:text-primary-dark">${report.data.title}</h3>
-        <p class="text-sm text-text-muted mb-3">
-          Published: <time datetime="${report.data.pubDate.toISOString()}">
-            ${report.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+      <a href="${reportUrl}" class="flex flex-col h-full p-4 bg-surface rounded-md border border-border group">
+        <h3 class="text-base font-semibold mb-1 text-primary group-hover:text-primary-dark">${report.data.cveId}</h3>
+        <p class="text-sm text-text-secondary mb-2 line-clamp-2 flex-grow">${report.data.title}</p>
+        <p class="text-xs text-text-muted mb-2">
+          Published: <time datetime="${report.data.publishDate.toISOString()}">
+            ${report.data.publishDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
           </time>
         </p>
-        ${descriptionHtml}
-        <div class="flex flex-wrap gap-2 text-xs mb-3">
-          ${cvssHtml}
-          ${epssHtml}
+        <div class="flex flex-col gap-0.5 text-xs mb-2">
+          ${cvssScoreHtml}
+          ${epssScoreHtml}
+        </div>
+        <div class="flex flex-wrap gap-1 mb-2">
+          ${severityTagHtml}
+          ${zeroDayTagHtml}
         </div>
         ${tagsHtml}
       </a>
@@ -109,65 +118,70 @@ describe('ReportCard Component Structure Test', () => {
         delete globalThis.Astro;
     });
 
-    it('HYPOTHESIS: Should render the report title as a heading', () => {
+    // Updated tests based on new structure
+    it('HYPOTHESIS: Should render the CVE ID as a heading', () => {
         const container = renderComponent({ report: mockReport });
-        const heading = getByRole(container, 'heading', { name: mockReport.data.title, level: 3 });
+        const heading = getByRole(container, 'heading', { name: mockReport.data.cveId, level: 3 });
         expect(heading).toBeInTheDocument();
     });
 
-    it('HYPOTHESIS: Should render the publication date', () => {
+     it('HYPOTHESIS: Should render the report title', () => {
         const container = renderComponent({ report: mockReport });
-        const expectedDate = mockReport.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-        // Find the time element by its text content
+        expect(getByText(container, mockReport.data.title)).toBeInTheDocument();
+    });
+
+    it('HYPOTHESIS: Should render the publication date (short format)', () => {
+        const container = renderComponent({ report: mockReport });
+        const expectedDate = mockReport.data.publishDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
         const timeElement = getByText(container, expectedDate);
         expect(timeElement).toBeInTheDocument();
         expect(timeElement.tagName).toBe('TIME');
-        expect(timeElement).toHaveAttribute('datetime', mockReport.data.pubDate.toISOString());
-        // Check the parent paragraph contains "Published:"
+        expect(timeElement).toHaveAttribute('datetime', mockReport.data.publishDate.toISOString());
         expect(timeElement.parentElement).toHaveTextContent(`Published: ${expectedDate}`);
     });
 
-    it('HYPOTHESIS: Should render the description if provided', () => {
+    it('HYPOTHESIS: Should render CVSS score using ScoreDisplay mock', () => {
         const container = renderComponent({ report: mockReport });
-        expect(getByText(container, mockReport.data.description!)).toBeInTheDocument();
+        expect(getByText(container, `CVSS: ${mockReport.data.cvssScore!.toFixed(1)}`)).toBeInTheDocument();
     });
 
-    it('HYPOTHESIS: Should NOT render the description if not provided', () => {
+    it('HYPOTHESIS: Should render EPSS score using ScoreDisplay mock', () => {
+        const container = renderComponent({ report: mockReport });
+        expect(getByText(container, `EPSS: ${(mockReport.data.epssScore! * 100).toFixed(1)}%`)).toBeInTheDocument();
+    });
+
+    it('HYPOTHESIS: Should render SeverityTag mock if severity provided', () => {
+        const container = renderComponent({ report: mockReport });
+        expect(getByText(container, mockReport.data.severity!)).toBeInTheDocument();
+    });
+
+     it('HYPOTHESIS: Should render ZeroDayTag mock if isZeroDay is true', () => {
+        const container = renderComponent({ report: mockReport });
+        expect(getByText(container, "ZERO-DAY")).toBeInTheDocument();
+    });
+
+    it('HYPOTHESIS: Should NOT render SeverityTag or ZeroDayTag if not provided/false', () => {
         const container = renderComponent({ report: mockReportMinimal });
-        // Check description text isn't present within the container
-        expect(queryByText(container, /brief description/i)).not.toBeInTheDocument();
+        expect(queryByText(container, /Critical|High|Medium|Low/i)).not.toBeInTheDocument(); // Check for severity text
+        expect(queryByText(container, "ZERO-DAY")).not.toBeInTheDocument();
     });
 
-    it('HYPOTHESIS: Should render CVSS score if provided', () => {
+    it('HYPOTHESIS: Should render limited tags if provided', () => {
         const container = renderComponent({ report: mockReport });
-        expect(getByText(container, `CVSS: ${mockReport.data.cvss!.toFixed(1)}`)).toBeInTheDocument();
-    });
-
-    it('HYPOTHESIS: Should render EPSS score if provided', () => {
-        const container = renderComponent({ report: mockReport });
-        expect(getByText(container, `EPSS: ${(mockReport.data.epss! * 100).toFixed(1)}%`)).toBeInTheDocument();
-    });
-
-    it('HYPOTHESIS: Should render tags if provided', () => {
-        const container = renderComponent({ report: mockReport });
-        for (const tag of mockReport.data.tags!) {
-            expect(getByText(container, `#${tag}`)).toBeInTheDocument();
+        // Check only for the first few tags based on slice(0, 4) in mock renderer
+        expect(getByText(container, `#${mockReport.data.tags![0]}`)).toBeInTheDocument();
+        expect(getByText(container, `#${mockReport.data.tags![1]}`)).toBeInTheDocument();
+        expect(getByText(container, `#${mockReport.data.tags![2]}`)).toBeInTheDocument();
+        // Ensure the last tag isn't rendered if more than 4 exist
+        if (mockReport.data.tags!.length > 4) {
+           expect(queryByText(container, `#${mockReport.data.tags![4]}`)).not.toBeInTheDocument();
         }
-    });
-
-    it('HYPOTHESIS: Should NOT render CVSS, EPSS, or tags if not provided', () => {
-        const container = renderComponent({ report: mockReportMinimal });
-        expect(queryByText(container, /CVSS:/)).not.toBeInTheDocument();
-        expect(queryByText(container, /EPSS:/)).not.toBeInTheDocument();
-        expect(queryByText(container, /#/)).not.toBeInTheDocument(); // Check for '#' indicating tags
     });
 
     it('HYPOTHESIS: Should render a link pointing to the correct report slug with base path', () => {
         const container = renderComponent({ report: mockReport });
-        // The container *is* the link element in this mock setup
         expect(container).toBeInTheDocument();
         expect(container.tagName).toBe('A');
-        // Construct expected URL using the mocked base path
         const expectedHref = `${mockAstroConfig.base}reports/${mockReport.slug}/`;
         expect(container).toHaveAttribute('href', expectedHref);
     });

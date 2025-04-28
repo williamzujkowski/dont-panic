@@ -13,12 +13,18 @@ import type { CollectionEntry } from 'astro:content';
 const mockReports: CollectionEntry<'reports'>[] = [
     {
         id: 'report-1.md', slug: 'report-1', collection: 'reports', body: '',
-        data: { title: "Report One", pubDate: new Date("2024-07-20T00:00:00.000Z"), cvss: 7.5 },
+        data: {
+            cveId: "CVE-2024-0001", title: "Report One", publishDate: new Date("2024-07-20T00:00:00.000Z"),
+            cvssScore: 7.5, severity: "High", isZeroDay: false
+        },
         render: async () => ({ Content: () => '', headings: [], remarkPluginFrontmatter: {} })
     },
     {
         id: 'report-2.md', slug: 'report-2', collection: 'reports', body: '',
-        data: { title: "Report Two", pubDate: new Date("2024-07-18T00:00:00.000Z"), description: "Second report desc" },
+        data: {
+            cveId: "CVE-2024-0002", title: "Report Two", publishDate: new Date("2024-07-18T00:00:00.000Z"),
+            description: "Second report desc", cvssScore: 9.8, severity: "Critical", isZeroDay: true
+        },
         render: async () => ({ Content: () => '', headings: [], remarkPluginFrontmatter: {} })
     },
 ];

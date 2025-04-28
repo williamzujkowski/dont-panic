@@ -5,12 +5,12 @@ title: "Sample Vulnerability Report: CVE-2024-XXXX"
 publishDate: 2024-07-15 # Renamed from pubDate
 
 # CVSS Information
-cvssScore: 9.8 # Renamed from cvss
+cvssScore: 9.8
 cvssVector: "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H" # Example vector for critical score
-cvssSeverity: "Critical" # Renamed from cvssSeverity, based on score
+cvssSeverity: "Critical" # This might be inferred or explicitly set
 
 # Additional Scoring
-epssScore: 0.85 # Renamed from epss, removed comment
+epssScore: 0.85
 
 # Classification
 cwe: "CWE-287" # Example: Improper Authentication (adjust as needed)
@@ -40,8 +40,8 @@ draft: false
 show_toc: true
 
 # Added based on UI Guide
-severity: "Critical" # Explicit severity matching score
-isZeroDay: false # Example value
+severity: "Critical" # Explicit severity, matching score
+isZeroDay: false # Example value, set to true for zero-days
 ---
 
 ## Summary

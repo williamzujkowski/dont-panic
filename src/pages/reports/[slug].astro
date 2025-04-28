@@ -1,5 +1,7 @@
 ---
 // src/pages/reports/[slug].astro
+---
+// src/pages/reports/[slug].astro
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SeverityTag from '../../components/SeverityTag.astro';
@@ -20,7 +22,7 @@ const { Content } = await entry.render();
 <BaseLayout title={entry.data.title} description={entry.data.description}>
 	<article class="prose prose-lg max-w-none dark:prose-invert"> {/* Ensure prose classes are applied */}
 		{/* Report Header */}
-		<header class="mb-8 border-b border-border pb-6"> {/* Increased padding bottom */}
+		<header class="mb-8 border-b border-border pb-6">
 			{/* CVE ID */}
 			<h1 class="text-3xl font-bold text-primary mb-1">{entry.data.cveId}</h1>
 			{/* Report Title */}
@@ -36,7 +38,8 @@ const { Content } = await entry.render();
 				</div>
 				{/* Severity & ZeroDay Tags */}
 				<div class="flex items-center gap-2">
-					{entry.data.severity && <SeverityTag severity={entry.data.severity} />}
+					{/* Use explicit severity if available, otherwise fallback to cvssSeverity */}
+					{(entry.data.severity || entry.data.cvssSeverity) && <SeverityTag severity={entry.data.severity || entry.data.cvssSeverity} />}
 					{entry.data.isZeroDay && <ZeroDayTag isZeroDay={entry.data.isZeroDay} />}
 				</div>
 			</div>
@@ -52,7 +55,7 @@ const { Content } = await entry.render();
 			{entry.data.tags && entry.data.tags.length > 0 && (
 				<div class="text-sm">
 					{entry.data.tags.map(tag => (
-						<span class="inline-block bg-secondary/10 text-secondary rounded px-2 py-0.5 mr-1">#{tag}</span>
+						<span class="inline-block bg-secondary/10 text-secondary rounded px-2 py-0.5 mr-1 mb-1">#{tag}</span>
 					))}
 				</div>
 			)}
