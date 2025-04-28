@@ -81,6 +81,11 @@ describe('Report Slug Page (src/pages/reports/[slug].astro)', () => {
             props: { entry: mockEntry }, // Mock props passed by getStaticPaths
             generator: 'astro'
         };
+        // DO NOT delete globalThis.Astro here
+    });
+
+    // Add afterEach for cleanup
+    afterEach(() => {
         // @ts-ignore
         delete globalThis.Astro;
     });

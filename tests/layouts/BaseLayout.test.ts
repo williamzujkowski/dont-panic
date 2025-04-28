@@ -126,8 +126,10 @@ describe('BaseLayout Component', () => {
         await renderLayout({ title: "Test" }, '<p>Slot Content</p>');
         const footer = screen.getByRole('contentinfo'); // Footer role
         expect(footer).toBeInTheDocument();
-        // Check for parts of the text content
-        expect(within(footer).getByText(/© \d{4} Don't Panic./)).toBeInTheDocument();
+        // Check copyright text within the paragraph, allowing for whitespace
+        const paragraph = footer.querySelector('p');
+        expect(paragraph).toBeInTheDocument();
+        expect(paragraph?.textContent?.trim()).toMatch(/© \d{4} Don't Panic./); // Use trim() and match
         const githubLink = within(footer).getByRole('link', { name: "View Source on GitHub" });
         expect(githubLink).toBeInTheDocument();
         expect(githubLink).toHaveAttribute('href', "https://github.com/williamzujkowski/dont-panic");

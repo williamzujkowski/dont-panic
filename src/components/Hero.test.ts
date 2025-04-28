@@ -8,11 +8,11 @@ import Hero from './Hero.astro'; // Direct import might need adjustment
 async function renderHero(props: { headline: string; subheadline?: string; ctaText: string; ctaHref: string }) {
   const subheadlineHtml = props.subheadline ? `<p class="text-xl text-text-secondary mb-8">${props.subheadline}</p>` : ''; // Added example classes
   const html = `
-    <section class="text-center py-16 md:py-24 bg-gradient-to-b from-surface to-background"> {/* Added example classes */}
-      <div class="container mx-auto px-4"> {/* Added example classes */}
-        <h1 class="text-4xl md:text-5xl font-bold text-primary mb-4">${props.headline}</h1> {/* Added example classes */}
+    <section class="text-center py-16 md:py-24 bg-gradient-to-b from-surface to-background">
+      <div class="container mx-auto px-4">
+        <h1 class="text-4xl md:text-5xl font-bold text-primary mb-4">${props.headline}</h1>
         ${subheadlineHtml}
-        <a href="${props.ctaHref}" class="cta-button inline-block bg-primary text-white font-semibold py-3 px-8 rounded hover:bg-primary-dark transition-colors"> {/* Added example classes */}
+        <a href="${props.ctaHref}" class="cta-button inline-block bg-primary text-white font-semibold py-3 px-8 rounded hover:bg-primary-dark transition-colors">
           ${props.ctaText}
         </a>
       </div>
