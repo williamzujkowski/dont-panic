@@ -1,10 +1,43 @@
 ---
+# Core Vulnerability Identifiers
+cveId: "CVE-2024-XXXX" # Extracted from title
 title: "Sample Vulnerability Report: CVE-2024-XXXX"
-pubDate: 2024-07-15
-description: "A brief description of the sample vulnerability."
-cvss: 9.8
-epss: 0.85 # 85%
-tags: ["sample", "critical", "web"]
+publishDate: 2024-07-15 # Renamed from pubDate
+
+# CVSS Information
+cvssScore: 9.8 # Renamed from cvss
+cvssVector: "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H" # Example vector for critical score
+cvssSeverity: "Critical" # Based on score
+
+# Additional Scoring
+epssScore: 0.85 # Renamed from epss, removed comment
+
+# Classification
+cwe: "CWE-287" # Example: Improper Authentication (adjust as needed)
+vulnerabilityType: "Authentication Bypass" # Example type (adjust as needed)
+
+# Product Information
+vendor: "ExampleCorp" # Placeholder vendor
+product: "SecureFile Transfer" # Placeholder product
+affectedProductsString: "Versions 1.0 through 2.1" # Placeholder affected versions
+
+# Patch Information
+patchAvailable: true # Assuming patch exists for a report
+patchLink: "https://example.com/advisory/CVE-2024-XXXX" # Placeholder link
+
+# Exploitation Information
+exploitationStatus: "PoC Available" # Example status
+exploitationStatusLink: "https://example.com/poc/CVE-2024-XXXX" # Placeholder link
+
+# Metadata Fields
+tags: ["sample", "critical", "web", "CVE-2024-XXXX", "Authentication Bypass"] # Added CVE ID and type
+author: "Don't Panic Security Team" # Placeholder author
+description: "A brief description of the sample vulnerability." # Kept existing
+draft: false
+# last_modified: null # Handled by Git
+
+# Display Settings
+show_toc: true
 ---
 
 ## Summary
