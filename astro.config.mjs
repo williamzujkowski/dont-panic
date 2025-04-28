@@ -1,6 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import tailwind from "@astrojs/tailwind";
+import tailwindcss from '@tailwindcss/vite'; // Import the Vite plugin
 
 // Determine base path and site URL based on environment
 // Fallback for local development
@@ -45,8 +45,11 @@ export default defineConfig({
   // Ensure the output directory is 'dist' as expected by the GitHub Pages actions
   outDir: 'dist',
 
-  integrations: [tailwind({
-    // Apply Tailwind base styles after other CSS resets/imports
-    applyBaseStyles: false,
-  })]
+  // Remove the Astro Tailwind integration
+  // integrations: [tailwind({...})],
+
+  // Add the Tailwind Vite plugin
+  vite: {
+    plugins: [tailwindcss()]
+  }
 });

@@ -106,7 +106,7 @@ graph TD
 
 *   **Framework:** Astro.js
 *   **UI Components:** Astro Components
-*   **Styling:** Tailwind CSS (`@astrojs/tailwind`)
+*   **Styling:** Tailwind CSS (using `@tailwindcss/vite`)
 *   **Package Manager:** npm (or pnpm/yarn)
 *   **CI/CD:** GitHub Actions
 *   **Hosting:** GitHub Pages (or Netlify, Vercel, Cloudflare Pages, etc.)
