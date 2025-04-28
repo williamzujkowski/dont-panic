@@ -1,6 +1,8 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 
+import tailwindcss from '@tailwindcss/vite';
+
 // Determine base path and site URL based on environment
 // Fallback for local development
 let base = '/';
@@ -30,8 +32,16 @@ console.log(`Astro Config: Using site='${site}' and base='${base}'`);
 
 // https://astro.build/config
 export default defineConfig({
-  site: site, // Dynamically set based on environment
-  base: base, // Dynamically set based on environment (e.g., '/astro-template-website/')
+  // Dynamically set based on environment
+  site: site,
+
+  // Dynamically set based on environment (e.g., '/astro-template-website/')
+  base: base,
+
   // Ensure the output directory is 'dist' as expected by the GitHub Pages actions
   outDir: 'dist',
+
+  vite: {
+    plugins: [tailwindcss()]
+  }
 });
