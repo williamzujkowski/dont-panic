@@ -8,25 +8,8 @@ import '@testing-library/jest-dom/vitest';
 // import SlugPage from '../../src/pages/reports/[slug].astro'; // Cannot import .astro page directly in Vitest easily
 import type { CollectionEntry } from 'astro:content';
 
-// --- Mocking Astro Features ---
-
-// Mock getCollection from 'astro:content'
-vi.mock('astro:content', async (importOriginal) => {
-    const original = await importOriginal() as typeof import('astro:content');
-    return {
-        ...original,
-        getCollection: vi.fn(), // Mock the function used by getStaticPaths
-    };
-});
-
-// Mock Astro global/config
-const mockAstroConfig = {
-    base: '/test-base/'
-};
-const mockAstroSite = new URL('http://test.com/test-base/');
-
 // --- Mock Data ---
-
+// (Moved mock data definition before mock setup for clarity)
 const mockEntry: CollectionEntry<'reports'> = {
     id: 'sample-cve.md',
     slug: 'sample-cve',
@@ -48,17 +31,41 @@ const mockEntry: CollectionEntry<'reports'> = {
     })
 };
 
+// --- Mocking Astro Features ---
+
+// 1. Define the mock function and its default behavior *before* vi.mock
+const mockGetCollectionFn = vi.fn().mockResolvedValue([mockEntry]); // Mock for potential getStaticPaths usage
+
+// 2. Mock the module and provide the mock function in the factory
+vi.mock('astro:content', async (importOriginal) => {
+    const original = await importOriginal() as typeof import('astro:content');
+    return {
+        ...original,
+        getCollection: mockGetCollectionFn, // Use the pre-defined mock function
+    };
+});
+
+// 3. Import the mocked function *after* vi.mock using a standard import
+import { getCollection } from 'astro:content';
+
+
+// Mock Astro global/config
+const mockAstroConfig = {
+    base: '/test-base/'
+};
+const mockAstroSite = new URL('http://test.com/test-base/');
+
 // --- Test Suite ---
+// (Mock data moved above mock setup)
 
 describe('Report Slug Page (src/pages/reports/[slug].astro)', () => {
 
-    beforeEach(async () => {
-        vi.resetAllMocks();
-
-        // Set up mock return value *before* the test runs, using the already mocked module
-        // We need to import it here to access the mocked function reference.
-        const { getCollection } = await import('astro:content');
-        vi.mocked(getCollection).mockResolvedValue([mockEntry]); // Mock for potential getStaticPaths usage
+    beforeEach(() => { // No longer needs to be async
+        // Reset mocks before each test
+        // Use the imported 'getCollection' which IS the mock function 'mockGetCollectionFn'
+        vi.mocked(getCollection).mockClear();
+        // Re-apply default mock behavior if it might have been changed in a previous test
+        vi.mocked(getCollection).mockResolvedValue([mockEntry]);
 
         // Mock Astro global
         // @ts-ignore
@@ -86,11 +93,10 @@ describe('Report Slug Page (src/pages/reports/[slug].astro)', () => {
         // @ts-ignore
         expect(globalThis.Astro.props.entry.slug).toBe(mockEntry.slug);
 
-        // Verify getCollection mock can be accessed and called
-        const { getCollection } = await import('astro:content');
+        // Verify getCollection mock can be accessed and called (using static import)
         const result = await getCollection('reports'); // Call the mock
-        expect(vi.mocked(getCollection)).toHaveBeenCalledWith('reports');
-        expect(result).toEqual([mockEntry]); // Check return value set in beforeEach
+        expect(getCollection).toHaveBeenCalledWith('reports'); // Use imported mock directly
+        expect(result).toEqual([mockEntry]); // Check return value configured in vi.mock
     });
 
     /*

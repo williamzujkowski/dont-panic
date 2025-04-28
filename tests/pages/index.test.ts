@@ -8,24 +8,8 @@ import '@testing-library/jest-dom/vitest'; // Import Jest DOM matchers for Vites
 // import IndexPage from '../../src/pages/index.astro'; // Cannot import .astro page directly in Vitest easily
 import type { CollectionEntry } from 'astro:content';
 
-// --- Mocking Astro Features ---
-
-// Mock getCollection from 'astro:content'
-vi.mock('astro:content', async (importOriginal) => {
-    const original = await importOriginal() as typeof import('astro:content');
-    return {
-        ...original,
-        getCollection: vi.fn(), // Mock the function
-    };
-});
-
-// Mock Astro global/config
-const mockAstroConfig = {
-    base: '/test-base/'
-};
-
 // --- Mock Data ---
-
+// (Moved mock data definition before mock setup for clarity)
 const mockReports: CollectionEntry<'reports'>[] = [
     {
         id: 'report-1.md', slug: 'report-1', collection: 'reports', body: '',
@@ -39,17 +23,39 @@ const mockReports: CollectionEntry<'reports'>[] = [
     },
 ];
 
+// --- Mocking Astro Features ---
+
+// 1. Define the mock function and its default behavior *before* vi.mock
+const mockGetCollectionFn = vi.fn().mockResolvedValue(mockReports);
+
+// 2. Mock the module and provide the mock function in the factory
+vi.mock('astro:content', async (importOriginal) => {
+    const original = await importOriginal() as typeof import('astro:content');
+    return {
+        ...original,
+        getCollection: mockGetCollectionFn, // Use the pre-defined mock function
+    };
+});
+
+// 3. Import the mocked function *after* vi.mock using a standard import
+import { getCollection } from 'astro:content';
+
+
+// Mock Astro global/config
+const mockAstroConfig = {
+    base: '/test-base/'
+};
+
 // --- Test Suite ---
+// (Mock data moved above mock setup)
 
 describe('Index Page (src/pages/index.astro)', () => {
 
-    beforeEach(async () => {
+    beforeEach(() => { // No longer needs to be async
         // Reset mocks before each test
-        vi.resetAllMocks();
-
-        // Set up mock return value *before* the test runs, using the already mocked module
-        // We need to import it here to access the mocked function reference.
-        const { getCollection } = await import('astro:content');
+        // Use the imported 'getCollection' which IS the mock function 'mockGetCollectionFn'
+        vi.mocked(getCollection).mockClear();
+        // Re-apply default mock behavior if it might have been changed in a previous test
         vi.mocked(getCollection).mockResolvedValue(mockReports);
 
         // Mock Astro global
@@ -65,15 +71,13 @@ describe('Index Page (src/pages/index.astro)', () => {
     // These tests would require Astro's dedicated testing utilities or E2E tests.
 
     it('HYPOTHESIS: Mock setup works (getCollection can be called)', async () => {
-        // This test verifies the basic mock setup is in place by calling the mocked function.
-        // Import the mocked function within the test scope.
-        const { getCollection } = await import('astro:content');
+        // This test verifies the basic mock setup is in place by calling the statically imported mock.
 
-        // Call the mocked function
+        // Call the mocked function (imported at the top level)
         const result = await getCollection('reports');
 
-        // Assert that the mock was called and returned the expected value (set in beforeEach)
-        expect(vi.mocked(getCollection)).toHaveBeenCalledWith('reports');
+        // Assert that the mock was called and returned the expected value (configured in vi.mock)
+        expect(getCollection).toHaveBeenCalledWith('reports'); // Use the imported mock directly
         expect(result).toEqual(mockReports);
     });
 
