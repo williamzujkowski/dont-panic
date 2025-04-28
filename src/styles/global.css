@@ -99,7 +99,9 @@ body {
 
   /* Improve focus visibility globally */
   *:focus-visible {
-    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+    outline: none; /* Remove default outline */
+    /* Replicate ring using box-shadow with CSS variables */
+    box-shadow: 0 0 0 2px var(--color-background), 0 0 0 4px var(--color-primary);
   }
 
   /* Remove default margins from prose elements if using Tailwind Typography */
