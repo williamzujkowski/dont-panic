@@ -55,9 +55,10 @@ describe('Report Slug Page (src/pages/reports/[slug].astro)', () => {
     beforeEach(async () => {
         vi.resetAllMocks();
 
-        // Mock getCollection for getStaticPaths (though not directly tested here)
+        // Set up mock return value *before* the test runs, using the already mocked module
+        // We need to import it here to access the mocked function reference.
         const { getCollection } = await import('astro:content');
-        vi.mocked(getCollection).mockResolvedValue([mockEntry]);
+        vi.mocked(getCollection).mockResolvedValue([mockEntry]); // Mock for potential getStaticPaths usage
 
         // Mock Astro global
         // @ts-ignore
@@ -77,12 +78,19 @@ describe('Report Slug Page (src/pages/reports/[slug].astro)', () => {
     // to Astro's build-time features and inability to resolve .astro files easily.
     // These tests would require Astro's dedicated testing utilities or E2E tests.
 
-    it('HYPOTHESIS: Mock setup works (Astro.props is set)', () => {
+    it('HYPOTHESIS: Mock setup works (Astro.props is set and getCollection mock accessible)', async () => {
         // This test verifies the basic mock setup is in place.
+        // Check Astro.props
         // @ts-ignore
         expect(globalThis.Astro.props.entry).toBeDefined();
         // @ts-ignore
         expect(globalThis.Astro.props.entry.slug).toBe(mockEntry.slug);
+
+        // Verify getCollection mock can be accessed and called
+        const { getCollection } = await import('astro:content');
+        const result = await getCollection('reports'); // Call the mock
+        expect(vi.mocked(getCollection)).toHaveBeenCalledWith('reports');
+        expect(result).toEqual([mockEntry]); // Check return value set in beforeEach
     });
 
     /*

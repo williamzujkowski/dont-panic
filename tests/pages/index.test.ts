@@ -47,7 +47,8 @@ describe('Index Page (src/pages/index.astro)', () => {
         // Reset mocks before each test
         vi.resetAllMocks();
 
-        // Provide mock implementation for getCollection
+        // Set up mock return value *before* the test runs, using the already mocked module
+        // We need to import it here to access the mocked function reference.
         const { getCollection } = await import('astro:content');
         vi.mocked(getCollection).mockResolvedValue(mockReports);
 
@@ -63,13 +64,17 @@ describe('Index Page (src/pages/index.astro)', () => {
     // to Astro's build-time features and virtual modules like `astro:content`.
     // These tests would require Astro's dedicated testing utilities or E2E tests.
 
-    it('HYPOTHESIS: Mock setup works (getCollection is mocked)', async () => {
-        // This test verifies the basic mock setup is in place.
+    it('HYPOTHESIS: Mock setup works (getCollection can be called)', async () => {
+        // This test verifies the basic mock setup is in place by calling the mocked function.
+        // Import the mocked function within the test scope.
         const { getCollection } = await import('astro:content');
-        // Attempt to call the mocked function (it won't do anything useful here,
-        // but confirms the mock exists)
-        await getCollection('reports');
+
+        // Call the mocked function
+        const result = await getCollection('reports');
+
+        // Assert that the mock was called and returned the expected value (set in beforeEach)
         expect(vi.mocked(getCollection)).toHaveBeenCalledWith('reports');
+        expect(result).toEqual(mockReports);
     });
 
     /*
