@@ -82,9 +82,20 @@ body {
   body {
     /* Keep non-color base styles here */
     font-family: theme('fontFamily.sans'); /* Apply the sans font stack from config */
-    @apply antialiased selection:bg-primary/20;
+    @apply antialiased; /* Removed selection style from here */
     /* font-family: 'Inter', sans-serif; */ /* Example: Use Inter font if added */
   }
+
+  /* Apply selection styles using standard CSS */
+  ::selection {
+    background-color: color-mix(in srgb, var(--color-primary) 20%, transparent); /* Apply primary color with 20% opacity */
+    color: inherit; /* Keep original text color */
+  }
+  ::-moz-selection { /* Firefox */
+    background-color: color-mix(in srgb, var(--color-primary) 20%, transparent);
+    color: inherit;
+  }
+
 
   /* Improve focus visibility globally */
   *:focus-visible {
