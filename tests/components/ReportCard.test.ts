@@ -164,8 +164,8 @@ describe('ReportCard Component Structure Test', () => {
 
     it('HYPOTHESIS: Should NOT render SeverityTag or ZeroDayTag mock elements if not provided/false', () => {
         const container = renderComponent({ report: mockReportMinimal });
-        expect(queryByText(container, /Critical|High|Medium|Low/i)).not.toBeInTheDocument(); // Check for severity text
-        expect(queryByText(container, "ZERO-DAY")).not.toBeInTheDocument();
+        expect(container.querySelector('.severity-tag')).not.toBeInTheDocument();
+        expect(container.querySelector('.zero-day-tag')).not.toBeInTheDocument();
     });
 
     it('HYPOTHESIS: Should render limited tags if provided', () => {
