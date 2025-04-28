@@ -25,9 +25,9 @@ allReports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valu
 		<p class="text-center text-text-muted py-xl">No reports found.</p> {/* Use spacing var */}
 	) : (
 		<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md"> {/* Use spacing variable */}
-			{allReports.map(report => {
-				return (<ReportCard report={report} />);
-			})}
+			{allReports.map(report => (
+				<ReportCard report={report} />
+			))}
 		</section>
 	)}
 
