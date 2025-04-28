@@ -44,6 +44,7 @@ This document outlines the structure of the repository.
         - .gitkeep
     - **src/** - *Source code*
         - **components/** - *Reusable Astro components*
+            - ReportCard.astro
             - .gitkeep
         - **content/** - *Markdown content collections*
             - config.ts # Content collection schema definitions
@@ -57,7 +58,7 @@ This document outlines the structure of the repository.
                 - .gitkeep
             - **reports/** # Directory for report pages
                 - [slug].astro # Dynamic route for displaying single reports
-            # - index.astro # Home page (to be implemented in Phase 2)
+            - index.astro # Home page listing reports
         - **styles/** - *CSS styles*
             - global.css
     - **tests/** - *Test files*

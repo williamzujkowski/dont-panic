@@ -1,41 +1,36 @@
 ---
 // src/pages/index.astro
-import Layout from '../layouts/Layout.astro';
-import Hero from '../components/Hero.astro';
-import Features from '../components/Features.astro';
-import AboutSection from '../components/AboutSection.astro';
-// Testimonials component removed
-import CTASection from '../components/CTASection.astro';
-import { featuresData } from '../data/featuresData';
-// testimonialsData removed
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ReportCard from '../components/ReportCard.astro';
 
-// Sample data for AboutSection
-const aboutContent = `
-  We are passionate about building modern web experiences.
-  Using Astro allows us to create performant, content-focused websites
-  with an excellent developer experience. This starter template provides
-  a solid foundation for your next project.
-`;
+// Fetch all reports, sort by publication date descending
+const allReports = await getCollection('reports', ({ data }) => {
+  // Optional: Filter out draft posts if you add a 'draft' field later
+  // return data.draft !== true;
+  return true; // Include all for now
+});
+
+allReports.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
+<BaseLayout title="Vulnerability Reports">
+	<section class="mb-12">
+		<h1 class="text-3xl font-bold mb-4 text-primary">Latest Vulnerability Reports</h1>
+		<p class="text-lg text-text-muted">
+			Stay informed about the latest security vulnerabilities and intelligence analysis.
+		</p>
+	</section>
 
-<Layout title="Welcome to My Astro Site">
-	<Hero
-		headline="Build Faster Websites"
-		subheadline="Leverage the power of Astro for unparalleled performance and developer experience."
-		ctaText="Get Started"
-		ctaHref="/docs"
-	/>
-	<Features features={featuresData} />
-	<AboutSection
-		headline="About This Project"
-		content={aboutContent}
-		imageUrl="/placeholder-image.jpg" /* Optional: Add a real image path later */
-		imageAlt="Abstract placeholder image"
-	/>
-	{/* Testimonials section removed */}
-	<CTASection
-		headline="Ready to Get Started?"
-		ctaText="Explore the Docs"
-		ctaHref="/docs"
-	/>
-</Layout>
+	{allReports.length === 0 ? (
+		<p class="text-center text-text-muted py-10">No reports found.</p>
+	) : (
+		<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+			{allReports.map(report => (
+				<ReportCard report={report} />
+			))}
+		</section>
+	)}
+
+	<!-- Optional: Add pagination later if needed -->
+
+</BaseLayout>
