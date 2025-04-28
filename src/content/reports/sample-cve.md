@@ -7,7 +7,7 @@ publishDate: 2024-07-15 # Renamed from pubDate
 # CVSS Information
 cvssScore: 9.8 # Renamed from cvss
 cvssVector: "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H" # Example vector for critical score
-cvssSeverity: "Critical" # Based on score
+cvssSeverity: "Critical" # Renamed from cvssSeverity, based on score
 
 # Additional Scoring
 epssScore: 0.85 # Renamed from epss, removed comment
@@ -38,6 +38,10 @@ draft: false
 
 # Display Settings
 show_toc: true
+
+# Added based on UI Guide
+severity: "Critical" # Explicit severity matching score
+isZeroDay: false # Example value
 ---
 
 ## Summary

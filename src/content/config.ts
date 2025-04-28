@@ -12,7 +12,7 @@ const reportsCollection = defineCollection({
     // CVSS Information
     cvssScore: z.number().min(0).max(10).optional(), // Renamed from cvss
     cvssVector: z.string().optional(), // e.g., "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
-    cvssSeverity: z.enum(["Low", "Medium", "High", "Critical"]).optional(), // Based on score
+    cvssSeverity: z.enum(["Low", "Medium", "High", "Critical"]).optional(), // Renamed from cvssSeverity, inferred or set
 
     // Additional Scoring
     epssScore: z.number().min(0).max(1).optional(), // Renamed from epss
@@ -43,6 +43,10 @@ const reportsCollection = defineCollection({
 
     // Display Settings
     show_toc: z.boolean().default(true),
+
+    // Added based on UI Guide
+    severity: z.enum(["Low", "Medium", "High", "Critical"]).optional(), // Explicit severity
+    isZeroDay: z.boolean().optional().default(false), // Is it a zero-day?
   }),
 });
 

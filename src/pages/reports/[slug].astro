@@ -2,6 +2,9 @@
 // src/pages/reports/[slug].astro
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import SeverityTag from '../../components/SeverityTag.astro';
+import ZeroDayTag from '../../components/ZeroDayTag.astro';
+import ScoreDisplay from '../../components/ScoreDisplay.astro';
 
 // Generate static pages for each report
 export async function getStaticPaths() {
@@ -17,22 +20,38 @@ const { Content } = await entry.render();
 <BaseLayout title={entry.data.title} description={entry.data.description}>
 	<article class="prose prose-lg max-w-none dark:prose-invert"> {/* Ensure prose classes are applied */}
 		{/* Report Header */}
-		<header class="mb-8 border-b border-border pb-4">
-			<h1 class="!mb-2">{entry.data.title}</h1> {/* Override prose margin */}
-			<p class="text-text-muted text-sm">
-				Published on: <time datetime={entry.data.publishDate.toISOString()}> {/* Use publishDate */}
-					{entry.data.publishDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} {/* Use publishDate */}
-				</time>
-			</p>
-			{entry.data.cvssScore && ( /* Use cvssScore */
-				<p class="text-sm text-text-secondary">CVSS Score: {entry.data.cvssScore}</p> /* Use cvssScore */
-			)}
-			{entry.data.epssScore && ( /* Use epssScore */
-				<p class="text-sm text-text-secondary">EPSS Score: {(entry.data.epssScore * 100).toFixed(1)}%</p> /* Use epssScore */
-			)}
+		<header class="mb-8 border-b border-border pb-6"> {/* Increased padding bottom */}
+			{/* CVE ID */}
+			<h1 class="text-3xl font-bold text-primary mb-1">{entry.data.cveId}</h1>
+			{/* Report Title */}
+			<h2 class="text-xl font-semibold text-text-secondary mb-3">{entry.data.title}</h2>
+
+			{/* Meta Info Row */}
+			<div class="flex flex-wrap items-center gap-x-4 gap-y-2 mb-4">
+				{/* Publish Date */}
+				<div class="text-sm text-text-muted">
+					Published: <time datetime={entry.data.publishDate.toISOString()}>
+						{entry.data.publishDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+					</time>
+				</div>
+				{/* Severity & ZeroDay Tags */}
+				<div class="flex items-center gap-2">
+					{entry.data.severity && <SeverityTag severity={entry.data.severity} />}
+					{entry.data.isZeroDay && <ZeroDayTag isZeroDay={entry.data.isZeroDay} />}
+				</div>
+			</div>
+
+			{/* Scores Row */}
+			<div class="flex flex-wrap items-center gap-x-4 gap-y-1 mb-4">
+				<ScoreDisplay type="CVSS" score={entry.data.cvssScore} link={`https://nvd.nist.gov/vuln/detail/${entry.data.cveId}`} />
+				<ScoreDisplay type="EPSS" score={entry.data.epssScore} link="https://www.first.org/epss/" />
+				{/* Add CISA KEV status here if data becomes available */}
+			</div>
+
+			{/* Tags */}
 			{entry.data.tags && entry.data.tags.length > 0 && (
-				<div class="mt-2 text-sm">
-					Tags: {entry.data.tags.map(tag => (
+				<div class="text-sm">
+					{entry.data.tags.map(tag => (
 						<span class="inline-block bg-secondary/10 text-secondary rounded px-2 py-0.5 mr-1">#{tag}</span>
 					))}
 				</div>

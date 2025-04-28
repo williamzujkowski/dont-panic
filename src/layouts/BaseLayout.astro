@@ -9,6 +9,7 @@ interface Props {
 }
 
 const { title, description = "Don't Panic - Vulnerability Intelligence Reports" } = Astro.props;
+const pageTitle = `${title} | Don't Panic`; // Consistent page title format
 
 // Safely access config properties with fallbacks
 const base = Astro.config?.base ?? '/';
@@ -22,56 +23,37 @@ const faviconUrl = `${base}favicon.svg`; // Construct base-aware favicon URL
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="description" content={description} />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" /> {/* Added initial-scale */}
 		<link rel="icon" type="image/svg+xml" href={faviconUrl} />
 		<meta name="generator" content={Astro.generator} />
-		<title>{title} | Don't Panic</title>
+		<title>{pageTitle}</title> {/* Use consistent variable */}
 
 		{/* Canonical URL */}
-		<link rel="canonical" href={canonicalURL} />
+		<link rel="canonical" href={canonicalURL.href} /> {/* Ensure .href */}
 
 		{/* Open Graph / Facebook */}
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content={canonicalURL} />
-		<meta property="og:title" content={`${title} | Don't Panic`} />
+		<meta property="og:url" content={canonicalURL.href} /> {/* Ensure .href */}
+		<meta property="og:title" content={pageTitle} /> {/* Use consistent variable */}
 		<meta property="og:description" content={description} />
 		{/* <meta property="og:image" content={new URL(image, Astro.url)} /> */}
 
 		{/* Twitter */}
 		<meta property="twitter:card" content="summary_large_image" />
-		<meta property="twitter:url" content={canonicalURL} />
-		<meta property="twitter:title" content={`${title} | Don't Panic`} />
+		<meta property="twitter:url" content={canonicalURL.href} /> {/* Ensure .href */}
+		<meta property="twitter:title" content={pageTitle} /> {/* Use consistent variable */}
 		<meta property="twitter:description" content={description} />
 		{/* <meta property="twitter:image" content={new URL(image, Astro.url)} /> */}
 
 	</head>
-	<body class="bg-background text-text min-h-screen flex flex-col antialiased">
-		<header class="bg-surface border-b border-border sticky top-0 z-10">
-			<nav class="container mx-auto px-4 py-3 flex justify-between items-center gap-4">
-				<a href={base} class="text-xl font-bold text-primary hover:text-primary-dark flex-shrink-0"> {/* Use safe base variable */}
-					Don't Panic
-				</a>
-				<!-- Add nav links here if needed -->
-				<div class="flex-grow"></div> {/* Spacer */}
-				<Search /> {/* Add the Search component */}
-				<!-- Example:
-				<ul class="flex space-x-4">
-					<li><a href={Astro.config.base} class="hover:text-primary">Home</a></li>
-					<li><a href={`${Astro.config.base}about`} class="hover:text-primary">About</a></li>
-				</ul>
-				-->
-			</nav>
-		</header>
+	<body class="bg-background text-text min-h-screen flex flex-col antialiased font-sans"> {/* Added font-sans */}
+		{/* Replaced inline header/footer with components */}
+		<Header siteTitle="Don't Panic" navItems={[]} currentPath={Astro.url.pathname} />
 
-		<main class="flex-grow container mx-auto px-4 py-8">
+		<main class="flex-grow container mx-auto px-4 py-8 w-full max-w-4xl"> {/* Added max-width */}
 			<slot /> {/* Page content will be injected here */}
 		</main>
 
-		<footer class="bg-surface border-t border-border mt-auto py-4 text-center text-text-muted text-sm">
-			<div class="container mx-auto px-4">
-				© {new Date().getFullYear()} Don't Panic. All rights reserved.
-				<!-- Add footer links or info here -->
-			</div>
-		</footer>
+		<Footer />
 	</body>
 </html>

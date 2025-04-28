@@ -9,10 +9,13 @@ interface Props {
 }
 
 const { siteTitle, navItems, currentPath } = Astro.props;
+const base = Astro.config?.base ?? '/'; // Get base path
 ---
 <header role="banner" class="site-header">
   <div class="site-title">
-    <a href="/">{siteTitle}</a>
+    {/* Optional: Add SVG icon here */}
+    {/* <svg class="inline-block w-6 h-6 mr-2 text-primary" ...>...</svg> */}
+    <a href={base}>{siteTitle}</a> {/* Use base path */}
   </div>
   <nav role="navigation" aria-label="Main navigation">
     <ul class="nav-list">

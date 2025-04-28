@@ -1,0 +1,14 @@
+---
+// src/components/ZeroDayTag.astro
+interface Props {
+  isZeroDay?: boolean;
+  text?: string; // Allow custom text like "PRELIMINARY"
+}
+
+const { isZeroDay = false, text = "ZERO-DAY" } = Astro.props;
+---
+{isZeroDay && (
+  <span class="bg-purple-100 text-purple-800 border border-purple-300 px-2 py-0.5 rounded text-xs font-semibold inline-block animate-pulse">
+    {text}
+  </span>
+)}

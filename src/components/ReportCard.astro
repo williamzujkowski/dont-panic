@@ -1,6 +1,9 @@
 ---
 // src/components/ReportCard.astro
 import type { CollectionEntry } from 'astro:content';
+import SeverityTag from './SeverityTag.astro';
+import ZeroDayTag from './ZeroDayTag.astro';
+import ScoreDisplay from './ScoreDisplay.astro';
 
 interface Props {
 	report: CollectionEntry<'reports'>;
@@ -12,25 +15,37 @@ const base = Astro.config?.base ?? '/';
 const reportUrl = `${base}reports/${report.slug}/`;
 ---
 <a href={reportUrl} class="block p-6 bg-surface rounded-md border border-border hover:shadow-sm hover:border-primary transition-all duration-200 ease-in-out group">
-	<h3 class="text-lg font-semibold mb-2 text-primary group-hover:text-primary-dark">{report.data.title}</h3>
-	<p class="text-sm text-text-muted mb-3">
-		Published: <time datetime={report.data.publishDate.toISOString()}> {/* Use publishDate */}
-			{report.data.publishDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} {/* Use publishDate */}
+	{/* CVE ID */}
+	<h3 class="text-lg font-semibold mb-1 text-primary group-hover:text-primary-dark">{report.data.cveId}</h3>
+	{/* Title (smaller) */}
+	<p class="text-sm text-text-secondary mb-2 line-clamp-2">{report.data.title}</p>
+
+	{/* Date */}
+	<p class="text-xs text-text-muted mb-3">
+		Published: <time datetime={report.data.publishDate.toISOString()}>
+			{report.data.publishDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })} {/* Short month */}
 		</time>
 	</p>
-	{report.data.description && (
-		<p class="text-sm text-text-secondary mb-3 line-clamp-2">{report.data.description}</p>
-	)}
-	<div class="flex flex-wrap gap-2 text-xs mb-3">
-		{report.data.cvssScore && ( /* Use cvssScore */
-			<span class="inline-block bg-red-100 text-red-800 rounded px-2 py-0.5">
-				CVSS: {report.data.cvssScore.toFixed(1)} {/* Use cvssScore */}
-			</span>
-		)}
-		{report.data.epssScore && ( /* Use epssScore */
-			<span class="inline-block bg-yellow-100 text-yellow-800 rounded px-2 py-0.5">
-				EPSS: {(report.data.epssScore * 100).toFixed(1)}% {/* Use epssScore */}
-			</span>
+
+	{/* Scores */}
+	<div class="flex flex-col gap-1 text-xs mb-3">
+		<ScoreDisplay type="CVSS" score={report.data.cvssScore} />
+		<ScoreDisplay type="EPSS" score={report.data.epssScore} />
+	</div>
+
+	{/* Tags Row */}
+	<div class="flex flex-wrap gap-1 mb-3">
+		{report.data.severity && <SeverityTag severity={report.data.severity} />}
+		{report.data.isZeroDay && <ZeroDayTag isZeroDay={report.data.isZeroDay} />}
+	</div>
+
+	{/* Original Tags (smaller) */}
+	{report.data.tags && report.data.tags.length > 0 && (
+		<div class="text-xs mt-auto pt-2 border-t border-border/50"> {/* Push tags to bottom */}
+			{report.data.tags.slice(0, 5).map(tag => ( // Limit tags shown
+				<span class="inline-block bg-secondary/10 text-secondary rounded px-1.5 py-0.5 mr-1 mb-1 text-[0.7rem]"> {/* Smaller tags */}
+					#{tag}
+				</span>
 		)}
 	</div>
 	{report.data.tags && report.data.tags.length > 0 && (
