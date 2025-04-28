@@ -8,31 +8,57 @@ This document outlines the structure of the repository.
     - README.md
     - dependabot.yml
     - CLAUDE.md
+    - astro.config.mjs
+    - package.json
+    - package-lock.json
+    - tailwind.config.cjs
+    - tsconfig.json
     - **.github/**
         - pull_request_template.md
         - **workflows/**
-            - **workflows/**
-                - ci.yml
-                - codeql-analysis.yml
-                - dependency-review.yml
+            - build_test.yml # Basic CI workflow
+            - deploy.yml # GitHub Pages deployment workflow
+            # - ci.yml # (Old - to be removed)
+            - codeql-analysis.yml # (Keep if desired)
+            - dependency-review.yml # (Keep if desired)
         - **ISSUE_TEMPLATE/**
             - **ISSUE_TEMPLATE/**
                 - bug_report.md
                 - config.yml
                 - feature_request.md
     - **.llmconfig/** - *Contains LLM agent configurations and rules*
+        - PROJECT_PLAN.md
         - agent-rules.md
-        - **prompt-templates/** - *Templates for LLM interactions*
+        - CLAUDE.md
+        - **prompt-templates/**
             - .gitkeep
-        - **context/** - *Context information for LLM agents*
+        - **context/**
             - .gitkeep
     - **config/** - *Configuration files*
         - .gitkeep
     - **docs/** - *Documentation files*
         - .gitkeep
+    - **public/** - *Static assets*
+        - favicon.svg
     - **scripts/** - *Utility scripts*
         - .gitkeep
     - **src/** - *Source code*
-        - .gitkeep
+        - **components/** - *Reusable Astro components*
+            - .gitkeep
+        - **content/** - *Markdown content collections*
+            - config.ts # Content collection schema definitions
+            - **reports/** # Synced/copied Markdown reports go here
+                - sample-cve.md # Sample report
+        - **env.d.ts** - *TypeScript environment definitions*
+        - **layouts/** - *Base page layouts*
+            - BaseLayout.astro
+        - **pages/** - *Site pages/routes*
+            - **api/** # Example API route directory (if needed later)
+                - .gitkeep
+            - **reports/** # Directory for report pages
+                - [slug].astro # Dynamic route for displaying single reports
+            # - index.astro # Home page (to be implemented in Phase 2)
+        - **styles/** - *CSS styles*
+            - global.css
     - **tests/** - *Test files*
         - .gitkeep

@@ -1,0 +1,48 @@
+name: Build and Test Astro Site
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Use Node.js 20.x or match your project requirement
+          cache: 'npm' # or 'pnpm' / 'yarn'
+
+      - name: Install dependencies
+        run: npm install # or pnpm install / yarn install
+
+      # Uncomment if you have linters/formatters configured
+      # - name: Lint code
+      #   run: npm run lint
+
+      # - name: Check formatting
+      #   run: npm run format -- --check
+
+      - name: Build Astro site
+        run: npm run build # or pnpm build / yarn build
+        env:
+          # Ensure environment variables needed for build are set
+          # Example: If your site/base depends on these
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+          GITHUB_ACTIONS: true
+
+      # Optional: Add steps for running tests (e.g., Playwright) here
+      # - name: Run tests
+      #   run: npm run test
+
+      # Optional: Add HTML validation or other checks
+      # - name: Validate HTML
+      #   uses: ...

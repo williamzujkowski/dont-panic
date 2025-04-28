@@ -79,3 +79,7 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 .aider*
+
+# Astro build output and cache
+dist/
+.astro/

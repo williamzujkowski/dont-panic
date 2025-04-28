@@ -1,6 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* src/styles/global.css */
 
-/* Basic Reset */
+/* Basic Reset (Tailwind's preflight handles most of this, but keep for safety) */
 *,
 *::before,
 *::after {

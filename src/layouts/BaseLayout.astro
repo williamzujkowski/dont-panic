@@ -1,0 +1,70 @@
+---
+// src/layouts/BaseLayout.astro
+import '../styles/global.css'; // Import global styles including Tailwind directives
+
+interface Props {
+	title: string;
+	description?: string; // Optional description for meta tag
+}
+
+const { title, description = "Don't Panic - Vulnerability Intelligence Reports" } = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const faviconUrl = `${Astro.config.base}favicon.svg`; // Construct base-aware favicon URL
+---
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content={description} />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href={faviconUrl} />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title} | Don't Panic</title>
+
+		{/* Canonical URL */}
+		<link rel="canonical" href={canonicalURL} />
+
+		{/* Open Graph / Facebook */}
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content={canonicalURL} />
+		<meta property="og:title" content={`${title} | Don't Panic`} />
+		<meta property="og:description" content={description} />
+		{/* <meta property="og:image" content={new URL(image, Astro.url)} /> */}
+
+		{/* Twitter */}
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content={canonicalURL} />
+		<meta property="twitter:title" content={`${title} | Don't Panic`} />
+		<meta property="twitter:description" content={description} />
+		{/* <meta property="twitter:image" content={new URL(image, Astro.url)} /> */}
+
+	</head>
+	<body class="bg-background text-text min-h-screen flex flex-col antialiased">
+		<header class="bg-surface border-b border-border sticky top-0 z-10">
+			<nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+				<a href={Astro.config.base} class="text-xl font-bold text-primary hover:text-primary-dark">
+					Don't Panic
+				</a>
+				<!-- Add nav links here if needed -->
+				<!-- Example:
+				<ul class="flex space-x-4">
+					<li><a href={Astro.config.base} class="hover:text-primary">Home</a></li>
+					<li><a href={`${Astro.config.base}about`} class="hover:text-primary">About</a></li>
+				</ul>
+				-->
+			</nav>
+		</header>
+
+		<main class="flex-grow container mx-auto px-4 py-8">
+			<slot /> {/* Page content will be injected here */}
+		</main>
+
+		<footer class="bg-surface border-t border-border mt-auto py-4 text-center text-text-muted text-sm">
+			<div class="container mx-auto px-4">
+				© {new Date().getFullYear()} Don't Panic. All rights reserved.
+				<!-- Add footer links or info here -->
+			</div>
+		</footer>
+	</body>
+</html>
