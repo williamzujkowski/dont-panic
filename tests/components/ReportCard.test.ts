@@ -51,7 +51,9 @@ const mockReportMinimal: CollectionEntry<'reports'> = {
 
 // Helper to render the component - Astro components might need special handling
 // This is a simplified approach assuming direct rendering works in the test env
-// Real-world scenarios might require Astro's test utilities or more complex setup
+// Real-world scenarios might require Astro's test utilities or more complex setup.
+// NOTE: This approach renders the component's structure but doesn't fully
+// replicate the Astro rendering lifecycle or scoped styles.
 async function renderComponent(props: { report: CollectionEntry<'reports'> }) {
     // Simulate Astro's rendering context if necessary
     // For now, directly use testing-library's render

@@ -16,9 +16,8 @@ This document outlines the structure of the repository.
     - **.github/**
         - pull_request_template.md
         - **workflows/**
-            - build_test.yml # Basic CI workflow
+            - build_test.yml # Basic CI workflow (includes tests)
             - deploy.yml # GitHub Pages deployment workflow
-            # - ci.yml # (Old - to be removed)
             - codeql-analysis.yml # (Keep if desired)
             - dependency-review.yml # (Keep if desired)
         - **ISSUE_TEMPLATE/**
@@ -64,10 +63,12 @@ This document outlines the structure of the repository.
     - **tests/** - *Test files*
         - **components/**
             - ReportCard.test.ts
+        - **layouts/**
+             - BaseLayout.test.ts
         - **pages/**
             - index.test.ts
-            # - reports/
-            #   - '[slug].test.ts' # Placeholder for future test
+            - **reports/**
+              - '[slug].test.ts'
         # - setup.ts # Optional setup file
         - .gitkeep
     - vitest.config.ts # Vitest configuration

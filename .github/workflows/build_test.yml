@@ -39,10 +39,9 @@ jobs:
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
           GITHUB_ACTIONS: true
 
-      # Optional: Add steps for running tests (e.g., Playwright) here
-      # - name: Run tests
-      #   run: npm run test
+      - name: Run tests
+        run: npm run test
 
-      # Optional: Add HTML validation or other checks
+      # Optional: Add other checks like HTML validation
       # - name: Validate HTML
       #   uses: ...

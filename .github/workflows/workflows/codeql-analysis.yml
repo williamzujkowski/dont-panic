@@ -20,8 +20,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'python' ]  # Update with languages for your project
-        # Supported options: cpp, csharp, go, java, javascript, python, ruby
+        # Define the language matrix. Add more languages as needed.
+        # Supported languages: cpp, csharp, go, java, javascript, python, ruby
+        language: [ 'javascript' ]
 
     steps:
       - name: Checkout repository

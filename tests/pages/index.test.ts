@@ -62,6 +62,8 @@ describe('Index Page (src/pages/index.astro)', () => {
     async function renderIndexPage() {
         // Rendering a full Astro page in Vitest might require Astro's specific testing utilities
         // or a more complex setup. This is a simplified approach.
+        // NOTE: This approach renders the page's structure but doesn't fully
+        // replicate the Astro rendering lifecycle or scoped styles.
         // @ts-ignore - Assuming direct render works for demonstration
         render(IndexPage);
         // Wait for any potential async operations within the component if necessary
