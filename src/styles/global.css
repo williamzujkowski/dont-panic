@@ -70,9 +70,18 @@ html.dark {
 @tailwind utilities;
 
 /* Global Styles & Overrides */
+
+/* Apply base colors directly using CSS variables */
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  /* Apply other base styles via @layer base or Tailwind utilities */
+}
+
 @layer base {
   body {
-    @apply bg-background text-text antialiased font-sans selection:bg-primary/20;
+    /* Keep non-color base styles here */
+    @apply antialiased font-sans selection:bg-primary/20;
     /* font-family: 'Inter', sans-serif; */ /* Example: Use Inter font if added */
   }
 
