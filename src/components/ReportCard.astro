@@ -46,14 +46,6 @@ const reportUrl = `${base}reports/${report.slug}/`;
 				<span class="inline-block bg-secondary/10 text-secondary rounded px-1.5 py-0.5 mr-1 mb-1 text-[0.7rem]"> {/* Smaller tags */}
 					#{tag}
 				</span>
-		)}
-	</div>
-	{report.data.tags && report.data.tags.length > 0 && (
-		<div class="text-xs">
-			{report.data.tags.map(tag => (
-				<span class="inline-block bg-secondary/10 text-secondary rounded px-2 py-0.5 mr-1 mb-1">
-					#{tag}
-				</span>
 			))}
 		</div>
 	)}
