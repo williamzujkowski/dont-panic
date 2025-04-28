@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.4",
+    "@pagefind/astro": "^1.2.0",
     "astro": "^5.7.5",
     "tailwindcss": "^4.1.4"
   },
@@ -22,7 +23,6 @@
     "@testing-library/jest-dom": "^6.6.3",
     "happy-dom": "^17.4.4",
     "jsdom": "^24.1.0",
-    "vitest": "^3.1.2",
-    "@pagefind/astro": "^1.2.0"
+    "vitest": "^3.1.2"
   }
 }
