@@ -104,8 +104,6 @@ body {
     box-shadow: 0 0 0 2px var(--color-background), 0 0 0 4px var(--color-primary);
   }
 
-  /* Remove default margins from prose elements if using Tailwind Typography */
-  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6, .prose p, .prose ul, .prose ol, .prose blockquote, .prose pre, .prose table {
-    @apply mt-0 mb-0; /* Reset margins handled by prose */
-  }
+  /* Margins for prose elements are handled by the @tailwindcss/typography plugin
+     and its configuration in tailwind.config.cjs. No need to reset here. */
 }
