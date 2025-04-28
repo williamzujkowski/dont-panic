@@ -12,9 +12,7 @@ async function renderHero(props: { headline: string; subheadline?: string; ctaTe
       <div class="container mx-auto px-4">
         <h1 class="text-4xl md:text-5xl font-bold text-primary mb-4">${props.headline}</h1>
         ${subheadlineHtml}
-        <a href="${props.ctaHref}" class="cta-button inline-block bg-primary text-white font-semibold py-3 px-8 rounded hover:bg-primary-dark transition-colors">
-          ${props.ctaText}
-        </a>
+        <a href="${props.ctaHref}" class="cta-button inline-block bg-primary text-white font-semibold py-3 px-8 rounded hover:bg-primary-dark transition-colors">${props.ctaText}</a>
       </div>
     </section>
   `;

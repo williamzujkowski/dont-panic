@@ -72,7 +72,7 @@ describe('Report Slug Page (src/pages/reports/[slug].astro)', () => {
         // Re-apply default mock behavior
         mockGetCollectionFn.mockResolvedValue([mockEntry]);
 
-        // Mock Astro global
+        // Mock Astro global - Ensure it's fully defined each time
         // @ts-ignore
         globalThis.Astro = {
             config: mockAstroConfig,
@@ -81,7 +81,6 @@ describe('Report Slug Page (src/pages/reports/[slug].astro)', () => {
             props: { entry: mockEntry }, // Mock props passed by getStaticPaths
             generator: 'astro'
         };
-        // DO NOT delete globalThis.Astro here
     });
 
     // Add afterEach for cleanup
