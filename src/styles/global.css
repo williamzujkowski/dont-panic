@@ -81,7 +81,8 @@ body {
 @layer base {
   body {
     /* Keep non-color base styles here */
-    @apply antialiased font-sans selection:bg-primary/20;
+    font-family: theme('fontFamily.sans'); /* Apply the sans font stack from config */
+    @apply antialiased selection:bg-primary/20;
     /* font-family: 'Inter', sans-serif; */ /* Example: Use Inter font if added */
   }
 
