@@ -48,11 +48,12 @@ const faviconUrl = `${base}favicon.svg`; // Construct base-aware favicon URL
 		{/* <meta property="twitter:image" content={new URL(image, Astro.url)} /> */}
 
 	</head>
-	<body class="bg-background text-text min-h-screen flex flex-col antialiased font-sans">
+	<body class="bg-background text-text min-h-screen flex flex-col antialiased font-sans selection:bg-primary/20"> {/* Added selection style */}
 		{/* Use Header and Footer Components */}
 		<Header siteTitle="Don't Panic" navItems={[]} currentPath={Astro.url.pathname} />
 
-		<main class="flex-grow container mx-auto px-4 py-8 w-full max-w-4xl">
+		{/* Adjusted padding and max-width */}
+		<main class="flex-grow container mx-auto px-md py-lg md:py-xl w-full max-w-5xl"> {/* Increased max-width */}
 			<slot /> {/* Page content will be injected here */}
 		</main>
 

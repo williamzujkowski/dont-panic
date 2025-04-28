@@ -3,32 +3,15 @@
 const currentYear = new Date().getFullYear();
 const repoUrl = "https://github.com/williamzujkowski/dont-panic"; // Link to repo
 ---
-<footer role="contentinfo" class="site-footer">
-  <p>
-    &copy; {currentYear} Don't Panic.
-    <a href={repoUrl} target="_blank" rel="noopener noreferrer" class="hover:text-primary hover:underline ml-2">
-      View Source on GitHub
-    </a>
-  </p>
+{/* Apply Tailwind classes directly */}
+<footer role="contentinfo" class="mt-xl py-lg text-center text-text-muted text-sm border-t border-border bg-surface"> {/* Use spacing vars */}
+  <div class="container mx-auto px-md"> {/* Added container */}
+    <p>
+      &copy; {currentYear} Don't Panic.
+      <a href={repoUrl} target="_blank" rel="noopener noreferrer" class="hover:text-primary hover:underline ml-sm transition-colors"> {/* Use spacing var */}
+        View Source on GitHub
+      </a>
+    </p>
+  </div>
 </footer>
-
-<style>
-.site-footer {
-  padding: var(--spacing-md) var(--spacing-md); /* Adjusted padding */
-  margin-top: var(--spacing-xl); /* Adjusted margin */
-  text-align: center;
-  background-color: var(--color-surface);
-  border-top: 1px solid var(--color-border);
-  color: var(--color-text-muted);
-  font-size: 0.85rem; /* Slightly smaller */
-}
-
-.site-footer p {
-  margin-bottom: 0;
-}
-
-.site-footer a {
-  color: var(--color-text-muted);
-  transition: color 0.2s ease;
-}
-</style>
+<!-- Removed <style> block -->

@@ -2,18 +2,18 @@
 
 /* Define CSS Variables for Theme */
 :root {
-  /* Color Palette (Example: Cool Gray + Blue Accent) */
+  /* Color Palette (Neutral + Blue Accent) */
   --color-primary: #3b82f6; /* blue-500 */
   --color-primary-dark: #2563eb; /* blue-600 */
-  --color-secondary: #6366f1; /* indigo-500 */
-  --color-accent: #ec4899; /* pink-500 */
+  --color-secondary: #6366f1; /* indigo-500 - Keep for potential secondary elements */
+  --color-accent: #ec4899; /* pink-500 - Keep for potential accents */
 
   --color-text: #1f2937; /* gray-800 */
   --color-text-muted: #6b7280; /* gray-500 */
   --color-text-secondary: #4b5563; /* gray-600 */
 
-  --color-background: #ffffff; /* white */
-  --color-surface: #f9fafb; /* gray-50 */
+  --color-background: #f9fafb; /* gray-50 */
+  --color-surface: #ffffff; /* white */
   --color-border: #e5e7eb; /* gray-200 */
 
   /* Dark Mode Colors */
@@ -70,17 +70,19 @@ html.dark {
 @tailwind utilities;
 
 /* Global Styles & Overrides */
-body {
-  @apply bg-background text-text antialiased font-sans;
-  /* font-family: 'Inter', sans-serif; */ /* Example: Use Inter font if added */
-}
+@layer base {
+  body {
+    @apply bg-background text-text antialiased font-sans selection:bg-primary/20;
+    /* font-family: 'Inter', sans-serif; */ /* Example: Use Inter font if added */
+  }
 
-/* Improve focus visibility globally */
-*:focus-visible {
-  @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
-}
+  /* Improve focus visibility globally */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+  }
 
-/* Remove default margins from prose elements if using Tailwind Typography */
-.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6, .prose p, .prose ul, .prose ol, .prose blockquote {
-  @apply mb-0; /* Reset margins handled by prose */
+  /* Remove default margins from prose elements if using Tailwind Typography */
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6, .prose p, .prose ul, .prose ol, .prose blockquote, .prose pre, .prose table {
+    @apply mt-0 mb-0; /* Reset margins handled by prose */
+  }
 }

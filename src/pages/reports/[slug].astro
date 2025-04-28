@@ -20,16 +20,17 @@ const { entry } = Astro.props;
 const { Content } = await entry.render();
 ---
 <BaseLayout title={entry.data.title} description={entry.data.description}>
-	<article class="prose prose-lg max-w-none dark:prose-invert"> {/* Ensure prose classes are applied */}
+	{/* Removed outer prose class, apply to content area */}
+	<article>
 		{/* Report Header */}
-		<header class="mb-8 border-b border-border pb-6">
+		<header class="mb-lg border-b border-border pb-md"> {/* Use spacing variables */}
 			{/* CVE ID */}
-			<h1 class="text-3xl font-bold text-primary mb-1">{entry.data.cveId}</h1>
+			<h1 class="text-3xl md:text-4xl font-bold text-text mb-xs">{entry.data.cveId}</h1> {/* Use text color, responsive size */}
 			{/* Report Title */}
-			<h2 class="text-xl font-semibold text-text-secondary mb-3">{entry.data.title}</h2>
+			<h2 class="text-xl md:text-2xl font-semibold text-text-secondary mb-md">{entry.data.title}</h2> {/* Responsive size */}
 
 			{/* Meta Info Row */}
-			<div class="flex flex-wrap items-center gap-x-4 gap-y-2 mb-4">
+			<div class="flex flex-wrap items-center gap-x-md gap-y-sm mb-md"> {/* Use spacing variables */}
 				{/* Publish Date */}
 				<div class="text-sm text-text-muted">
 					Published: <time datetime={entry.data.publishDate.toISOString()}>
@@ -37,7 +38,7 @@ const { Content } = await entry.render();
 					</time>
 				</div>
 				{/* Severity & ZeroDay Tags */}
-				<div class="flex items-center gap-2">
+				<div class="flex items-center gap-sm"> {/* Use spacing variable */}
 					{/* Use explicit severity if available, otherwise fallback to cvssSeverity */}
 					{(entry.data.severity || entry.data.cvssSeverity) && <SeverityTag severity={entry.data.severity || entry.data.cvssSeverity} />}
 					{entry.data.isZeroDay && <ZeroDayTag isZeroDay={entry.data.isZeroDay} />}
@@ -45,7 +46,7 @@ const { Content } = await entry.render();
 			</div>
 
 			{/* Scores Row */}
-			<div class="flex flex-wrap items-center gap-x-4 gap-y-1 mb-4">
+			<div class="flex flex-wrap items-center gap-x-md gap-y-xs mb-md"> {/* Use spacing variables */}
 				<ScoreDisplay type="CVSS" score={entry.data.cvssScore} link={`https://nvd.nist.gov/vuln/detail/${entry.data.cveId}`} />
 				<ScoreDisplay type="EPSS" score={entry.data.epssScore} link="https://www.first.org/epss/" />
 				{/* Add CISA KEV status here if data becomes available */}
@@ -55,13 +56,15 @@ const { Content } = await entry.render();
 			{entry.data.tags && entry.data.tags.length > 0 && (
 				<div class="text-sm">
 					{entry.data.tags.map(tag => (
-						<span class="inline-block bg-secondary/10 text-secondary rounded px-2 py-0.5 mr-1 mb-1">#{tag}</span>
+						<span class="inline-block bg-secondary/10 text-secondary rounded px-2 py-0.5 mr-sm mb-sm text-xs">#{tag}</span> {/* Use spacing variables */}
 					))}
 				</div>
 			)}
 		</header>
 
-		{/* Report Content */}
-		<Content />
+		{/* Report Content - Apply prose classes here */}
+		<div class="prose prose-lg max-w-none dark:prose-invert mt-lg"> {/* Added margin-top */}
+			<Content />
+		</div>
 	</article>
 </BaseLayout>

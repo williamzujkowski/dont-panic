@@ -11,96 +11,36 @@ interface Props {
 const { siteTitle, navItems, currentPath } = Astro.props;
 const base = Astro.config?.base ?? '/'; // Get base path
 ---
-<header role="banner" class="site-header">
-  <div class="site-title flex items-center"> {/* Added flex items-center */}
-    {/* Optional: Add SVG icon here */}
-    {/* Example Placeholder: Replace with actual SVG */}
+{/* Apply Tailwind classes directly */}
+<header role="banner" class="sticky top-0 z-50 backdrop-blur-md bg-surface/90 border-b border-border"> {/* Adjusted transparency */}
+  <div class="container mx-auto flex justify-between items-center px-md py-sm"> {/* Use container and variables */}
+    <div class="site-title flex items-center">
+      {/* Optional: Add SVG icon here */}
+      {/* Example Placeholder: Replace with actual SVG */}
     <!-- <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-primary inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
       <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg> -->
-    <a href={base}>{siteTitle}</a> {/* Use base path */}
+      <a href={base} class="text-xl font-bold text-text hover:text-primary transition-colors">{siteTitle}</a> {/* Adjusted styles */}
+    </div>
+    <nav role="navigation" aria-label="Main navigation">
+      <ul class="flex items-center gap-sm md:gap-md"> {/* Use flex and gap */}
+        {navItems.map((item) => (
+          <li> {/* Removed nav-item class */}
+            <a
+              href={item.href}
+              class:list={[
+                "px-sm py-xs rounded hover:bg-primary/10 hover:text-primary transition-colors", // Base link styles
+                { 'text-primary font-medium': item.href === currentPath } // Active styles
+              ]}
+              aria-current={item.href === currentPath ? "page" : false}
+            >
+              {item.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
   </div>
-  <nav role="navigation" aria-label="Main navigation">
-    <ul class="nav-list">
-      {navItems.map((item) => (
-        <li class="nav-item">
-          <a
-            href={item.href}
-            class:list={["nav-link", { active: item.href === currentPath }]}
-            aria-current={item.href === currentPath ? "page" : false}
-          >
-            {item.text}
-          </a>
-        </li>
-      ))}
-    </ul>
-  </nav>
 </header>
 
-<style>
-.site-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-sm) var(--spacing-md);
-  background-color: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.site-title a {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: var(--color-text);
-  text-decoration: none;
-}
-.site-title a:hover {
-  color: var(--color-primary);
-}
-
-.nav-list {
-  display: flex;
-  gap: var(--spacing-md);
-}
-
-.nav-item {
-  /* No specific styles needed here currently */
-}
-
-.nav-link {
-  color: var(--color-text);
-  text-decoration: none;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--border-radius);
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-/* Style for active link using class and/or attribute */
-.nav-link:hover,
-.nav-link.active, /* Style based on class */
-.nav-link[aria-current="page"] { /* Style based on ARIA attribute */
-  color: var(--color-primary);
-  background-color: rgba(0, 123, 255, 0.1); /* Light primary background */
-  font-weight: 500; /* Slightly bolder */
-}
-
-
-/* Basic Responsiveness for Header */
-@media (max-width: 768px) {
-  .site-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .nav-list {
-    margin-top: var(--spacing-sm);
-    flex-direction: column; /* Stack links vertically */
-    width: 100%; /* Make nav take full width */
-    gap: var(--spacing-xs);
-  }
-
-  .nav-link {
-    display: block; /* Make links take full width */
-    text-align: center;
-  }
-}
-</style>
+<!-- Removed <style> block -->

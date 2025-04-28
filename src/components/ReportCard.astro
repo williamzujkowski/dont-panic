@@ -14,27 +14,27 @@ const { report } = Astro.props;
 const base = Astro.config?.base ?? '/';
 const reportUrl = `${base}reports/${report.slug}/`;
 ---
-<a href={reportUrl} class="flex flex-col h-full p-4 bg-surface rounded-md border border-border hover:shadow-md hover:border-primary hover:bg-background transition-all duration-200 ease-in-out group"> {/* Added hover:bg-background */}
+<a href={reportUrl} class="flex flex-col h-full p-md bg-surface rounded-lg border border-border hover:shadow-md hover:border-primary hover:bg-background transition-all duration-200 ease-in-out group"> {/* Use spacing/radius vars */}
 	{/* CVE ID */}
-	<h3 class="text-base font-semibold mb-1 text-primary group-hover:text-primary-dark">{report.data.cveId}</h3>
+	<h3 class="text-base font-semibold mb-xs text-primary group-hover:text-primary-dark">{report.data.cveId}</h3> {/* Use spacing var */}
 	{/* Title (smaller) */}
-	<p class="text-sm text-text-secondary mb-2 line-clamp-2 flex-grow">{report.data.title}</p> {/* Added flex-grow */}
+	<p class="text-sm text-text-secondary mb-sm line-clamp-2 flex-grow">{report.data.title}</p> {/* Use spacing var */}
 
 	{/* Date */}
-	<p class="text-xs text-text-muted mb-2"> {/* Reduced margin */}
+	<p class="text-xs text-text-muted mb-sm"> {/* Use spacing var */}
 		Published: <time datetime={report.data.publishDate.toISOString()}>
 			{report.data.publishDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
 		</time>
 	</p>
 
 	{/* Scores */}
-	<div class="flex flex-col gap-0.5 text-xs mb-2"> {/* Reduced gap and margin */}
+	<div class="flex flex-col gap-xs text-xs mb-sm"> {/* Use spacing vars */}
 		<ScoreDisplay type="CVSS" score={report.data.cvssScore} />
 		<ScoreDisplay type="EPSS" score={report.data.epssScore} />
 	</div>
 
 	{/* Tags Row */}
-	<div class="flex flex-wrap gap-1 mb-2"> {/* Reduced margin */}
+	<div class="flex flex-wrap gap-xs mb-sm"> {/* Use spacing vars */}
 		{/* Use explicit severity if available, otherwise fallback to cvssSeverity */}
 		{(report.data.severity || report.data.cvssSeverity) && <SeverityTag severity={report.data.severity || report.data.cvssSeverity} />}
 		{report.data.isZeroDay && <ZeroDayTag isZeroDay={report.data.isZeroDay} />}
@@ -42,9 +42,9 @@ const reportUrl = `${base}reports/${report.slug}/`;
 
 	{/* Original Tags (smaller) */}
 	{report.data.tags && report.data.tags.length > 0 && (
-		<div class="text-xs mt-auto pt-2 border-t border-border/50"> {/* Push tags to bottom */}
+		<div class="text-xs mt-auto pt-sm border-t border-border/50"> {/* Push tags to bottom, use spacing var */}
 			{report.data.tags.slice(0, 4).map(tag => ( // Limit tags shown further
-				<span class="inline-block bg-secondary/10 text-secondary rounded px-1.5 py-0.5 mr-1 mb-1 text-[0.7rem]"> {/* Smaller tags */}
+				<span class="inline-block bg-secondary/10 text-secondary rounded px-1.5 py-0.5 mr-xs mb-xs text-[0.7rem]"> {/* Smaller tags, use spacing vars */}
 					#{tag}
 				</span>
 			))}

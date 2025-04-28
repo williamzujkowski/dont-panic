@@ -11,20 +11,20 @@ const allReports = await getCollection('reports', ({ data }) => {
   return true; // Include all for now
 });
 
-allReports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf()); // Use correct field name
+allReports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf());
 ---
 <BaseLayout title="Vulnerability Reports">
-	<section class="mb-12">
-		<h1 class="text-3xl font-bold mb-4 text-primary">Latest Vulnerability Reports</h1>
-		<p class="text-lg text-text-muted">
+	<section class="mb-lg md:mb-xl text-center"> {/* Centered intro, use spacing vars */}
+		<h1 class="text-4xl font-bold mb-sm text-text">Latest Vulnerability Reports</h1> {/* Use text color, spacing var */}
+		<p class="text-lg text-text-muted max-w-2xl mx-auto"> {/* Constrained width */}
 			Stay informed about the latest security vulnerabilities and intelligence analysis.
 		</p>
 	</section>
 
 	{allReports.length === 0 ? (
-		<p class="text-center text-text-muted py-10">No reports found.</p>
+		<p class="text-center text-text-muted py-xl">No reports found.</p> {/* Use spacing var */}
 	) : (
-		<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+		<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md"> {/* Use spacing variable */}
 			{allReports.map(report => (
 				<ReportCard report={report} />
 			))}
