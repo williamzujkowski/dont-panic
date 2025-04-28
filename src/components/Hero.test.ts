@@ -3,24 +3,27 @@ import { describe, it, expect } from 'vitest';
 import { within } from '@testing-library/dom'; // Keep within for scoped queries
 import Hero from './Hero.astro'; // Direct import might need adjustment
 
-// Mock render helper
+// Mock render helper - Simulates the expected output structure
+// NOTE: This does NOT render the actual Astro component.
 async function renderHero(props: { headline: string; subheadline?: string; ctaText: string; ctaHref: string }) {
-  const subheadlineHtml = props.subheadline ? `<p class="subheadline">${props.subheadline}</p>` : '';
+  const subheadlineHtml = props.subheadline ? `<p class="text-xl text-text-secondary mb-8">${props.subheadline}</p>` : ''; // Added example classes
   const html = `
-    <section class="hero-section">
-      <div class="hero-content">
-        <h1>${props.headline}</h1>
+    <section class="text-center py-16 md:py-24 bg-gradient-to-b from-surface to-background"> {/* Added example classes */}
+      <div class="container mx-auto px-4"> {/* Added example classes */}
+        <h1 class="text-4xl md:text-5xl font-bold text-primary mb-4">${props.headline}</h1> {/* Added example classes */}
         ${subheadlineHtml}
-        <a href="${props.ctaHref}" class="cta-button">${props.ctaText}</a>
+        <a href="${props.ctaHref}" class="cta-button inline-block bg-primary text-white font-semibold py-3 px-8 rounded hover:bg-primary-dark transition-colors"> {/* Added example classes */}
+          ${props.ctaText}
+        </a>
       </div>
     </section>
   `;
   const container = document.createElement('div');
   container.innerHTML = html;
-  return container; // Return the container element directly
+  return container;
 }
 
-describe('Hero.astro', () => {
+describe('Hero Component Mock Test', () => { // Renamed describe block
   const sampleProps = {
     headline: 'Test Headline',
     subheadline: 'Test Subheadline',
@@ -28,32 +31,33 @@ describe('Hero.astro', () => {
     ctaHref: '/test-link',
   };
 
-  it('3.1: Renders <section>, headline, subheadline, and CTA link', async () => {
+  it('HYPOTHESIS: Renders section, headline, subheadline, and CTA link', async () => {
     const heroContainer = await renderHero(sampleProps);
-    // No render call needed, query heroContainer directly
-    const section = heroContainer.querySelector('section.hero-section'); // More specific query
+    const section = heroContainer.querySelector('section'); // Simplified query
     expect(section, 'Section element should exist').not.toBeNull();
 
-    // Use within to scope queries
-    const heading = within(heroContainer).getByRole('heading', { level: 1, name: sampleProps.headline });
+    // Use querySelector for simplicity
+    const heading = section?.querySelector('h1');
     expect(heading).not.toBeNull();
+    expect(heading?.textContent).toBe(sampleProps.headline);
 
-    const subheadline = within(heroContainer).getByText(sampleProps.subheadline);
+    const subheadline = section?.querySelector('p'); // Assuming subheadline is the only <p>
     expect(subheadline).not.toBeNull();
+    expect(subheadline?.textContent).toBe(sampleProps.subheadline);
 
-    const ctaLink = within(heroContainer).getByRole('link', { name: sampleProps.ctaText });
+    const ctaLink = section?.querySelector('a.cta-button');
     expect(ctaLink).not.toBeNull();
-    expect(ctaLink.getAttribute('href')).toBe(sampleProps.ctaHref);
+    expect(ctaLink?.textContent).toBe(sampleProps.ctaText);
+    expect(ctaLink?.getAttribute('href')).toBe(sampleProps.ctaHref);
   });
 
-  it('3.1: Renders correctly without optional subheadline', async () => {
+  it('HYPOTHESIS: Renders correctly without optional subheadline', async () => {
     const { subheadline, ...propsWithoutSub } = sampleProps;
     const heroContainer = await renderHero(propsWithoutSub);
-    // No render call needed, query heroContainer directly
+    const section = heroContainer.querySelector('section');
 
-    // Use within to scope queries
-    expect(within(heroContainer).queryByText(sampleProps.subheadline)).toBeNull(); // Subheadline should not be present
-    expect(within(heroContainer).getByRole('heading', { level: 1, name: sampleProps.headline })).not.toBeNull();
-    expect(within(heroContainer).getByRole('link', { name: sampleProps.ctaText })).not.toBeNull();
+    expect(section?.querySelector('p')).toBeNull(); // Subheadline <p> should not be present
+    expect(section?.querySelector('h1')?.textContent).toBe(sampleProps.headline);
+    expect(section?.querySelector('a.cta-button')?.textContent).toBe(sampleProps.ctaText);
   });
 });

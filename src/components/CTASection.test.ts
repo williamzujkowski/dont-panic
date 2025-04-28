@@ -3,40 +3,44 @@ import { describe, it, expect } from 'vitest';
 import { within } from '@testing-library/dom'; // Keep within for scoped queries
 import CTASection from './CTASection.astro'; // Direct import might need adjustment
 
-// Mock render helper
+// Mock render helper - Simulates the expected output structure
+// NOTE: This does NOT render the actual Astro component.
 async function renderCTASection(props: { headline: string; ctaText: string; ctaHref: string }) {
   const html = `
-    <section class="cta-section">
-      <div class="cta-content">
-        <h2>${props.headline}</h2>
-        <a href="${props.ctaHref}" class="cta-button">${props.ctaText}</a>
+    <section class="py-12 md:py-20 bg-primary text-white text-center"> {/* Added example classes */}
+      <div class="container mx-auto px-4"> {/* Added example classes */}
+        <h2 class="text-3xl font-bold mb-6">${props.headline}</h2> {/* Added example classes */}
+        <a href="${props.ctaHref}" class="cta-button inline-block bg-white text-primary font-semibold py-3 px-8 rounded hover:bg-gray-100 transition-colors"> {/* Added example classes */}
+          ${props.ctaText}
+        </a>
       </div>
     </section>
   `;
   const container = document.createElement('div');
   container.innerHTML = html;
-  return container; // Return the container element directly
+  return container;
 }
 
-describe('CTASection.astro', () => {
+describe('CTASection Component Mock Test', () => { // Renamed describe block
   const sampleProps = {
     headline: 'Ready to Test?',
     ctaText: 'Run Tests',
     ctaHref: '/run-tests',
   };
 
-  it('3.3: Renders <section>, headline, and CTA link', async () => {
+  it('HYPOTHESIS: Renders section, headline, and CTA link', async () => {
     const ctaContainer = await renderCTASection(sampleProps);
-    // No render call needed, query ctaContainer directly
-    const section = ctaContainer.querySelector('section.cta-section'); // More specific query
+    const section = ctaContainer.querySelector('section'); // Simplified query
     expect(section, 'Section element should exist').not.toBeNull();
 
-    // Use within to scope queries to the container
-    const heading = within(ctaContainer).getByRole('heading', { level: 2, name: sampleProps.headline });
+    // Use querySelector for simplicity
+    const heading = section?.querySelector('h2');
     expect(heading).not.toBeNull();
+    expect(heading?.textContent).toBe(sampleProps.headline);
 
-    const ctaLink = within(ctaContainer).getByRole('link', { name: sampleProps.ctaText });
+    const ctaLink = section?.querySelector('a.cta-button');
     expect(ctaLink).not.toBeNull();
-    expect(ctaLink.getAttribute('href')).toBe(sampleProps.ctaHref);
+    expect(ctaLink?.textContent).toBe(sampleProps.ctaText);
+    expect(ctaLink?.getAttribute('href')).toBe(sampleProps.ctaHref);
   });
 });

@@ -4,29 +4,33 @@ import { within } from '@testing-library/dom'; // Keep within for scoped queries
 import Features from './Features.astro'; // Direct import might need adjustment
 import type { FeatureItem } from '../data/featuresData'; // Import type
 
-// Mock render helper
+// Mock render helper - Simulates the expected output structure
+// NOTE: This does NOT render the actual Astro component.
 async function renderFeatures(props: { features: FeatureItem[] }) {
   const featuresHtml = props.features.map(feature => `
-    <div class="feature-card">
-      ${feature.icon ? `<div class="feature-icon">${feature.icon}</div>` : ''}
-      <h3>${feature.title}</h3>
-      <p>${feature.description}</p>
+    <div class="feature-card p-6 bg-surface rounded-md border border-border text-center"> {/* Added example classes */}
+      ${feature.icon ? `<div class="feature-icon text-4xl mb-4 text-primary">${feature.icon}</div>` : ''}
+      <h3 class="text-lg font-semibold mb-2">${feature.title}</h3>
+      <p class="text-text-secondary">${feature.description}</p>
     </div>
   `).join('');
 
   const html = `
-    <section class="features-section">
-      <div class="features-grid">
-        ${featuresHtml}
+    <section class="py-12 md:py-20"> {/* Added example classes */}
+      {/* Assuming a container and grid structure */}
+      <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8"> {/* Added example classes */}
+          ${featuresHtml}
+        </div>
       </div>
     </section>
   `;
   const container = document.createElement('div');
   container.innerHTML = html;
-  return container; // Return the container element directly
+  return container;
 }
 
-describe('Features.astro', () => {
+describe('Features Component Mock Test', () => { // Renamed describe block
   const sampleFeatures: FeatureItem[] = [
     { title: 'Feat 1', description: 'Desc 1', icon: '🚀' },
     { title: 'Feat 2', description: 'Desc 2' }, // No icon

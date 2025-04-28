@@ -11,7 +11,7 @@ const allReports = await getCollection('reports', ({ data }) => {
   return true; // Include all for now
 });
 
-allReports.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+allReports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf()); // Use correct field name
 ---
 <BaseLayout title="Vulnerability Reports">
 	<section class="mb-12">
