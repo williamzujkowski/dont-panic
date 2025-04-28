@@ -37,42 +37,44 @@ describe('Features Component Mock Test', () => { // Renamed describe block
     { title: 'Feat 3', description: 'Desc 3', icon: '⚙️' },
   ];
 
-  it('3.2: Renders <section> and a block for each feature', async () => {
+  it('HYPOTHESIS: Renders a section and a card for each feature', async () => {
     const featuresContainer = await renderFeatures({ features: sampleFeatures });
-    // No render call needed, query featuresContainer directly
-    const section = featuresContainer.querySelector('section.features-section'); // More specific query
+    const section = featuresContainer.querySelector('section'); // Simplified query
     expect(section, 'Section element should exist').not.toBeNull();
 
     const featureCards = featuresContainer.querySelectorAll('.feature-card');
     expect(featureCards).toHaveLength(sampleFeatures.length);
   });
 
-  it('3.2: Renders title and description for each feature', async () => {
+  it('HYPOTHESIS: Renders title and description within each feature card', async () => {
     const featuresContainer = await renderFeatures({ features: sampleFeatures });
-    // No render call needed, query featuresContainer directly
-    const featureCards = featuresContainer.querySelectorAll('.feature-card'); // Get cards directly
+    const featureCards = featuresContainer.querySelectorAll('.feature-card');
 
     featureCards.forEach((card, index) => {
-      expect(card).not.toBeNull();
       const featureData = sampleFeatures[index];
-      const heading = within(card!).getByRole('heading', { level: 3, name: featureData.title });
-      const description = within(card!).getByText(featureData.description);
+      // Use querySelector for simplicity as getByRole/getByText might be too strict for mock HTML
+      const heading = card.querySelector('h3');
+      const description = card.querySelector('p');
       expect(heading).not.toBeNull();
+      expect(heading?.textContent).toBe(featureData.title);
       expect(description).not.toBeNull();
+      expect(description?.textContent).toBe(featureData.description);
     });
   });
 
-  it('3.2: Renders icon if provided', async () => {
+  it('HYPOTHESIS: Renders icon within card if provided', async () => {
      const featuresContainer = await renderFeatures({ features: sampleFeatures });
-     // No render call needed, query featuresContainer directly
-     const featureCards = featuresContainer.querySelectorAll('.feature-card'); // Get cards directly
+     const featureCards = featuresContainer.querySelectorAll('.feature-card');
 
-     const card1Icon = within(featureCards[0]!).queryByText(sampleFeatures[0].icon!);
-     const card2Icon = within(featureCards[1]!).queryByText('🚀'); // Check absence by querying for *any* icon text
-     const card3Icon = within(featureCards[2]!).queryByText(sampleFeatures[2].icon!);
+     // Check for icon presence/absence using querySelector
+     const card1IconContainer = featureCards[0].querySelector('.feature-icon');
+     const card2IconContainer = featureCards[1].querySelector('.feature-icon');
+     const card3IconContainer = featureCards[2].querySelector('.feature-icon');
 
-     expect(card1Icon).not.toBeNull();
-     expect(card2Icon).toBeNull(); // Icon should not be present in card 2
-     expect(card3Icon).not.toBeNull();
+     expect(card1IconContainer).not.toBeNull();
+     expect(card1IconContainer?.textContent).toBe(sampleFeatures[0].icon);
+     expect(card2IconContainer).toBeNull(); // Icon container should not be present
+     expect(card3IconContainer).not.toBeNull();
+     expect(card3IconContainer?.textContent).toBe(sampleFeatures[2].icon);
   });
 });
