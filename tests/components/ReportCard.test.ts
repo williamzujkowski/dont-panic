@@ -104,7 +104,7 @@ describe('ReportCard Component Structure Test', () => {
     });
 
     afterEach(() => {
-        cleanup(); // Clean up the DOM after each test
+        // cleanup(); // Vitest + happy-dom should handle cleanup automatically
         // @ts-ignore
         delete globalThis.Astro;
     });

@@ -73,7 +73,7 @@ describe('BaseLayout Component', () => {
     });
 
     afterEach(() => {
-        cleanup();
+        // cleanup(); // Vitest + happy-dom should handle cleanup automatically
         document.body.innerHTML = ''; // Clean up body
         // @ts-ignore
         delete globalThis.Astro;
