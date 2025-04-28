@@ -7,7 +7,9 @@ interface Props {
 }
 
 const { report } = Astro.props;
-const reportUrl = `${Astro.config.base}reports/${report.slug}/`;
+// Safely access config property with fallback
+const base = Astro.config?.base ?? '/';
+const reportUrl = `${base}reports/${report.slug}/`;
 ---
 <a href={reportUrl} class="block p-6 bg-surface rounded-md border border-border hover:shadow-sm hover:border-primary transition-all duration-200 ease-in-out group">
 	<h3 class="text-lg font-semibold mb-2 text-primary group-hover:text-primary-dark">{report.data.title}</h3>

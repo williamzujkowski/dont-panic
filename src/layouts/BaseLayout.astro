@@ -9,8 +9,12 @@ interface Props {
 
 const { title, description = "Don't Panic - Vulnerability Intelligence Reports" } = Astro.props;
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const faviconUrl = `${Astro.config.base}favicon.svg`; // Construct base-aware favicon URL
+// Safely access config properties with fallbacks
+const base = Astro.config?.base ?? '/';
+const site = Astro.site ?? new URL('http://localhost:4321'); // Default to localhost if site is undefined
+
+const canonicalURL = new URL(Astro.url.pathname, site);
+const faviconUrl = `${base}favicon.svg`; // Construct base-aware favicon URL
 ---
 <!doctype html>
 <html lang="en">
@@ -43,7 +47,7 @@ const faviconUrl = `${Astro.config.base}favicon.svg`; // Construct base-aware fa
 	<body class="bg-background text-text min-h-screen flex flex-col antialiased">
 		<header class="bg-surface border-b border-border sticky top-0 z-10">
 			<nav class="container mx-auto px-4 py-3 flex justify-between items-center">
-				<a href={Astro.config.base} class="text-xl font-bold text-primary hover:text-primary-dark">
+				<a href={base} class="text-xl font-bold text-primary hover:text-primary-dark"> {/* Use safe base variable */}
 					Don't Panic
 				</a>
 				<!-- Add nav links here if needed -->
