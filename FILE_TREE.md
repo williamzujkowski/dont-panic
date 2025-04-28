@@ -44,6 +44,7 @@ This document outlines the structure of the repository.
     - **src/** - *Source code*
         - **components/** - *Reusable Astro components*
             - ReportCard.astro
+            - Search.astro # Added Pagefind search component
             - .gitkeep
         - **content/** - *Markdown content collections*
             - config.ts # Content collection schema definitions

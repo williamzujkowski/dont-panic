@@ -46,11 +46,13 @@ const faviconUrl = `${base}favicon.svg`; // Construct base-aware favicon URL
 	</head>
 	<body class="bg-background text-text min-h-screen flex flex-col antialiased">
 		<header class="bg-surface border-b border-border sticky top-0 z-10">
-			<nav class="container mx-auto px-4 py-3 flex justify-between items-center">
-				<a href={base} class="text-xl font-bold text-primary hover:text-primary-dark"> {/* Use safe base variable */}
+			<nav class="container mx-auto px-4 py-3 flex justify-between items-center gap-4">
+				<a href={base} class="text-xl font-bold text-primary hover:text-primary-dark flex-shrink-0"> {/* Use safe base variable */}
 					Don't Panic
 				</a>
 				<!-- Add nav links here if needed -->
+				<div class="flex-grow"></div> {/* Spacer */}
+				<Search /> {/* Add the Search component */}
 				<!-- Example:
 				<ul class="flex space-x-4">
 					<li><a href={Astro.config.base} class="hover:text-primary">Home</a></li>

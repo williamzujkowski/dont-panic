@@ -115,7 +115,7 @@ graph TD
 
 *   **Phase 1 (Implemented):** Initialize Astro project with Tailwind. Setup basic project structure (`src/content/reports`, basic layout, report page). Create basic layout/template (`src/layouts/`, `src/pages/reports/[slug].astro`) to display a single Markdown report from `src/content/`. Setup manual report copying. Setup basic CI/CD for building/testing.
 *   **Phase 2 (Implemented):** Implement index page (`src/pages/index.astro`) listing all available reports using Astro's content collections API. Refine styling and layout using Tailwind (created `ReportCard` component). Setup deployment CI/CD (using existing `deploy.yml`). *Note: Automated report syncing deferred.*
-*   **Phase 3:** Add features like client-side search (e.g., using Pagefind or Algolia integration), filtering/sorting reports, improve accessibility, enhance styling further. Implement automated report syncing/fetching in CI/CD.
+*   **Phase 3 (Partially Implemented):** Add features like client-side search (Implemented using Pagefind integration). *Remaining: filtering/sorting reports, improve accessibility, enhance styling further, implement automated report syncing/fetching in CI/CD.*
 
 ## How to Run Locally
 

@@ -1,6 +1,8 @@
 // @ts-check
+// @ts-check
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite'; // Import the Vite plugin
+import pagefind from '@pagefind/astro'; // Import Pagefind integration
 
 // Determine base path and site URL based on environment
 // Fallback for local development
@@ -45,8 +47,9 @@ export default defineConfig({
   // Ensure the output directory is 'dist' as expected by the GitHub Pages actions
   outDir: 'dist',
 
-  // Remove the Astro Tailwind integration
-  // integrations: [tailwind({...})],
+  integrations: [
+    pagefind() // Add Pagefind integration
+  ],
 
   // Add the Tailwind Vite plugin
   vite: {
