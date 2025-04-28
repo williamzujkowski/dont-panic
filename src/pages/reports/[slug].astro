@@ -53,9 +53,9 @@ const { Content } = await entry.render();
 			{/* Tags */}
 			{entry.data.tags && entry.data.tags.length > 0 && (
 				<div class="text-sm">
-					{entry.data.tags.map(tag => (
-						<span class="inline-block bg-secondary/10 text-secondary rounded px-2 py-0.5 mr-sm mb-sm text-xs">#{tag}</span> {/* Use spacing variables */}
-					))}
+					{entry.data.tags.map(tag => {
+						return (<span class="inline-block bg-secondary/10 text-secondary rounded px-2 py-0.5 mr-sm mb-sm text-xs">#{tag}</span>); {/* Use spacing variables */}
+					})}
 				</div>
 			)}
 		</header>
