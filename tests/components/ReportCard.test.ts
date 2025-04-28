@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/happy-dom'; // Use happy-dom integration
+import { render, screen, cleanup } from '@testing-library/dom'; // Use @testing-library/dom
+import '@testing-library/jest-dom/vitest'; // Import Jest DOM matchers for Vitest
 import ReportCard from '../../src/components/ReportCard.astro';
 import type { CollectionEntry } from 'astro:content';
 

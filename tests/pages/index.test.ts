@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/happy-dom';
+import { render, screen, cleanup } from '@testing-library/dom'; // Use @testing-library/dom
+import '@testing-library/jest-dom/vitest'; // Import Jest DOM matchers for Vitest
 import IndexPage from '../../src/pages/index.astro'; // Adjust path if needed
 import type { CollectionEntry } from 'astro:content';
 
