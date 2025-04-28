@@ -66,9 +66,9 @@ This document outlines the structure of the repository.
         - **layouts/**
              - BaseLayout.test.ts
         - **pages/**
-            - index.test.ts
+            - index.test.ts # (Temporarily Disabled - Requires Astro Test Utils)
             - **reports/**
-              - '[slug].test.ts'
+              - '[slug].test.ts' # (Temporarily Disabled - Requires Astro Test Utils)
         # - setup.ts # Optional setup file
         - .gitkeep
     - vitest.config.ts # Vitest configuration

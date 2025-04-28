@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup, getByText } from '@testing-library/dom';
+import { screen, cleanup, getByText } from '@testing-library/dom'; // Import specific functions
 import '@testing-library/jest-dom/vitest';
-import BaseLayout from '../../src/layouts/BaseLayout.astro';
+// import BaseLayout from '../../src/layouts/BaseLayout.astro'; // Cannot import .astro directly
 
 // Mock Astro global/config needed by BaseLayout
 const mockAstroConfig = {
