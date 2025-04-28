@@ -46,6 +46,7 @@ vi.mock('astro:content', async (importOriginal) => {
 });
 
 // 3. DO NOT import from 'astro:content' here anymore. Access the mock via the hoisted variable.
+// import { getCollection } from 'astro:content'; // REMOVED STATIC IMPORT
 
 
 // Mock Astro global/config
