@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { screen, cleanup, getByRole, queryByText, getByText } from '@testing-library/dom'; // Import specific functions including cleanup
+import { screen, cleanup, getByRole, queryByText, getByText, querySelector } from '@testing-library/dom'; // Import specific functions including cleanup
 import '@testing-library/jest-dom/vitest'; // Import Jest DOM matchers for Vitest
 // import ReportCard from '../../src/components/ReportCard.astro'; // Cannot import .astro directly
 import type { CollectionEntry } from 'astro:content';
@@ -118,11 +118,13 @@ describe('ReportCard Component Structure Test', () => {
     it('HYPOTHESIS: Should render the publication date', () => {
         const container = renderComponent({ report: mockReport });
         const expectedDate = mockReport.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-        // Check for text containing the formatted date
-        expect(getByText(container, `Published: ${expectedDate}`, { exact: false })).toBeInTheDocument();
-        // Check the time element's datetime attribute
-        const timeElement = getByText(container, expectedDate).closest('time');
+        // Find the time element by its text content
+        const timeElement = getByText(container, expectedDate);
+        expect(timeElement).toBeInTheDocument();
+        expect(timeElement.tagName).toBe('TIME');
         expect(timeElement).toHaveAttribute('datetime', mockReport.data.pubDate.toISOString());
+        // Check the parent paragraph contains "Published:"
+        expect(timeElement.parentElement).toHaveTextContent(`Published: ${expectedDate}`);
     });
 
     it('HYPOTHESIS: Should render the description if provided', () => {
@@ -162,10 +164,11 @@ describe('ReportCard Component Structure Test', () => {
 
     it('HYPOTHESIS: Should render a link pointing to the correct report slug with base path', () => {
         const container = renderComponent({ report: mockReport });
-        const link = getByRole(container, 'link'); // The container itself is the link
-        expect(link).toBeInTheDocument();
+        // The container *is* the link element in this mock setup
+        expect(container).toBeInTheDocument();
+        expect(container.tagName).toBe('A');
         // Construct expected URL using the mocked base path
         const expectedHref = `${mockAstroConfig.base}reports/${mockReport.slug}/`;
-        expect(link).toHaveAttribute('href', expectedHref);
+        expect(container).toHaveAttribute('href', expectedHref);
     });
 });
