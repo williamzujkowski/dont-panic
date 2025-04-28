@@ -8,8 +8,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "test": "vitest run",
-    "test:watch": "vitest watch"
+    "test": "npx vitest run",
+    "test:watch": "npx vitest watch"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.4",
