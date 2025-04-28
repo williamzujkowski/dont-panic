@@ -12,9 +12,12 @@ const { siteTitle, navItems, currentPath } = Astro.props;
 const base = Astro.config?.base ?? '/'; // Get base path
 ---
 <header role="banner" class="site-header">
-  <div class="site-title">
+  <div class="site-title flex items-center"> {/* Added flex items-center */}
     {/* Optional: Add SVG icon here */}
-    {/* <svg class="inline-block w-6 h-6 mr-2 text-primary" ...>...</svg> */}
+    {/* Example Placeholder: Replace with actual SVG */}
+    <!-- <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-primary inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg> -->
     <a href={base}>{siteTitle}</a> {/* Use base path */}
   </div>
   <nav role="navigation" aria-label="Main navigation">
