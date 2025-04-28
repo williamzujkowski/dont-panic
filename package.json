@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.4",
-    "@pagefind/astro": "^1.2.0",
     "astro": "^5.7.5",
     "tailwindcss": "^4.1.4"
   },
