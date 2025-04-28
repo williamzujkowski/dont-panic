@@ -35,21 +35,29 @@ async function renderLayout(props: { title: string; description?: string }, slot
           <meta property="twitter:title" content="${title} | Don't Panic" />
           <meta property="twitter:description" content="${description}" />
         </head>
-        <body class="bg-background text-text min-h-screen flex flex-col antialiased">
-          <header class="bg-surface border-b border-border sticky top-0 z-10">
-            <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
-              <a href="${mockAstroConfig.base}" class="text-xl font-bold text-primary hover:text-primary-dark">
-                Don't Panic
-              </a>
+        <body class="bg-background text-text min-h-screen flex flex-col antialiased font-sans">
+          {/* Mock Header structure based on Header.astro */}
+          <header role="banner" class="site-header">
+            <div class="site-title">
+              <a href="${mockAstroConfig.base}">Don't Panic</a>
+            </div>
+            <nav role="navigation" aria-label="Main navigation">
+              <ul class="nav-list"></ul> {/* Empty nav for base layout test */}
             </nav>
           </header>
-          <main class="flex-grow container mx-auto px-4 py-8">
+
+          <main class="flex-grow container mx-auto px-4 py-8 w-full max-w-4xl">
             ${slotContent} {/* Inject slot content */}
           </main>
-          <footer class="bg-surface border-t border-border mt-auto py-4 text-center text-text-muted text-sm">
-            <div class="container mx-auto px-4">
-              © ${new Date().getFullYear()} Don't Panic. All rights reserved.
-            </div>
+
+          {/* Mock Footer structure based on Footer.astro */}
+          <footer role="contentinfo" class="site-footer">
+            <p>
+              &copy; ${new Date().getFullYear()} Don't Panic.
+              <a href="https://github.com/williamzujkowski/dont-panic" target="_blank" rel="noopener noreferrer" class="hover:text-primary hover:underline ml-2">
+                View Source on GitHub
+              </a>
+            </p>
           </footer>
         </body>
       </html>
@@ -106,16 +114,23 @@ describe('BaseLayout Component', () => {
 
     it('HYPOTHESIS: Should render the header with site title link', async () => {
         await renderLayout({ title: "Test" }, '<p>Slot Content</p>');
-        const headerLink = screen.getByRole('link', { name: "Don't Panic" });
+        // Check within the header element (role="banner")
+        const header = screen.getByRole('banner');
+        expect(header).toBeInTheDocument();
+        const headerLink = within(header).getByRole('link', { name: "Don't Panic" });
         expect(headerLink).toBeInTheDocument();
         expect(headerLink).toHaveAttribute('href', mockAstroConfig.base);
     });
 
-    it('HYPOTHESIS: Should render the footer with copyright', async () => {
+    it('HYPOTHESIS: Should render the footer with copyright and GitHub link', async () => {
         await renderLayout({ title: "Test" }, '<p>Slot Content</p>');
         const footer = screen.getByRole('contentinfo'); // Footer role
         expect(footer).toBeInTheDocument();
-        expect(getByText(footer, `© ${new Date().getFullYear()} Don't Panic. All rights reserved.`)).toBeInTheDocument();
+        // Check for parts of the text content
+        expect(within(footer).getByText(/© \d{4} Don't Panic./)).toBeInTheDocument();
+        const githubLink = within(footer).getByRole('link', { name: "View Source on GitHub" });
+        expect(githubLink).toBeInTheDocument();
+        expect(githubLink).toHaveAttribute('href', "https://github.com/williamzujkowski/dont-panic");
     });
 
     it('HYPOTHESIS: Should render the slot content within the main tag', async () => {

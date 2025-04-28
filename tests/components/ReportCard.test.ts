@@ -150,17 +150,19 @@ describe('ReportCard Component Structure Test', () => {
         expect(getByText(container, `EPSS: ${(mockReport.data.epssScore! * 100).toFixed(1)}%`)).toBeInTheDocument();
     });
 
-    it('HYPOTHESIS: Should render SeverityTag mock if severity provided', () => {
+    it('HYPOTHESIS: Should render SeverityTag mock text if severity provided', () => {
         const container = renderComponent({ report: mockReport });
-        expect(getByText(container, mockReport.data.severity!)).toBeInTheDocument();
+        // Check for the text content rendered by the mock span
+        expect(container.querySelector('.severity-tag')).toHaveTextContent(mockReport.data.severity!);
     });
 
-     it('HYPOTHESIS: Should render ZeroDayTag mock if isZeroDay is true', () => {
+     it('HYPOTHESIS: Should render ZeroDayTag mock text if isZeroDay is true', () => {
         const container = renderComponent({ report: mockReport });
-        expect(getByText(container, "ZERO-DAY")).toBeInTheDocument();
+         // Check for the text content rendered by the mock span
+        expect(container.querySelector('.zero-day-tag')).toHaveTextContent("ZERO-DAY");
     });
 
-    it('HYPOTHESIS: Should NOT render SeverityTag or ZeroDayTag if not provided/false', () => {
+    it('HYPOTHESIS: Should NOT render SeverityTag or ZeroDayTag mock elements if not provided/false', () => {
         const container = renderComponent({ report: mockReportMinimal });
         expect(queryByText(container, /Critical|High|Medium|Low/i)).not.toBeInTheDocument(); // Check for severity text
         expect(queryByText(container, "ZERO-DAY")).not.toBeInTheDocument();
@@ -168,14 +170,10 @@ describe('ReportCard Component Structure Test', () => {
 
     it('HYPOTHESIS: Should render limited tags if provided', () => {
         const container = renderComponent({ report: mockReport });
-        // Check only for the first few tags based on slice(0, 4) in mock renderer
-        expect(getByText(container, `#${mockReport.data.tags![0]}`)).toBeInTheDocument();
-        expect(getByText(container, `#${mockReport.data.tags![1]}`)).toBeInTheDocument();
-        expect(getByText(container, `#${mockReport.data.tags![2]}`)).toBeInTheDocument();
-        // Ensure the last tag isn't rendered if more than 4 exist
-        if (mockReport.data.tags!.length > 4) {
-           expect(queryByText(container, `#${mockReport.data.tags![4]}`)).not.toBeInTheDocument();
-        }
+        const tagElements = container.querySelectorAll('.tag');
+        expect(tagElements).toHaveLength(Math.min(mockReport.data.tags!.length, 4)); // Check correct number rendered
+        // Check text content of the first tag
+        expect(tagElements[0]).toHaveTextContent(`#${mockReport.data.tags![0]}`);
     });
 
     it('HYPOTHESIS: Should render a link pointing to the correct report slug with base path', () => {
