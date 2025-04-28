@@ -59,22 +59,33 @@ function renderComponent(props: { report: CollectionEntry<'reports'> }) {
     const { report } = props;
     const reportUrl = `${mockAstroConfig.base}reports/${report.slug}/`;
 
-    // Mock ScoreDisplay output
-    const cvssScoreHtml = report.data.cvssScore !== undefined ? `<div class="score-display text-sm">CVSS: ${report.data.cvssScore.toFixed(1)}</div>` : '';
-    const epssScoreHtml = report.data.epssScore !== undefined ? `<div class="score-display text-sm">EPSS: ${(report.data.epssScore * 100).toFixed(1)}%</div>` : '';
-
-    // Mock SeverityTag output
-    const severityTagHtml = report.data.severity ? `<span class="severity-tag">${report.data.severity}</span>` : '';
-    // Mock ZeroDayTag output
-    const zeroDayTagHtml = report.data.isZeroDay ? `<span class="zero-day-tag">ZERO-DAY</span>` : '';
-
-    // Mock Original Tags output
-    const tagsHtml = report.data.tags && report.data.tags.length > 0
-        ? `<div class="text-xs mt-auto pt-2 border-t border-border/50">${report.data.tags.slice(0, 4).map(tag => `<span class="tag">#${tag}</span>`).join('')}</div>`
+    // Mock ScoreDisplay output more accurately
+    const cvssScoreHtml = report.data.cvssScore !== undefined
+        ? `<div class="score-display text-sm"><span class="font-medium">CVSS Score:</span><span class="ml-1">${report.data.cvssScore.toFixed(1)}</span></div>`
+        : '';
+    const epssScoreHtml = report.data.epssScore !== undefined
+        ? `<div class="score-display text-sm"><span class="font-medium">EPSS Score:</span><span class="ml-1">${(report.data.epssScore * 100).toFixed(1)}%</span></div>`
         : '';
 
+    // Mock SeverityTag output more accurately
+    const severityTagHtml = report.data.severity
+        ? `<span class="px-2 py-0.5 rounded text-xs font-semibold inline-block severity-tag">${report.data.severity}</span>` // Added base classes
+        : '';
+    // Mock ZeroDayTag output more accurately
+    const zeroDayTagHtml = report.data.isZeroDay
+        ? `<span class="px-2 py-0.5 rounded text-xs font-semibold inline-block zero-day-tag">ZERO-DAY</span>` // Added base classes
+        : '';
+
+    // Mock Original Tags output more accurately
+    const tagsHtml = report.data.tags && report.data.tags.length > 0
+        ? `<div class="text-xs mt-auto pt-2 border-t border-border/50">${report.data.tags.slice(0, 4).map(tag =>
+            `<span class="inline-block bg-secondary/10 text-secondary rounded px-1.5 py-0.5 mr-1 mb-1 text-[0.7rem] tag">#${tag}</span>` // Added base classes
+          ).join('')}</div>`
+        : '';
+
+    // Updated main HTML structure with more accurate classes
     const html = `
-      <a href="${reportUrl}" class="flex flex-col h-full p-4 bg-surface rounded-md border border-border group">
+      <a href="${reportUrl}" class="flex flex-col h-full p-4 bg-surface rounded-md border border-border hover:shadow-md hover:border-primary hover:bg-background transition-all duration-200 ease-in-out group">
         <h3 class="text-base font-semibold mb-1 text-primary group-hover:text-primary-dark">${report.data.cveId}</h3>
         <p class="text-sm text-text-secondary mb-2 line-clamp-2 flex-grow">${report.data.title}</p>
         <p class="text-xs text-text-muted mb-2">
@@ -95,7 +106,7 @@ function renderComponent(props: { report: CollectionEntry<'reports'> }) {
     `;
 
     // Render the mock HTML into the testing DOM
-    const container = document.createElement('div'); // Create a container div
+    const container = document.createElement('div');
     container.innerHTML = html;
     document.body.appendChild(container); // Append the container to the body
 
@@ -140,26 +151,34 @@ describe('ReportCard Component Structure Test', () => {
         expect(timeElement.parentElement).toHaveTextContent(`Published: ${expectedDate}`);
     });
 
-    it('HYPOTHESIS: Should render CVSS score using ScoreDisplay mock', () => {
+    it('HYPOTHESIS: Should render CVSS score using ScoreDisplay mock structure', () => {
         const container = renderComponent({ report: mockReport });
-        expect(getByText(container, `CVSS: ${mockReport.data.cvssScore!.toFixed(1)}`)).toBeInTheDocument();
+        const scoreDiv = container.querySelector('.score-display:has(span:first-child:contains("CVSS Score:"))'); // Find CVSS score div
+        expect(scoreDiv).toBeInTheDocument();
+        expect(scoreDiv).toHaveTextContent(mockReport.data.cvssScore!.toFixed(1));
     });
 
-    it('HYPOTHESIS: Should render EPSS score using ScoreDisplay mock', () => {
+    it('HYPOTHESIS: Should render EPSS score using ScoreDisplay mock structure', () => {
         const container = renderComponent({ report: mockReport });
-        expect(getByText(container, `EPSS: ${(mockReport.data.epssScore! * 100).toFixed(1)}%`)).toBeInTheDocument();
+        const scoreDiv = container.querySelector('.score-display:has(span:first-child:contains("EPSS Score:"))'); // Find EPSS score div
+        expect(scoreDiv).toBeInTheDocument();
+        expect(scoreDiv).toHaveTextContent(`${(mockReport.data.epssScore! * 100).toFixed(1)}%`);
     });
 
-    it('HYPOTHESIS: Should render SeverityTag mock text if severity provided', () => {
+    it('HYPOTHESIS: Should render SeverityTag mock element with text if severity provided', () => {
         const container = renderComponent({ report: mockReport });
-        // Check for the text content rendered by the mock span
-        expect(container.querySelector('.severity-tag')).toHaveTextContent(mockReport.data.severity!);
+        const tag = container.querySelector('.severity-tag');
+        expect(tag).toBeInTheDocument();
+        expect(tag).toHaveTextContent(mockReport.data.severity!);
+        expect(tag).toHaveClass('px-2', 'py-0.5', 'rounded'); // Check base classes
     });
 
-     it('HYPOTHESIS: Should render ZeroDayTag mock text if isZeroDay is true', () => {
+     it('HYPOTHESIS: Should render ZeroDayTag mock element with text if isZeroDay is true', () => {
         const container = renderComponent({ report: mockReport });
-         // Check for the text content rendered by the mock span
-        expect(container.querySelector('.zero-day-tag')).toHaveTextContent("ZERO-DAY");
+        const tag = container.querySelector('.zero-day-tag');
+        expect(tag).toBeInTheDocument();
+        expect(tag).toHaveTextContent("ZERO-DAY");
+        expect(tag).toHaveClass('px-2', 'py-0.5', 'rounded'); // Check base classes
     });
 
     it('HYPOTHESIS: Should NOT render SeverityTag or ZeroDayTag mock elements if not provided/false', () => {
@@ -168,12 +187,12 @@ describe('ReportCard Component Structure Test', () => {
         expect(container.querySelector('.zero-day-tag')).not.toBeInTheDocument();
     });
 
-    it('HYPOTHESIS: Should render limited tags if provided', () => {
+    it('HYPOTHESIS: Should render limited tags with correct classes if provided', () => {
         const container = renderComponent({ report: mockReport });
         const tagElements = container.querySelectorAll('.tag');
-        expect(tagElements).toHaveLength(Math.min(mockReport.data.tags!.length, 4)); // Check correct number rendered
-        // Check text content of the first tag
+        expect(tagElements).toHaveLength(Math.min(mockReport.data.tags!.length, 4));
         expect(tagElements[0]).toHaveTextContent(`#${mockReport.data.tags![0]}`);
+        expect(tagElements[0]).toHaveClass('inline-block', 'bg-secondary/10', 'text-secondary', 'rounded'); // Check base classes
     });
 
     it('HYPOTHESIS: Should render a link pointing to the correct report slug with base path', () => {
