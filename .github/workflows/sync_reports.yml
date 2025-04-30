@@ -14,6 +14,11 @@ on:
         required: true
         default: 'main'
         type: string
+      source_path:
+        description: 'Path to reports directory in source repo'
+        required: true
+        default: 'reports'
+        type: string
   
   # Run on a schedule (daily at midnight UTC)
   schedule:
@@ -22,6 +27,10 @@ on:
 jobs:
   sync_reports:
     runs-on: ubuntu-latest
+    outputs:
+      reports_changed: ${{ steps.check_reports.outputs.reports_changed }}
+      new_reports: ${{ steps.check_reports.outputs.new_reports }}
+      updated_reports: ${{ steps.check_reports.outputs.updated_reports }}
     steps:
       - name: Checkout destination repository
         uses: actions/checkout@v4
@@ -44,37 +53,404 @@ jobs:
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'dont-panic/package-lock.json'
+
+      - name: Install dependencies for validation
+        working-directory: dont-panic
+        run: npm ci
+
+      - name: Check for source reports directory
+        id: check_source_dir
+        run: |
+          # Sanitize source path - prevent path traversal by removing any '..' components
+          RAW_SOURCE_PATH="${{ github.event.inputs.source_path || 'reports' }}"
+          SANITIZED_PATH=$(echo "$RAW_SOURCE_PATH" | sed 's|\.\./||g' | sed 's|/\.\./||g')
+          
+          # Warn if sanitization changed the path
+          if [ "$RAW_SOURCE_PATH" != "$SANITIZED_PATH" ]; then
+            echo "WARNING: Source path contained potentially unsafe components and was sanitized."
+            echo "Original: $RAW_SOURCE_PATH"
+            echo "Sanitized: $SANITIZED_PATH"
+          fi
+          
+          SOURCE_PATH="$SANITIZED_PATH"
+          echo "Using source path: $SOURCE_PATH"
+          
+          if [ ! -d "source-repo/$SOURCE_PATH" ]; then
+            echo "Source reports directory not found: source-repo/$SOURCE_PATH"
+            echo "source_dir_exists=false" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "source_dir_exists=true" >> $GITHUB_OUTPUT
+            echo "source_path=$SOURCE_PATH" >> $GITHUB_OUTPUT
+          fi
+
       - name: Check for new reports
         id: check_reports
+        if: steps.check_source_dir.outputs.source_dir_exists == 'true'
         run: |
           # Create reports directory if it doesn't exist
           mkdir -p dont-panic/src/content/reports
           
-          # Check if there are differences between source and destination report directories
-          DIFF_COUNT=$(diff -r source-repo/reports dont-panic/src/content/reports | wc -l)
+          # Use the sanitized source path from the previous step
+          SOURCE_PATH="${{ steps.check_source_dir.outputs.source_path }}"
+          DEST_PATH="dont-panic/src/content/reports"
           
-          # Set output variable to determine if we need to sync
+          # Create secure temp directory for this job with unique name
+          TEMP_DIR=$(mktemp -d -t report_sync_XXXXXXXX)
+          chmod 700 "$TEMP_DIR" # Restrict permissions
+          echo "temp_dir=$TEMP_DIR" >> $GITHUB_OUTPUT
+          
+          # Count files in source and destination
+          SOURCE_COUNT=$(find "source-repo/$SOURCE_PATH" -type f -name "*.md" | wc -l)
+          DEST_COUNT=$(find "$DEST_PATH" -type f -name "*.md" -not -name "sample-cve.md" | wc -l)
+          
+          # Check if there are differences between source and destination report directories
+          diff_output=$(diff -r "source-repo/$SOURCE_PATH" "$DEST_PATH" 2>/dev/null || true)
+          DIFF_COUNT=$(echo "$diff_output" | wc -l)
+          
+          # Get list of files that exist in source but not in destination - safely using temp files
+          find "source-repo/$SOURCE_PATH" -type f -name "*.md" -printf "%f\n" | sort > "$TEMP_DIR/source_files.txt"
+          find "$DEST_PATH" -type f -name "*.md" -printf "%f\n" | sort > "$TEMP_DIR/dest_files.txt"
+          comm -23 "$TEMP_DIR/source_files.txt" "$TEMP_DIR/dest_files.txt" > "$TEMP_DIR/new_files.txt"
+          NEW_FILES=$(cat "$TEMP_DIR/new_files.txt")
+          NEW_COUNT=$(grep -v "^$" "$TEMP_DIR/new_files.txt" | wc -l)
+          
+          # Get list of files that exist in both but have different content
+          echo "$diff_output" | grep "^Files .* and .* differ$" | 
+            sed -E "s/Files source-repo\/$SOURCE_PATH\/(.+) and .+\/(.+) differ/\1/g" | 
+            grep -v "sample-cve.md" > "$TEMP_DIR/updated_files.txt"
+          UPDATED_FILES=$(cat "$TEMP_DIR/updated_files.txt")
+          UPDATED_COUNT=$(grep -v "^$" "$TEMP_DIR/updated_files.txt" | wc -l)
+          
+          echo "Source reports: $SOURCE_COUNT"
+          echo "Destination reports: $DEST_COUNT"
+          echo "New reports: $NEW_COUNT"
+          echo "Updated reports: $UPDATED_COUNT"
+          
+          # Set output variables
           if [ $DIFF_COUNT -gt 0 ]; then
             echo "reports_changed=true" >> $GITHUB_OUTPUT
           else
             echo "reports_changed=false" >> $GITHUB_OUTPUT
           fi
           
-          # Count new reports for commit message
-          NEW_COUNT=$(find source-repo/reports -type f -newer dont-panic/src/content/reports/sample-cve.md 2>/dev/null | wc -l)
           echo "new_reports=$NEW_COUNT" >> $GITHUB_OUTPUT
+          echo "updated_reports=$UPDATED_COUNT" >> $GITHUB_OUTPUT
+
+      - name: Validate reports schema
+        if: steps.check_reports.outputs.reports_changed == 'true'
+        id: validate_schema
+        run: |
+          # Use the sanitized source path and secure temp directory
+          SOURCE_PATH="${{ steps.check_source_dir.outputs.source_path }}"
+          DEST_PATH="dont-panic/src/content/reports"
+          TEMP_DIR="${{ steps.check_reports.outputs.temp_dir }}/validate-reports"
+          
+          # Create temp directory for validation
+          mkdir -p "$TEMP_DIR"
+          chmod 700 "$TEMP_DIR" # Restrict permissions
+          
+          # Copy sample report for reference
+          if [ -f "$DEST_PATH/sample-cve.md" ]; then
+            cp "$DEST_PATH/sample-cve.md" "$TEMP_DIR/"
+            echo "Copied sample report for reference"
+          else
+            echo "Warning: Sample report not found at $DEST_PATH/sample-cve.md"
+          fi
+          
+          # Copy new and updated files for validation
+          VALIDATION_COUNT=0
+          
+          # Process new files
+          while read file; do
+            if [ -n "$file" ] && [ -f "source-repo/$SOURCE_PATH/$file" ]; then
+              echo "Copying new file $file for validation"
+              cp "source-repo/$SOURCE_PATH/$file" "$TEMP_DIR/"
+              VALIDATION_COUNT=$((VALIDATION_COUNT + 1))
+            fi
+          done < "${{ steps.check_reports.outputs.temp_dir }}/new_files.txt"
+          
+          # Process updated files
+          while read file; do
+            if [ -n "$file" ] && [ -f "source-repo/$SOURCE_PATH/$file" ]; then
+              echo "Copying updated file $file for validation"
+              cp "source-repo/$SOURCE_PATH/$file" "$TEMP_DIR/"
+              VALIDATION_COUNT=$((VALIDATION_COUNT + 1))
+            fi
+          done < "${{ steps.check_reports.outputs.temp_dir }}/updated_files.txt"
+          
+          echo "Total files copied for validation: $VALIDATION_COUNT"
+          
+          # Create validation script with improved security and validation
+          cat > dont-panic/validate-reports.mjs << 'EOF'
+          import { readFileSync, readdirSync, existsSync } from 'fs';
+          import { join, basename } from 'path';
+          import matter from 'gray-matter';
+          
+          // Path to reports for validation
+          const reportsPath = process.argv[2];
+          
+          // Validate the provided path
+          if (!reportsPath || !existsSync(reportsPath)) {
+            console.error(`❌ Error: Invalid reports path: ${reportsPath}`);
+            process.exit(1);
+          }
+          
+          try {
+            // Extract schema requirements from the content/config.ts file
+            const configPath = './src/content/config.ts';
+            if (!existsSync(configPath)) {
+              console.error(`❌ Error: Schema configuration file not found at ${configPath}`);
+              process.exit(1);
+            }
+            
+            // Extract enum values from the config file
+            const configContent = readFileSync(configPath, 'utf8');
+            
+            // Extract severity enum values from config
+            let severityValues = ['Low', 'Medium', 'High', 'Critical']; // Default fallback
+            const severityMatch = configContent.match(/cvssSeverity: z\.enum\(\[(.*?)\]\)/);
+            if (severityMatch && severityMatch[1]) {
+              try {
+                // Parse the enum values from the matched string
+                severityValues = severityMatch[1]
+                  .split(',')
+                  .map(val => val.trim().replace(/"/g, '').replace(/'/g, ''));
+                console.log(`Detected severity values from config: ${severityValues.join(', ')}`);
+              } catch (err) {
+                console.warn(`Warning: Could not parse severity enum values from config: ${err.message}`);
+              }
+            }
+            
+            // Required and optional fields with validation rules
+            const fieldValidations = {
+              // Required fields
+              cveId: {
+                required: true,
+                validate: value => typeof value === 'string' && value.trim().length > 0,
+                message: 'must be a non-empty string'
+              },
+              title: {
+                required: true,
+                validate: value => typeof value === 'string' && value.trim().length > 0,
+                message: 'must be a non-empty string'
+              },
+              publishDate: {
+                required: true,
+                validate: value => value instanceof Date && !isNaN(value),
+                message: 'must be a valid date'
+              },
+              
+              // Optional fields with validations
+              cvssScore: {
+                required: false,
+                validate: value => typeof value === 'number' && value >= 0 && value <= 10,
+                message: 'must be a number between 0 and 10'
+              },
+              cvssSeverity: {
+                required: false,
+                validate: value => severityValues.includes(value),
+                message: `must be one of: ${severityValues.join(', ')}`
+              },
+              severity: {
+                required: false,
+                validate: value => severityValues.includes(value),
+                message: `must be one of: ${severityValues.join(', ')}`
+              },
+              epssScore: {
+                required: false,
+                validate: value => value === undefined || (typeof value === 'number' && value >= 0 && value <= 1),
+                message: 'must be a number between 0 and 1'
+              },
+              patchAvailable: {
+                required: false,
+                validate: value => value === undefined || typeof value === 'boolean',
+                message: 'must be a boolean (true or false)'
+              },
+              patchLink: {
+                required: false,
+                validate: value => value === undefined || value === null || 
+                  (typeof value === 'string' && 
+                  (value.startsWith('https://') || value.startsWith('http://'))),
+                message: 'must be a valid URL starting with http:// or https://'
+              },
+              exploitationStatusLink: {
+                required: false,
+                validate: value => value === undefined || value === null || 
+                  (typeof value === 'string' && 
+                  (value.startsWith('https://') || value.startsWith('http://'))),
+                message: 'must be a valid URL starting with http:// or https://'
+              },
+              isZeroDay: {
+                required: false,
+                validate: value => value === undefined || typeof value === 'boolean',
+                message: 'must be a boolean (true or false)'
+              }
+            };
+            
+            // Count successful and failed validations
+            let successCount = 0;
+            let failCount = 0;
+            const failures = [];
+            
+            // Get all markdown files with security checks
+            const files = readdirSync(reportsPath)
+              .filter(file => {
+                const cleanName = basename(file);
+                // Skip potentially malicious filenames
+                if (cleanName.includes('..') || 
+                    cleanName.startsWith('.') || 
+                    !cleanName.endsWith('.md')) {
+                  console.warn(`⚠️ Skipping suspicious file: ${cleanName}`);
+                  return false;
+                }
+                return true;
+              });
+            
+            console.log(`Validating ${files.length} report files...`);
+            
+            for (const file of files) {
+              try {
+                const filePath = join(reportsPath, file);
+                const fileContent = readFileSync(filePath, 'utf8');
+                
+                // Parse frontmatter with error handling
+                let data;
+                try {
+                  const parsed = matter(fileContent);
+                  data = parsed.data;
+                } catch (parseError) {
+                  console.error(`❌ ${file}: Error parsing frontmatter - ${parseError.message}`);
+                  failCount++;
+                  failures.push({ file, reason: `Error parsing frontmatter: ${parseError.message}` });
+                  continue;
+                }
+                
+                // Validate each field
+                const fieldErrors = [];
+                
+                // Check required fields first
+                for (const [field, validation] of Object.entries(fieldValidations)) {
+                  if (validation.required && (data[field] === undefined || data[field] === null)) {
+                    fieldErrors.push(`${field} is required but missing`);
+                    continue;
+                  }
+                  
+                  // Skip validation for undefined optional fields
+                  if (!validation.required && (data[field] === undefined || data[field] === null)) {
+                    continue;
+                  }
+                  
+                  // Validate value if present
+                  if (data[field] !== undefined && data[field] !== null && 
+                      !validation.validate(data[field])) {
+                    fieldErrors.push(`${field} ${validation.message}`);
+                  }
+                }
+                
+                // Report validation results for this file
+                if (fieldErrors.length > 0) {
+                  console.error(`❌ ${file}: Validation errors:`);
+                  fieldErrors.forEach(err => console.error(`   - ${err}`));
+                  failCount++;
+                  failures.push({ file, reason: fieldErrors.join(', ') });
+                } else {
+                  console.log(`✅ ${file}: Valid`);
+                  successCount++;
+                }
+              } catch (error) {
+                console.error(`❌ ${file}: Error processing file - ${error.message}`);
+                failCount++;
+                failures.push({ file, reason: `Error processing: ${error.message}` });
+              }
+            }
+            
+            // Report summary
+            console.log(`\nValidation Summary:`);
+            console.log(`✅ ${successCount} valid reports`);
+            console.log(`❌ ${failCount} invalid reports`);
+            
+            if (failCount > 0) {
+              console.log('\nFailure details:');
+              failures.forEach(({ file, reason }) => {
+                console.log(`  - ${file}: ${reason}`);
+              });
+              process.exit(1);
+            }
+          } catch (error) {
+            console.error(`❌ Fatal error during validation: ${error.message}`);
+            console.error(error.stack);
+            process.exit(1);
+          }
+          EOF
+          
+          # Run validation with specific gray-matter version to avoid unexpected updates
+          cd dont-panic
+          npx -y gray-matter@4.0.3
+          
+          # Run validation with proper error handling
+          if ! node validate-reports.mjs "$TEMP_DIR"; then
+            echo "::error::Validation failed - some reports do not match required schema"
+            echo "validation_success=false" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "All reports validated successfully against the schema"
+            echo "validation_success=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: Sync reports
-        if: steps.check_reports.outputs.reports_changed == 'true'
+        if: steps.check_reports.outputs.reports_changed == 'true' && steps.validate_schema.outputs.validation_success == 'true'
         run: |
-          # Remove all current reports except the sample
-          find dont-panic/src/content/reports -type f -not -name "sample-cve.md" -delete
+          # Use the sanitized source path and secure temp directory
+          SOURCE_PATH="${{ steps.check_source_dir.outputs.source_path }}"
+          DEST_PATH="dont-panic/src/content/reports"
+          TEMP_DIR="${{ steps.check_reports.outputs.temp_dir }}"
           
-          # Copy all reports from source to destination
-          cp -r source-repo/reports/* dont-panic/src/content/reports/
+          echo "Starting sync from source-repo/$SOURCE_PATH to $DEST_PATH"
           
-          # Ensure correct file structure and format if needed
-          # This step might need customization based on the source structure
+          # Create backup of sample report to ensure it doesn't get overwritten
+          SAMPLE_FILE="$DEST_PATH/sample-cve.md"
+          if [ -f "$SAMPLE_FILE" ]; then
+            cp "$SAMPLE_FILE" "$TEMP_DIR/sample-cve.md.backup"
+            echo "Backed up sample report"
+          fi
+          
+          # Create a list of files to copy for tracking
+          find "source-repo/$SOURCE_PATH" -type f -name "*.md" | sort > "$TEMP_DIR/files_to_copy.txt"
+          echo "Found $(wc -l < "$TEMP_DIR/files_to_copy.txt") files to copy"
+          
+          # Remove all current reports except the sample with error checking
+          echo "Removing existing reports except the sample"
+          find "$DEST_PATH" -type f -not -name "sample-cve.md" -delete
+          
+          # Copy files individually instead of using cp -r to avoid path traversal
+          echo "Copying new reports..."
+          while read file_path; do
+            file_name=$(basename "$file_path")
+            # Skip potential dangerous files or paths
+            if [[ "$file_name" == *".."* || "$file_name" == "."* ]]; then
+              echo "Skipping suspicious filename: $file_name"
+              continue
+            fi
+            echo "Copying $file_name"
+            cp "$file_path" "$DEST_PATH/"
+          done < "$TEMP_DIR/files_to_copy.txt"
+          
+          # Restore sample report if it was overwritten
+          if [ -f "$TEMP_DIR/sample-cve.md.backup" ] && [ ! -f "$SAMPLE_FILE" ]; then
+            echo "Restoring sample report that was overwritten"
+            cp "$TEMP_DIR/sample-cve.md.backup" "$SAMPLE_FILE"
+          fi
+          
+          # Verify the copy was successful
+          COPIED_COUNT=$(find "$DEST_PATH" -type f -name "*.md" -not -name "sample-cve.md" | wc -l)
+          echo "Successfully copied $COPIED_COUNT reports"
           
           # Navigate to the repository directory
           cd dont-panic
@@ -86,27 +462,90 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
+            # Create a detailed commit message
+            NEW_COUNT="${{ steps.check_reports.outputs.new_reports }}"
+            UPDATED_COUNT="${{ steps.check_reports.outputs.updated_reports }}"
+            
+            COMMIT_MSG="Update vulnerability reports: "
+            
+            if [ "$NEW_COUNT" -gt 0 ]; then
+              COMMIT_MSG+="$NEW_COUNT new, "
+            fi
+            
+            if [ "$UPDATED_COUNT" -gt 0 ]; then
+              COMMIT_MSG+="$UPDATED_COUNT updated, "
+            fi
+            
+            # Remove trailing comma and space
+            COMMIT_MSG=$(echo "$COMMIT_MSG" | sed 's/, $//')
+            
+            # Add timestamp
+            COMMIT_MSG+=" [$(date '+%Y-%m-%d %H:%M:%S UTC')]"
+            
             # Commit changes
-            git commit -m "Update reports: ${{ steps.check_reports.outputs.new_reports }} new vulnerability reports synced"
+            git commit -m "$COMMIT_MSG"
             
             # Push changes
             git push
           fi
 
+      - name: Cleanup
+        if: always()
+        run: |
+          # Cleanup any temporary files and directories safely
+          if [ -n "${{ steps.check_reports.outputs.temp_dir }}" ] && [ -d "${{ steps.check_reports.outputs.temp_dir }}" ]; then
+            echo "Cleaning up temporary directory: ${{ steps.check_reports.outputs.temp_dir }}"
+            rm -rf "${{ steps.check_reports.outputs.temp_dir }}"
+          else
+            echo "No temporary directory to clean up"
+          fi
+          
+          # Remove validation script
+          if [ -f "dont-panic/validate-reports.mjs" ]; then
+            rm -f "dont-panic/validate-reports.mjs"
+          fi
+
   # Trigger the deploy workflow if reports were changed
   trigger_deploy:
     needs: sync_reports
-    if: needs.sync_reports.outputs.reports_changed == 'true'
+    if: needs.sync_reports.outputs.reports_changed == 'true' && needs.sync_reports.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Trigger deploy workflow
+        id: trigger_deploy
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'deploy.yml',
-              ref: 'main'
-            })
+            try {
+              console.log('Triggering deployment workflow...');
+              
+              const result = await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'deploy.yml',
+                ref: 'main'
+              });
+              
+              console.log('Deployment workflow triggered successfully!');
+              console.log(`Status: ${result.status}`);
+              return 'success';
+            } catch (error) {
+              console.error('Failed to trigger deployment workflow:');
+              console.error(error);
+              core.setFailed(`Failed to trigger deployment: ${error.message}`);
+              return 'failed';
+            }
+            
+      - name: Report sync results
+        run: |
+          echo "✅ Successfully synced vulnerability reports"
+          echo "- New reports: ${{ needs.sync_reports.outputs.new_reports }}"
+          echo "- Updated reports: ${{ needs.sync_reports.outputs.updated_reports }}"
+          
+          if [[ "${{ steps.trigger_deploy.outputs.result }}" == "success" ]]; then
+            echo "- Deployment workflow triggered successfully"
+          else
+            echo "⚠️ Deployment workflow could not be triggered. Check the logs for details."
+            echo "  You may need to manually trigger the deployment."
+          fi
