@@ -48,7 +48,8 @@ const faviconUrl = `${base}favicon.svg`; // Construct base-aware favicon URL
 		{/* <meta property="twitter:image" content={new URL(image, Astro.url)} /> */}
 
 	</head>
-	<body class="bg-background text-text min-h-screen flex flex-col antialiased font-sans selection:bg-primary/20"> {/* Added selection style */}
+	{/* Removed redundant selection:bg-primary/20 class. Standard CSS in global.css handles this. */}
+	<body class="bg-background text-text min-h-screen flex flex-col antialiased font-sans"> 
 		{/* Use Header and Footer Components */}
 		<Header siteTitle="Don't Panic" navItems={[]} currentPath={Astro.url.pathname} />
 
