@@ -627,9 +627,11 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
 </script>
 
 <style>
-  /* Highlight style for new reports using Tailwind color */
+  /* Highlight style for new reports using direct CSS */
   tr.new-report {
-    @apply border-l-4 border-l-emerald-500; /* Use Tailwind's emerald-500 */
+    /* Replace @apply with direct CSS properties */
+    border-left-width: 4px;
+    border-left-color: #10b981; /* Tailwind's emerald-500 */
     animation: fadeOutHighlight 3s ease-out forwards;
   }
   
