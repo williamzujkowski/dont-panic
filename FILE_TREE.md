@@ -30,15 +30,7 @@ This document outlines the structure of the repository.
                 - config.yml
                 - feature_request.md
     - **.llmconfig/** - *Contains LLM agent configurations and rules*
-        - CLAUDE.md
-        - PROJECT_PLAN.md
-        - PROJECT_PLAN_UPDATED.md
-        - USAGE_GUIDE.md
-        - agent-rules.md
-        - publish.md
-        - styling.md
-        - todo.md
-        - ux-ui guide.md
+        - CONSOLIDATED_TASKS.md
         - **prompt-templates/**
             - .gitkeep
         - **context/**
@@ -59,20 +51,15 @@ This document outlines the structure of the repository.
             - AboutSection.test.ts
             - CTASection.astro
             - CTASection.test.ts
-            - Features.astro
-            - Features.test.ts
+            - FilterSidebar.astro
             - Footer.astro
             - Footer.test.ts
             - Header.astro
             - Header.test.ts
-            - Hero.astro
-            - Hero.test.ts
-            - ReportCard.astro
             - ScoreDisplay.astro
             - Search.astro # Pagefind search component
             - SeverityTag.astro
             - Styling.test.ts
-            - Testimonials.astro
             - ZeroDayTag.astro
         - **content/** - *Markdown content collections*
             - config.ts # Content collection schema definitions
@@ -98,12 +85,15 @@ This document outlines the structure of the repository.
             - global.css
     - **tests/** - *Test files*
         - **components/**
+            - FilterSidebar.test.ts
             - ReportCard.test.ts
+            - VulnerabilityTable.test.ts
         - **layouts/**
             - BaseLayout.test.ts
         - **pages/**
             - index.test.ts
             - **reports/**
                 - '[slug].test.ts'
+            - table-view.e2e.js
         - **workflows/**
             - sync_reports.test.ts # Tests for report syncing workflow

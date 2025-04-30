@@ -1,19 +1,26 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
 
-// Example of an E2E test for the vulnerability table
+// E2E tests for the vulnerability table with sidebar filters
 test.describe('Vulnerability Table E2E Tests', () => {
   
-  test('page loads with table and controls', async ({ page }) => {
+  test('page loads with table and sidebar controls', async ({ page }) => {
     await page.goto('/');
     
     // Check that the table exists
     await expect(page.locator('#reportTable')).toBeVisible();
     
-    // Check that the filter controls exist
-    await expect(page.locator('#searchInput')).toBeVisible();
-    await expect(page.locator('#severityFilter')).toBeVisible();
+    // Check that the filter sidebar exists
+    await expect(page.locator('aside')).toBeVisible();
+    
+    // Check that the sidebar filter controls exist
     await expect(page.locator('#zeroDayFilter')).toBeVisible();
+    await expect(page.locator('#cvssSlider')).toBeVisible();
+    await expect(page.locator('#epssSlider')).toBeVisible();
+    await expect(page.locator('#criticalFilter')).toBeVisible();
+    await expect(page.locator('#startDateFilter')).toBeVisible();
+    await expect(page.locator('#resetFilters')).toBeVisible();
+    await expect(page.locator('#applyFiltersBtn')).toBeVisible();
     
     // Check that the table headers exist
     await expect(page.locator('th[data-sort-key="cve"]')).toBeVisible();
@@ -72,60 +79,156 @@ test.describe('Vulnerability Table E2E Tests', () => {
     await expect(page).toHaveURL(/dir=asc/);
   });
 
-  test('filtering by severity', async ({ page }) => {
+  test('severity filter in sidebar works', async ({ page }) => {
     await page.goto('/');
     
-    // Select Critical severity
-    await page.selectOption('#severityFilter', 'Critical');
+    // Check Critical severity in the sidebar
+    await page.check('#criticalFilter');
+    await page.click('#applyFiltersBtn');
+    
+    // Wait for filtering to complete
+    await page.waitForTimeout(100);
     
     // Check URL has the severity parameter
     await expect(page).toHaveURL(/severity=Critical/);
     
+    // Active filters display should show the Critical chip
+    await expect(page.locator('#activeFilters')).toBeVisible();
+    await expect(page.locator('#activeFiltersList')).toContainText('Critical');
+    
     // Check all visible rows have Critical severity
     const visibleRows = await page.locator('tbody tr:visible').all();
-    for (const row of visibleRows) {
-      const severity = await row.getAttribute('data-severity');
-      expect(severity).toBe('Critical');
+    
+    // If we have visible rows, they should all be Critical
+    if (visibleRows.length > 0) {
+      for (const row of visibleRows) {
+        const severity = await row.getAttribute('data-severity');
+        expect(severity).toBe('Critical');
+      }
     }
   });
 
-  test('search filter works', async ({ page }) => {
+  test('CVSS slider filter works', async ({ page }) => {
     await page.goto('/');
     
-    // Type search term
-    await page.fill('#searchInput', 'specific-term');
+    // Set CVSS slider to 7.0
+    await page.fill('#cvssSlider', '7.0');
+    await page.click('#applyFiltersBtn');
     
-    // Wait for debounce
-    await page.waitForTimeout(500);
+    // Wait for filtering to complete
+    await page.waitForTimeout(100);
     
-    // Check URL has the search parameter
-    await expect(page).toHaveURL(/search=specific-term/);
+    // Check URL has the CVSS parameter
+    await expect(page).toHaveURL(/cvssMin=7/);
     
-    // Hidden rows should have hidden attribute
-    const allRows = await page.locator('tbody tr').all();
-    const hiddenRows = await page.locator('tbody tr[hidden]').all();
+    // Active filters display should show the CVSS filter chip
+    await expect(page.locator('#activeFilters')).toBeVisible();
+    await expect(page.locator('#activeFiltersList')).toContainText('CVSS');
     
-    // If all rows are hidden (no matches), that's fine too
-    if (allRows.length > 0) {
-      expect(hiddenRows.length).toBeLessThanOrEqual(allRows.length);
+    // Check all visible rows have CVSS >= 7.0
+    const visibleRows = await page.locator('tbody tr:visible').all();
+    
+    // If we have visible rows, they should all meet the CVSS threshold
+    if (visibleRows.length > 0) {
+      for (const row of visibleRows) {
+        const cvss = parseFloat(await row.getAttribute('data-cvss') || '0');
+        expect(cvss).toBeGreaterThanOrEqual(7.0);
+      }
     }
   });
 
-  test('zero-day filter works', async ({ page }) => {
+  test('zero-day filter in sidebar works', async ({ page }) => {
     await page.goto('/');
     
-    // Check the zero-day filter
+    // Check the zero-day filter in sidebar
     await page.check('#zeroDayFilter');
+    await page.click('#applyFiltersBtn');
     
-    // Check URL has the zeroday parameter
-    await expect(page).toHaveURL(/zeroday=true/);
+    // Wait for filtering to complete
+    await page.waitForTimeout(100);
+    
+    // Check URL has the zeroDay parameter
+    await expect(page).toHaveURL(/zeroDay=true/);
+    
+    // Active filters display should show the Zero-Day chip
+    await expect(page.locator('#activeFilters')).toBeVisible();
+    await expect(page.locator('#activeFiltersList')).toContainText('Zero-Day');
     
     // Check all visible rows are zero-days
     const visibleRows = await page.locator('tbody tr:visible').all();
-    for (const row of visibleRows) {
-      const isZeroDay = await row.getAttribute('data-zeroday');
-      expect(isZeroDay).toBe('true');
+    
+    // If we have visible rows, they should all be zero-days
+    if (visibleRows.length > 0) {
+      for (const row of visibleRows) {
+        const isZeroDay = await row.getAttribute('data-zeroday');
+        expect(isZeroDay).toBe('true');
+      }
     }
+  });
+  
+  test('date range filter works', async ({ page }) => {
+    await page.goto('/');
+    
+    // Set start date to 30 days ago
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+    
+    const startDate = thirtyDaysAgo.toISOString().split('T')[0]; // YYYY-MM-DD
+    const endDate = today.toISOString().split('T')[0]; // YYYY-MM-DD
+    
+    await page.fill('#startDateFilter', startDate);
+    await page.fill('#endDateFilter', endDate);
+    await page.click('#applyFiltersBtn');
+    
+    // Wait for filtering to complete
+    await page.waitForTimeout(100);
+    
+    // Check URL has the date range parameters
+    await expect(page).toHaveURL(/startDate=/);
+    await expect(page).toHaveURL(/endDate=/);
+    
+    // Active filters display should show the date range chips
+    await expect(page.locator('#activeFilters')).toBeVisible();
+    await expect(page.locator('#activeFiltersList')).toContainText('From:');
+    
+    // Check all visible rows are within the date range
+    const visibleRows = await page.locator('tbody tr:visible').all();
+    
+    // If we have visible rows, they should all be within the date range
+    if (visibleRows.length > 0) {
+      for (const row of visibleRows) {
+        const rowDate = await row.getAttribute('data-date');
+        expect(rowDate >= startDate).toBeTruthy();
+        expect(rowDate <= endDate).toBeTruthy();
+      }
+    }
+  });
+  
+  test('reset filters button works', async ({ page }) => {
+    await page.goto('/');
+    
+    // Apply a filter - check Zero-Day
+    await page.check('#zeroDayFilter');
+    await page.click('#applyFiltersBtn');
+    
+    // Wait for filtering to complete
+    await page.waitForTimeout(100);
+    
+    // Verify filter is applied (URL has parameter)
+    await expect(page).toHaveURL(/zeroDay=true/);
+    
+    // Click reset filters button
+    await page.click('#resetFilters');
+    
+    // Wait for reset to complete
+    await page.waitForTimeout(100);
+    
+    // Verify Zero-Day checkbox is unchecked
+    await expect(page.locator('#zeroDayFilter')).not.toBeChecked();
+    
+    // Active filters display should be hidden
+    await expect(page.locator('#activeFilters')).toBeHidden();
   });
 
   test('clicking on CVE ID navigates to report page', async ({ page }) => {

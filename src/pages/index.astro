@@ -4,6 +4,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SeverityTag from '../components/SeverityTag.astro';
 import ZeroDayTag from '../components/ZeroDayTag.astro';
+import FilterSidebar from '../components/FilterSidebar.astro';
 
 // Fetch all reports, sort by publication date descending
 const reports = await getCollection('reports', ({ data }) => {
@@ -15,106 +16,103 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
 ---
 
 <BaseLayout title="Vulnerability Reports">
-  <h1 class="text-xl font-semibold mb-4">Vulnerability Reports</h1>
+  <!-- Two-column layout -->
+  <div class="flex flex-col md:flex-row">
+    <!-- Filter Sidebar -->
+    <FilterSidebar reports={reports} />
 
-  <!-- Filter Controls -->
-  <div class="flex flex-wrap gap-2 mb-4">
-    <input 
-      type="text" 
-      id="searchInput" 
-      placeholder="Search..." 
-      class="border rounded px-2 py-1 text-sm"
-    >
-    <select 
-      id="severityFilter" 
-      class="border rounded px-2 py-1 text-sm appearance-none"
-    >
-      <option value="">All Severities</option>
-      <option value="Critical">Critical</option>
-      <option value="High">High</option>
-      <option value="Medium">Medium</option>
-      <option value="Low">Low</option>
-    </select>
-    <label class="text-sm flex items-center gap-1">
-      <input type="checkbox" id="zeroDayFilter"> 
-      Show Only Zero-Days
-    </label>
-  </div>
+    <!-- Main Content -->
+    <div class="flex-grow p-4">
+      <h1 class="text-xl font-semibold mb-4">Vulnerability Reports</h1>
 
-  <!-- Table Container -->
-  <div class="overflow-x-auto">
-    <table id="reportTable" class="w-full text-left text-sm">
-      <thead class="bg-gray-100 dark:bg-gray-700">
-        <tr>
-          <th scope="col" data-sort-key="cve" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">CVE ID <span>↕</span></th>
-          <th scope="col" data-sort-key="title" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Title/Summary <span>↕</span></th>
-          <th scope="col" data-sort-key="cvss" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">CVSS <span>↕</span></th>
-          <th scope="col" data-sort-key="epss" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">EPSS <span>↕</span></th>
-          <th scope="col" data-sort-key="severity" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Severity <span>↕</span></th>
-          <th scope="col" data-sort-key="zeroday" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Zero-Day? <span>↕</span></th>
-          <th scope="col" data-sort-key="date" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Date <span>↕</span></th>
-        </tr>
-      </thead>
-      <tbody id="reportTableBody">
-        {reports.map((report) => (
-          <tr 
-            class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50" 
-            data-cve={report.slug}
-            data-severity={report.data.severity || report.data.cvssSeverity}
-            data-date={report.data.publishDate.toISOString().split('T')[0]}
-            data-zeroday={report.data.isZeroDay.toString()}
-          >
-            <td class="px-3 py-2 whitespace-nowrap">
-              <a 
-                href={`/reports/${report.slug}`} 
-                class="text-blue-600 dark:text-blue-400 font-medium hover:underline"
+      <!-- Active Filter Summary -->
+      <div id="activeFilters" class="mb-4 text-sm text-gray-700 dark:text-gray-300 hidden">
+        <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded">
+          <h2 class="font-medium mb-1">Active Filters:</h2>
+          <div id="activeFiltersList" class="flex flex-wrap gap-2">
+            <!-- Active filters will be inserted here via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Table Container -->
+      <div class="overflow-x-auto">
+        <table id="reportTable" class="w-full text-left text-sm">
+          <thead class="bg-gray-100 dark:bg-gray-700">
+            <tr>
+              <th scope="col" data-sort-key="cve" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">CVE ID <span>↕</span></th>
+              <th scope="col" data-sort-key="title" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Title/Summary <span>↕</span></th>
+              <th scope="col" data-sort-key="cvss" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">CVSS <span>↕</span></th>
+              <th scope="col" data-sort-key="epss" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">EPSS <span>↕</span></th>
+              <th scope="col" data-sort-key="severity" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Severity <span>↕</span></th>
+              <th scope="col" data-sort-key="zeroday" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Zero-Day? <span>↕</span></th>
+              <th scope="col" data-sort-key="date" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Date <span>↕</span></th>
+            </tr>
+          </thead>
+          <tbody id="reportTableBody">
+            {reports.map((report) => (
+              <tr 
+                class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50" 
+                data-cve={report.slug}
+                data-severity={report.data.severity || report.data.cvssSeverity}
+                data-date={report.data.publishDate.toISOString().split('T')[0]}
+                data-zeroday={report.data.isZeroDay.toString()}
+                data-cvss={report.data.cvssScore}
+                data-epss={report.data.epssScore}
+                data-vendor={report.data.vendor}
+                data-product={report.data.product}
+                data-patch-available={report.data.patchAvailable.toString()}
               >
-                {report.data.cveId}
-              </a>
-            </td>
-            <td class="px-3 py-2">{report.data.title}</td>
-            <td class="px-3 py-2 whitespace-nowrap font-mono" data-value={report.data.cvssScore}>
-              {report.data.cvssScore !== undefined ? report.data.cvssScore.toFixed(1) : 'N/A'}
-            </td>
-            <td class="px-3 py-2 whitespace-nowrap font-mono" data-value={report.data.epssScore}>
-              {report.data.epssScore !== undefined ? `${(report.data.epssScore * 100).toFixed(1)}%` : 'N/A'}
-            </td>
-            <td class="px-3 py-2 whitespace-nowrap">
-              {(report.data.severity || report.data.cvssSeverity) && 
-                <SeverityTag severity={report.data.severity || report.data.cvssSeverity} />
-              }
-            </td>
-            <td class="px-3 py-2 whitespace-nowrap">
-              {report.data.isZeroDay ? (
-                <span class="text-yellow-600 dark:text-yellow-400">✓ Yes</span>
-              ) : 'No'}
-            </td>
-            <td class="px-3 py-2 whitespace-nowrap" data-value={report.data.publishDate.valueOf()}>
-              {report.data.publishDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+                <td class="px-3 py-2 whitespace-nowrap">
+                  <a 
+                    href={`/reports/${report.slug}`} 
+                    class="text-blue-600 dark:text-blue-400 font-medium hover:underline"
+                  >
+                    {report.data.cveId}
+                  </a>
+                </td>
+                <td class="px-3 py-2">{report.data.title}</td>
+                <td class="px-3 py-2 whitespace-nowrap font-mono" data-value={report.data.cvssScore}>
+                  {report.data.cvssScore !== undefined ? report.data.cvssScore.toFixed(1) : 'N/A'}
+                </td>
+                <td class="px-3 py-2 whitespace-nowrap font-mono" data-value={report.data.epssScore}>
+                  {report.data.epssScore !== undefined ? `${(report.data.epssScore * 100).toFixed(1)}%` : 'N/A'}
+                </td>
+                <td class="px-3 py-2 whitespace-nowrap">
+                  {(report.data.severity || report.data.cvssSeverity) && 
+                    <SeverityTag severity={report.data.severity || report.data.cvssSeverity} />
+                  }
+                </td>
+                <td class="px-3 py-2 whitespace-nowrap">
+                  {report.data.isZeroDay ? (
+                    <span class="text-yellow-600 dark:text-yellow-400">✓ Yes</span>
+                  ) : 'No'}
+                </td>
+                <td class="px-3 py-2 whitespace-nowrap" data-value={report.data.publishDate.valueOf()}>
+                  {report.data.publishDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </BaseLayout>
 
-<script is:inline>
+<script>
   // DOM References
   const table = document.getElementById('reportTable');
   const tableBody = document.getElementById('reportTableBody');
-  const searchInput = document.getElementById('searchInput');
-  const severityFilter = document.getElementById('severityFilter');
-  const zeroDayFilter = document.getElementById('zeroDayFilter');
   const sortableHeaders = document.querySelectorAll('th[data-sort-key]');
+  const activeFiltersContainer = document.getElementById('activeFilters');
+  const activeFiltersList = document.getElementById('activeFiltersList');
 
   // State
   let state = {
     sort: 'date', // Default sort column
     dir: 'desc',   // Default sort direction
-    search: '',    // Search text
-    severity: '',  // Severity filter
-    zeroday: false // Zero-day filter
+    filters: {}    // Active filters from sidebar
   };
 
   // Initialization function
@@ -124,31 +122,22 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
     
     if (urlParams.has('sort')) state.sort = urlParams.get('sort');
     if (urlParams.has('dir')) state.dir = urlParams.get('dir');
-    if (urlParams.has('search')) {
-      state.search = urlParams.get('search');
-      searchInput.value = state.search;
-    }
-    if (urlParams.has('severity')) {
-      state.severity = urlParams.get('severity');
-      severityFilter.value = state.severity;
-    }
-    if (urlParams.has('zeroday')) {
-      state.zeroday = urlParams.get('zeroday') === 'true';
-      zeroDayFilter.checked = state.zeroday;
-    }
-
-    // Add event listeners
+    
+    // Add event listeners for sorting
     sortableHeaders.forEach(header => {
       header.addEventListener('click', (e) => handleSortClick(e));
     });
-    
-    searchInput.addEventListener('input', debounce(handleFilterChange, 300));
-    severityFilter.addEventListener('change', handleFilterChange);
-    zeroDayFilter.addEventListener('change', handleFilterChange);
 
-    // Apply initial sort and filtering
+    // Add event listener for sidebar filter changes
+    document.addEventListener('sidebarFiltersChanged', (e) => {
+      state.filters = e.detail;
+      applyFiltering();
+      updateActiveFiltersDisplay();
+      updateURL();
+    });
+    
+    // Apply initial sort and highlighting
     applySorting();
-    applyFiltering();
     handleHighlighting();
   }
 
@@ -159,16 +148,37 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
     // Clear existing params
     url.searchParams.delete('sort');
     url.searchParams.delete('dir');
-    url.searchParams.delete('search');
-    url.searchParams.delete('severity');
-    url.searchParams.delete('zeroday');
     
-    // Set new params
+    // Set sorting params
     url.searchParams.set('sort', state.sort);
     url.searchParams.set('dir', state.dir);
-    if (state.search) url.searchParams.set('search', state.search);
-    if (state.severity) url.searchParams.set('severity', state.severity);
-    if (state.zeroday) url.searchParams.set('zeroday', state.zeroday.toString());
+    
+    // Set filter params if present
+    if (state.filters) {
+      // Add filter parameters based on state.filters object
+      // This is simplified - you'll need to expand this based on your filter structure
+      if (state.filters.zeroDay) url.searchParams.set('zeroDay', 'true');
+      if (state.filters.kev) url.searchParams.set('kev', 'true');
+      if (state.filters.patchAvailable) url.searchParams.set('patchAvailable', 'true');
+      if (state.filters.cvssMin > 0) url.searchParams.set('cvssMin', state.filters.cvssMin.toString());
+      if (state.filters.epssMin > 0) url.searchParams.set('epssMin', state.filters.epssMin.toString());
+      
+      // Handle severity filters
+      const severities = [];
+      if (state.filters.severity?.critical) severities.push('Critical');
+      if (state.filters.severity?.high) severities.push('High');
+      if (state.filters.severity?.medium) severities.push('Medium');
+      if (state.filters.severity?.low) severities.push('Low');
+      if (severities.length > 0) url.searchParams.set('severity', severities.join(','));
+      
+      // Handle date range
+      if (state.filters.dateRange?.start) url.searchParams.set('startDate', state.filters.dateRange.start);
+      if (state.filters.dateRange?.end) url.searchParams.set('endDate', state.filters.dateRange.end);
+      
+      // Handle vendors and products (if multiple, join with commas)
+      if (state.filters.vendors?.length > 0) url.searchParams.set('vendors', state.filters.vendors.join(','));
+      if (state.filters.products?.length > 0) url.searchParams.set('products', state.filters.products.join(','));
+    }
     
     history.pushState({}, '', url);
   }
@@ -206,7 +216,7 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
     }
     
     // Get rows as array for sorting
-    const rows = Array.from(tableBody.querySelectorAll('tr'));
+    const rows = Array.from(tableBody.querySelectorAll('tr:not([hidden])'));
     
     // Sort rows
     rows.sort((rowA, rowB) => {
@@ -250,48 +260,176 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
     rows.forEach(row => tableBody.appendChild(row));
   }
 
-  // Filter change handler
-  function handleFilterChange() {
-    state.search = searchInput.value.toLowerCase();
-    state.severity = severityFilter.value;
-    state.zeroday = zeroDayFilter.checked;
-    
-    applyFiltering();
-    updateURL();
-  }
-
-  // Apply filtering to table
+  // Apply filtering based on sidebar filters
   function applyFiltering() {
+    if (!state.filters) return;
+    
     const rows = tableBody.querySelectorAll('tr');
+    let visibleCount = 0;
     
     rows.forEach(row => {
       let visible = true;
       
-      // Search filter
-      if (state.search) {
-        const text = row.textContent.toLowerCase();
-        if (!text.includes(state.search)) {
-          visible = false;
-        }
-      }
-      
-      // Severity filter
-      if (visible && state.severity) {
-        const severity = row.getAttribute('data-severity');
-        if (severity !== state.severity) {
-          visible = false;
-        }
-      }
-      
-      // Zero-day filter
-      if (visible && state.zeroday) {
+      // Apply Zero-Day filter
+      if (visible && state.filters.zeroDay) {
         const isZeroDay = row.getAttribute('data-zeroday') === 'true';
-        if (!isZeroDay) {
+        if (!isZeroDay) visible = false;
+      }
+      
+      // Apply KEV filter (this would need corresponding data attributes)
+      // if (visible && state.filters.kev) { ... }
+      
+      // Apply Patch Available filter
+      if (visible && state.filters.patchAvailable) {
+        const patchAvailable = row.getAttribute('data-patch-available') === 'true';
+        if (!patchAvailable) visible = false;
+      }
+      
+      // Apply CVSS Min filter
+      if (visible && state.filters.cvssMin > 0) {
+        const cvssScore = parseFloat(row.getAttribute('data-cvss') || '0');
+        if (cvssScore < state.filters.cvssMin) visible = false;
+      }
+      
+      // Apply EPSS Min filter
+      if (visible && state.filters.epssMin > 0) {
+        const epssScore = parseFloat(row.getAttribute('data-epss') || '0');
+        if (epssScore < state.filters.epssMin) visible = false;
+      }
+      
+      // Apply Severity filters
+      if (visible && state.filters.severity && 
+          (state.filters.severity.critical || 
+           state.filters.severity.high || 
+           state.filters.severity.medium || 
+           state.filters.severity.low)) {
+        
+        const rowSeverity = row.getAttribute('data-severity');
+        
+        if (rowSeverity) {
+          const matchesSeverity = 
+            (rowSeverity === 'Critical' && state.filters.severity.critical) ||
+            (rowSeverity === 'High' && state.filters.severity.high) ||
+            (rowSeverity === 'Medium' && state.filters.severity.medium) ||
+            (rowSeverity === 'Low' && state.filters.severity.low);
+            
+          if (!matchesSeverity) visible = false;
+        }
+      }
+      
+      // Apply Date Range filters
+      if (visible && state.filters.dateRange) {
+        const rowDate = row.getAttribute('data-date');
+        
+        if (rowDate) {
+          if (state.filters.dateRange.start && rowDate < state.filters.dateRange.start) {
+            visible = false;
+          }
+          
+          if (state.filters.dateRange.end && rowDate > state.filters.dateRange.end) {
+            visible = false;
+          }
+        }
+      }
+      
+      // Apply Vendor filters
+      if (visible && state.filters.vendors && state.filters.vendors.length > 0) {
+        const vendor = row.getAttribute('data-vendor');
+        if (!vendor || !state.filters.vendors.includes(vendor)) {
           visible = false;
         }
       }
       
+      // Apply Product filters
+      if (visible && state.filters.products && state.filters.products.length > 0) {
+        const product = row.getAttribute('data-product');
+        if (!product || !state.filters.products.includes(product)) {
+          visible = false;
+        }
+      }
+      
+      // Update visibility
       row.hidden = !visible;
+      if (visible) visibleCount++;
+    });
+    
+    // Re-apply sorting to the filtered rows
+    applySorting();
+    
+    // Show count in UI (optional)
+    const resultCount = document.createElement('div');
+    resultCount.textContent = `Showing ${visibleCount} reports`;
+    resultCount.className = 'text-sm text-gray-500 dark:text-gray-400 mt-2';
+    const existingCount = document.querySelector('.overflow-x-auto + div');
+    if (existingCount) {
+      existingCount.replaceWith(resultCount);
+    } else {
+      document.querySelector('.overflow-x-auto').after(resultCount);
+    }
+  }
+
+  // Update active filters display
+  function updateActiveFiltersDisplay() {
+    if (!state.filters || !activeFiltersContainer || !activeFiltersList) return;
+    
+    // Clear current filters
+    activeFiltersList.innerHTML = '';
+    
+    // Track if we have any active filters
+    let hasActiveFilters = false;
+    
+    // Helper to add a filter chip
+    const addFilterChip = (label) => {
+      hasActiveFilters = true;
+      const chip = document.createElement('span');
+      chip.className = 'px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-xs flex items-center';
+      chip.innerHTML = `${label} <button class="ml-1 text-xs font-bold" data-filter="${label}">&times;</button>`;
+      activeFiltersList.appendChild(chip);
+    };
+    
+    // Add chips for each active filter
+    if (state.filters.zeroDay) addFilterChip('Zero-Day');
+    if (state.filters.kev) addFilterChip('Known Exploited');
+    if (state.filters.patchAvailable) addFilterChip('Patch Available');
+    
+    if (state.filters.cvssMin > 0) addFilterChip(`CVSS ≥ ${state.filters.cvssMin}`);
+    if (state.filters.epssMin > 0) addFilterChip(`EPSS ≥ ${state.filters.epssMin * 100}%`);
+    
+    // Severity filters
+    if (state.filters.severity) {
+      if (state.filters.severity.critical) addFilterChip('Critical');
+      if (state.filters.severity.high) addFilterChip('High');
+      if (state.filters.severity.medium) addFilterChip('Medium');
+      if (state.filters.severity.low) addFilterChip('Low');
+    }
+    
+    // Date range
+    if (state.filters.dateRange) {
+      if (state.filters.dateRange.start) addFilterChip(`From: ${state.filters.dateRange.start}`);
+      if (state.filters.dateRange.end) addFilterChip(`To: ${state.filters.dateRange.end}`);
+    }
+    
+    // Vendors
+    if (state.filters.vendors && state.filters.vendors.length > 0) {
+      state.filters.vendors.forEach(vendor => addFilterChip(`Vendor: ${vendor}`));
+    }
+    
+    // Products
+    if (state.filters.products && state.filters.products.length > 0) {
+      state.filters.products.forEach(product => addFilterChip(`Product: ${product}`));
+    }
+    
+    // Show/hide the container based on whether there are active filters
+    activeFiltersContainer.classList.toggle('hidden', !hasActiveFilters);
+    
+    // Add click handlers to remove filter buttons
+    document.querySelectorAll('#activeFiltersList button').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const filterLabel = e.currentTarget.getAttribute('data-filter');
+        // Handle removal based on label
+        // This is a simplification - you'd need to map back to your filter state
+        // and then dispatch an event or call applyFiltering()
+      });
     });
   }
 
@@ -333,15 +471,6 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
       case 'date': return 6;
       default: return 0;
     }
-  }
-
-  // Utility: Debounce function for search input
-  function debounce(func, wait) {
-    let timeout;
-    return function(...args) {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(this, args), wait);
-    };
   }
 
   // Initialize when DOM is loaded
