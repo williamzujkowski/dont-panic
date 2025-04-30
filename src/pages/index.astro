@@ -26,8 +26,8 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
         aria-expanded="false"
         class="w-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium py-2 px-4 rounded flex items-center justify-center min-h-[44px] md:hidden" /* Added md:hidden directly to button */
       >
-        {/* Changed h-4 w-4 to h-1 w-1 */}
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-1 w-1 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        {/* Restored icon size to h-5 w-5 */}
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
         </svg>
         Show Filters
@@ -528,7 +528,7 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
        
       if (toggleBtn) {
         toggleBtn.setAttribute('aria-expanded', 'false');
-        toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-1 w-1 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"> {/* Changed h-4 w-4 to h-1 w-1 */}
+        toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"> {/* Restored icon size to h-5 w-5 */}
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
         </svg> Show Filters`;
       }
@@ -580,10 +580,10 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
         // Update button state
         toggleBtn.setAttribute('aria-expanded', newState.toString());
         toggleBtn.innerHTML = newState 
-          ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-1 w-1 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"> {/* Changed h-4 w-4 to h-1 w-1 */}
+          ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"> {/* Restored icon size to h-5 w-5 */}
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
              </svg> Hide Filters` 
-          : `<svg xmlns="http://www.w3.org/2000/svg" class="h-1 w-1 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"> {/* Changed h-4 w-4 to h-1 w-1 */}
+          : `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"> {/* Restored icon size to h-5 w-5 */}
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
              </svg> Show Filters`;
              
@@ -628,7 +628,7 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
           document.body.classList.remove('overflow-hidden');
           // Reset toggle button state if resizing to desktop
           toggleBtn.setAttribute('aria-expanded', 'false');
-          toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-1 w-1 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"> {/* Changed h-4 w-4 to h-1 w-1 */}
+          toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"> {/* Restored icon size to h-5 w-5 */}
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
             </svg> Show Filters`;
         } else {
