@@ -53,8 +53,8 @@ const faviconUrl = `${base}favicon.svg`; // Construct base-aware favicon URL
 		{/* Use Header and Footer Components */}
 		<Header siteTitle="Don't Panic" navItems={[]} currentPath={Astro.url.pathname} />
 
-		{/* Adjusted padding and max-width */}
-		<main class="flex-grow container mx-auto px-2 sm:px-4 md:px-6 py-4 md:py-6 w-full max-w-5xl"> {/* Responsive padding */}
+		{/* Adjusted padding - Temporarily removed max-w-5xl to test */}
+		<main class="flex-grow container mx-auto px-2 sm:px-4 md:px-6 py-4 md:py-6 w-full"> {/* Responsive padding */}
 			<slot /> {/* Page content will be injected here */}
 		</main>
 
