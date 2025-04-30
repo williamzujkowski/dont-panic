@@ -561,6 +561,16 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
       
       // Set transition for sidebar
       sidebar.style.transition = 'transform 0.3s ease';
+
+      // Check initial screen size and set sidebar visibility accordingly
+      if (window.innerWidth >= 768) {
+        // Desktop: Ensure sidebar is visible and styled correctly on load
+        sidebar.classList.remove('hidden', 'fixed', 'inset-y-0', 'left-0', 'z-50', 'pt-16', 'pb-4', 'overflow-y-auto', 'w-[85%]', 'max-w-sm');
+        sidebar.style.transform = ''; // Clear any transform
+      } else {
+        // Mobile: Ensure sidebar is hidden on load
+        sidebar.classList.add('hidden');
+      }
       
       toggleBtn.addEventListener('click', () => {
         const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
@@ -609,12 +619,28 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
       
       // Handle window resize
       window.addEventListener('resize', () => {
-        // Show sidebar by default on desktop
         if (window.innerWidth >= 768) {
-          sidebar.classList.remove('hidden', 'fixed', 'inset-0', 'z-50', 'pt-16', 'pb-4');
-          sidebar.classList.add('md:block');
+          // Resized to Desktop: Ensure sidebar is visible and styled correctly
+          sidebar.classList.remove('hidden', 'fixed', 'inset-y-0', 'left-0', 'z-50', 'pt-16', 'pb-4', 'overflow-y-auto', 'w-[85%]', 'max-w-sm');
+          sidebar.style.transform = ''; // Ensure transform is cleared
           if (overlay) overlay.classList.add('hidden');
           document.body.classList.remove('overflow-hidden');
+          // Reset toggle button state if resizing to desktop
+          toggleBtn.setAttribute('aria-expanded', 'false');
+          toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg> Show Filters`;
+        } else {
+          // Resized to Mobile: Hide sidebar unless it was explicitly open
+          const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+          if (!isExpanded) {
+             sidebar.classList.add('hidden');
+             // Clean up mobile positioning classes if they were somehow left
+             sidebar.classList.remove('fixed', 'inset-y-0', 'left-0', 'z-50', 'pt-16', 'pb-4', 'overflow-y-auto', 'w-[85%]', 'max-w-sm');
+             sidebar.style.transform = '';
+             if (overlay) overlay.classList.add('hidden');
+             document.body.classList.remove('overflow-hidden');
+          }
         }
       });
     }
