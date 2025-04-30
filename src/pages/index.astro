@@ -446,9 +446,13 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
         // Handle removal based on label
         // This is a simplification - you'd need to map back to your filter state
         // and then dispatch an event or call applyFiltering()
-      });
-    });
-  }
+     });
+   }
+
+   // Listen for close request from sidebar component
+   document.addEventListener('closeSidebarRequest', () => {
+     closeSidebar();
+   });
 
   // Highlight new reports
   function handleHighlighting() {

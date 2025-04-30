@@ -29,9 +29,9 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
     <div class="flex items-center justify-between">
       <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Filters</h2>
       <!-- Mobile close button -->
-      <button 
-        id="closeSidebarBtn" 
-        class="md:hidden p-1 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+      <button
+        id="closeSidebarBtn"
+        class="md:hidden p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-gray-800"
         aria-label="Close filters"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -39,7 +39,13 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
         </svg>
       </button>
     </div>
-    <button id="resetFilters" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">Reset All</button>
+    {/* Increased touch target size with padding and margin */}
+    <button 
+      id="resetFilters" 
+      class="inline-block mt-1 py-2 px-3 rounded text-sm text-blue-600 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:no-underline focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800"
+    >
+      Reset All
+    </button>
   </div>
 
   <!-- Quick Filters / Status -->
@@ -404,51 +410,8 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
     });
     document.dispatchEvent(event);
   }
-  
-  // Handle close button on mobile
-  const closeBtn = document.getElementById('closeSidebarBtn');
-  if (closeBtn) {
-    closeBtn.addEventListener('click', () => {
-      const sidebar = document.getElementById('filterSidebar');
-      const toggleBtn = document.getElementById('filterToggleBtn');
-      const overlay = document.getElementById('sidebarOverlay');
-      
-      if (sidebar) {
-        // Start animations
-        if (overlay) {
-          overlay.style.opacity = '0';
-        }
-        
-        // Animate sidebar
-        if (window.innerWidth < 768) {
-          sidebar.style.transform = 'translateX(-100%)';
-        }
-        
-        // Wait for animations to complete before hiding
-        setTimeout(() => {
-          sidebar.classList.add('hidden');
-          sidebar.classList.remove('fixed', 'inset-y-0', 'left-0', 'z-50', 'pt-16', 'pb-4', 'overflow-y-auto', 'w-[85%]', 'max-w-sm');
-          sidebar.style.transform = '';
-          
-          if (overlay) {
-            overlay.classList.add('hidden');
-          }
-        }, 300);
-        
-        // Update toggle button state
-        if (toggleBtn) {
-          toggleBtn.setAttribute('aria-expanded', 'false');
-          toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-          </svg> Show Filters`;
-        }
-        
-        // Allow body scrolling again
-        document.body.classList.remove('overflow-hidden');
-      }
-    });
-  }
 
-  // Initialize when DOM is loaded
+  // Initialize controls when DOM is loaded
   document.addEventListener('DOMContentLoaded', initializeControls);
+  // Note: Mobile close button logic is handled in index.astro
 </script>

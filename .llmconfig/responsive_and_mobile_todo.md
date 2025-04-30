@@ -44,46 +44,42 @@ Ensure the search modal/UI renders correctly and is usable on small screens.
     [X] Toggle Button (Option A): Implemented with label, icon, ARIA (`aria-controls`, `aria-expanded`), and touch target size (`min-h-[44px]`).
     [X] Scrolling: Desktop scrolling (`md:overflow-y-auto`) and mobile overlay scrolling (`overflow-y-auto` via JS) implemented.
 
-[ ] Table Container Responsiveness:
+[X] Table Container Responsiveness: (Verified 2025-04-30)
+    [X] Ensure the div wrapping the <table> has overflow-x-auto applied consistently. (`overflow-x-auto` is present on the container div).
 
-Ensure the div wrapping the <table> has overflow-x-auto applied consistently to allow horizontal scrolling of the table content on small screens where it might not fit.
+5. Table Responsiveness (<table> in src/pages/index.astro) (Verified 2025-04-30)
 
-5. Table Responsiveness (<table> in src/pages/index.astro)
+[X] Horizontal Scrolling: Verify overflow-x-auto on the container works correctly. (Container has `overflow-x-auto`).
 
-[ ] Horizontal Scrolling: Verify overflow-x-auto on the container works correctly, allowing users to scroll the table horizontally on small screens.
+[X] Column Visibility (Optional but Recommended):
+    [X] Identify less critical columns (Title, EPSS, Zero-Day).
+    [X] Apply responsive utility classes (`hidden sm:table-cell`, `hidden md:table-cell`) to hide columns on smaller screens.
+    [X] Ensure critical information remains visible.
 
-[ ] Column Visibility (Optional but Recommended):
+[X] Cell Padding/Whitespace: Ensure appropriate padding (`px-2 sm:px-3 py-3`) and whitespace handling (`whitespace-nowrap` used selectively).
 
-Identify less critical columns (e.g., EPSS score, potentially Title/Summary if CVE ID is primary).
+6. Filter Controls Responsiveness (src/components/FilterSidebar.astro) (Updated 2025-04-30)
 
-Apply responsive utility classes to hide these columns on smaller screens (e.g., hidden md:table-cell on both the <th> and corresponding <td> elements).
+[X] Touch Target Size:
+    [X] Checkboxes, Date Inputs, Text Inputs, Summaries: Use `min-h-[44px]` or sufficient padding/labels.
+    [X] Sliders: Added `py-2` to container divs for better vertical spacing.
+    [X] Buttons: Date Presets (`min-h-[44px]`), Apply Filters (`min-h-[48px]`) OK. Reset All button padding increased (`py-2 px-3`). Close button padding increased (`p-2`).
 
-Ensure the most critical information (CVE ID, Severity, Date, CVSS) remains visible by default if possible.
+[X] Input Fields: Native date pickers used. Text inputs OK. Sliders improved with padding.
 
-[ ] Cell Padding/Whitespace: Ensure px- and py- on <th> and <td> provide enough space but don't waste too much horizontal space, especially on mobile. Adjust padding for smaller screens if necessary (px-2 md:px-3). Use whitespace-nowrap judiciously (e.g., for scores, dates, tags) but allow wrapping for titles/summaries (whitespace-normal).
+[X] Collapsible Sections: `<details>/<summary>` use `min-h-[44px]`.
 
-6. Filter Controls Responsiveness (src/components/FilterSidebar.astro)
+[X] Dynamic Lists (Vendor/Product): Use `max-h-40 overflow-y-auto`.
 
-[ ] Touch Target Size: Ensure all interactive elements (checkboxes, radio buttons, select dropdowns, sliders, date inputs, buttons, collapsible <summary> elements) have sufficient size and spacing to be easily tapped on mobile devices (minimum 44x44px recommended guideline). Use appropriate padding (p-2, p-3).
+7. JavaScript Interactivity & Responsiveness (Verified 2025-04-30)
 
-[ ] Input Fields: Ensure text inputs, date inputs, and sliders are usable on mobile keyboards/touch interfaces. Consider native date pickers where appropriate.
+[X] Sidebar Toggle Logic (If implemented): JS in `index.astro` handles toggle button, close button event, ARIA attributes, overlay, and animations correctly.
 
-[ ] Collapsible Sections: Verify <details>/<summary> elements work correctly on touch devices. Ensure the clickable area for <summary> is large enough.
+[X] Event Listeners: Sorting/filtering listeners seem appropriate for touch/mouse.
 
-[ ] Dynamic Lists (Vendor/Product): If these lists become long, ensure they are scrollable within their container inside the sidebar (overflow-y-auto max-h-XX).
+8. Testing (Process Reminder)
 
-7. JavaScript Interactivity & Responsiveness
-
-[ ] Sidebar Toggle Logic (If implemented): Ensure the JavaScript correctly toggles the visibility/state of the sidebar and the toggle button's ARIA attributes.
-
-[ ] Event Listeners: Ensure all event listeners for filtering/sorting work correctly on both touch and mouse events.
-
-8. Testing
-
-[ ] Browser DevTools: Use browser developer tools extensively to simulate different screen sizes (mobile, tablet, desktop) and touch events.
-
-[ ] Physical Devices: Test on actual mobile and tablet devices (iOS and Android) if possible.
-
-[ ] Cross-Browser Testing: Check layout and functionality on major browsers (Chrome, Firefox, Safari, Edge).
-
-[ ] E2E Tests (Playwright): Add specific tests that resize the viewport and verify layout changes (e.g., sidebar hiding/showing, column hiding, table scrolling).
+[ ] Browser DevTools: Use browser developer tools extensively.
+[ ] Physical Devices: Test on actual mobile and tablet devices.
+[ ] Cross-Browser Testing: Check layout and functionality on major browsers.
+[ ] E2E Tests (Playwright): Add specific tests for responsive behavior.
