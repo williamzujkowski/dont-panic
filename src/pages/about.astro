@@ -9,7 +9,8 @@ import AboutSection from '../components/AboutSection.astro'; // Optional: Use if
     <p class="tagline">Learn more about who we are and what we do.</p>
 
     <!-- Option 1: Simple content directly in the page -->
-    <section class="about-content simple-about">
+    {/* Apply prose classes for consistent styling and responsiveness */}
+    <section class="about-content prose prose-lg dark:prose-invert max-w-none mt-lg"> 
       <h2>Our Mission</h2>
       <p>
         We are dedicated to creating amazing web experiences using modern technologies like Astro.
@@ -56,28 +57,21 @@ import AboutSection from '../components/AboutSection.astro'; // Optional: Use if
   h1 {
     text-align: center;
     margin-bottom: 0.5rem;
-    color: var(--color-primary);
+    /* Use Tailwind classes or keep variable if needed elsewhere */
+    @apply text-primary; 
   }
 
   .tagline {
     text-align: center;
     margin-bottom: 3rem;
     font-size: 1.2rem;
-    color: var(--color-text-secondary);
+    /* Use Tailwind classes or keep variable if needed elsewhere */
+    @apply text-text-secondary; 
   }
 
-  .simple-about h2 {
-    margin-top: 2.5rem;
-    margin-bottom: 1rem;
-    color: var(--color-accent); /* Or another appropriate color */
-    border-bottom: 2px solid var(--color-border);
-    padding-bottom: 0.5rem;
-  }
-
-  .simple-about p {
-    line-height: 1.7;
-    margin-bottom: 1rem;
-  }
+  /* Remove custom styles for .simple-about h2 and p as prose handles them */
+  /* If specific overrides are needed, target them within the prose scope, e.g.: */
+  /* .about-content h2 { color: var(--color-accent); } */
 
   /* Add styles for AboutSection component if you use it */
   /* .about-section { margin-bottom: 3rem; } */

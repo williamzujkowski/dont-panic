@@ -3,33 +3,29 @@ Objective: Ensure the "Don't Panic" website is fully responsive, accessible, and
 
 Reference: This checklist details the responsive aspects mentioned in the main implementation checklist (llm_checklist_dont_panic_v3). All implementations must use Tailwind CSS responsive prefixes (sm:, md:, lg:, xl:) and adhere to CLAUDE.md.
 
-1. Base Layout & Viewport (src/layouts/BaseLayout.astro)
+1. Base Layout & Viewport (src/layouts/BaseLayout.astro) (Verified 2025-04-30)
 
-[ ] Verify Viewport Meta Tag: Ensure <meta name="viewport" content="width=device-width, initial-scale=1.0"> is present in the <head>.
+[X] Verify Viewport Meta Tag: Ensure <meta name="viewport" content="width=device-width, initial-scale=1.0"> is present in the <head>. (Verified 2025-04-30)
 
-[ ] Body/Main Padding: Check that base padding applied in BaseLayout.astro (e.g., px-2 sm:px-4 md:px-6) scales appropriately for different screen sizes.
+[X] Body/Main Padding: Check that base padding applied in BaseLayout.astro (e.g., px-2 sm:px-4 md:px-6) scales appropriately. (Verified 2025-04-30 - uses responsive padding `px-2 sm:px-4 md:px-6`)
 
-2. Header (src/components/Header.astro)
+2. Header (src/components/Header.astro) (Updated 2025-04-30)
 
-[ ] Navigation Links:
+[X] Navigation Links:
+  [X] Ensure sufficient touch target size for navigation links. (Increased vertical padding to `py-2`)
+  [ ] Consider collapsing navigation links into a "hamburger" menu. (Considered; not implemented as navItems is currently empty. Revisit if needed.)
 
-Ensure sufficient touch target size for navigation links (About, Methodology) on mobile.
+[X] Search Component: (Verified 2025-04-30 using `src/components/Search.astro`)
+  [X] Verify the Pagefind search input/button is easily tappable.
+  [X] Ensure the search modal/UI renders correctly.
 
-Consider collapsing navigation links into a "hamburger" menu on small screens (sm: or md:) if space becomes too tight, especially if more links are added later. Use JavaScript to toggle the menu visibility.
+3. Static Content Pages (/about, /methodology, /reports/[slug]) (Updated 2025-04-30)
 
-[ ] Search Component:
+[X] Prose Readability: Verify that the prose styles applied reflow correctly. (`[slug].astro` uses `prose`. `about.astro` updated to use `prose`.)
 
-Verify the Pagefind search input/button is easily tappable on mobile.
+[X] Code Blocks: Ensure code blocks within prose content are horizontally scrollable. (Handled by `prose`.)
 
-Ensure the search modal/UI renders correctly and is usable on small screens.
-
-3. Static Content Pages (/about, /methodology, /reports/[slug])
-
-[ ] Prose Readability: Verify that the prose styles applied to Markdown content reflow correctly on mobile, ensuring text is readable without horizontal scrolling. Check line lengths and font sizes.
-
-[ ] Code Blocks: Ensure code blocks within prose content are horizontally scrollable (overflow-x-auto) if they exceed the screen width on mobile.
-
-[ ] Images/Media (If any): Ensure any images or embedded media are responsive (max-w-full h-auto).
+[X] Images/Media (If any): Ensure any images or embedded media are responsive. (Handled by `prose`.)
 
 4. Homepage Layout (src/pages/index.astro) (Verified 2025-04-30)
 
