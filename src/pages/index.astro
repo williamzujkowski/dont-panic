@@ -494,12 +494,51 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
     }
   }
 
+  // Define closeSidebar function in a higher scope
+  function closeSidebar() {
+    const sidebar = document.getElementById('filterSidebar');
+    const toggleBtn = document.getElementById('filterToggleBtn');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    if (sidebar) {
+      // Animate out
+      if (overlay) {
+        overlay.style.opacity = '0';
+      }
+       
+      // Add animation to sidebar if on mobile
+      if (window.innerWidth < 768) {
+        sidebar.style.transform = 'translateX(-100%)';
+      }
+       
+      // Wait for animation before hiding
+      setTimeout(() => {
+        sidebar.classList.add('hidden');
+        sidebar.classList.remove('fixed', 'inset-y-0', 'left-0', 'z-50', 'pt-16', 'pb-4', 'overflow-y-auto', 'w-[85%]', 'max-w-sm');
+        sidebar.style.transform = '';
+         
+        if (overlay) {
+          overlay.classList.add('hidden');
+        }
+         
+        document.body.classList.remove('overflow-hidden');
+      }, 300);
+       
+      if (toggleBtn) {
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+        </svg> Show Filters`;
+      }
+    }
+  }
+
   // Mobile filter sidebar toggle
   function setupFilterToggle() {
     const toggleBtn = document.getElementById('filterToggleBtn');
     const sidebar = document.getElementById('filterSidebar');
     let overlay;
-    
+     
     // Create overlay element for mobile
     function createOverlay() {
       overlay = document.createElement('div');
@@ -508,48 +547,13 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
       overlay.style.opacity = '0';
       overlay.style.transition = 'opacity 0.3s ease';
       document.body.appendChild(overlay);
-      
+       
       // Close sidebar when clicking overlay
       overlay.addEventListener('click', () => {
-        closeSidebar();
+        closeSidebar(); // Now calls the function in the higher scope
       });
     }
-    
-    // Close sidebar and hide overlay
-    function closeSidebar() {
-      if (sidebar) {
-        // Animate out
-        if (overlay) {
-          overlay.style.opacity = '0';
-        }
-        
-        // Add animation to sidebar if on mobile
-        if (window.innerWidth < 768) {
-          sidebar.style.transform = 'translateX(-100%)';
-        }
-        
-        // Wait for animation before hiding
-        setTimeout(() => {
-          sidebar.classList.add('hidden');
-          sidebar.classList.remove('fixed', 'inset-y-0', 'left-0', 'z-50', 'pt-16', 'pb-4', 'overflow-y-auto', 'w-[85%]', 'max-w-sm');
-          sidebar.style.transform = '';
-          
-          if (overlay) {
-            overlay.classList.add('hidden');
-          }
-          
-          document.body.classList.remove('overflow-hidden');
-        }, 300);
-        
-        if (toggleBtn) {
-          toggleBtn.setAttribute('aria-expanded', 'false');
-          toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-          </svg> Show Filters`;
-        }
-      }
-    }
-    
+     
     if (toggleBtn && sidebar) {
       // Create overlay on init
       createOverlay();
