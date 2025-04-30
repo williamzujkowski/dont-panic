@@ -49,7 +49,7 @@ const base = Astro.config?.base ?? '/'; // Get base path
               <a
                 href={item.href}
                 class:list={[
-                  "px-sm py-xs rounded hover:bg-primary/10 hover:text-primary transition-colors", // Base link styles
+                  "block px-sm py-2 rounded hover:bg-primary/10 hover:text-primary transition-colors", // Base link styles, added py-2 and block
                   { 'text-primary font-medium': item.href === currentPath } // Active styles
                 ]}
                 aria-current={item.href === currentPath ? "page" : false}
