@@ -75,9 +75,9 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
       Severity & Risk Score
     </summary>
     <div class="mt-2 pl-2 space-y-4">
-      <!-- CVSS Score Slider -->
-      <div>
-        <label class="block text-sm font-medium mb-2">CVSS Score</label>
+      {/* CVSS Score Slider - Added py-2 for vertical spacing */}
+      <div class="py-2">
+        <label for="cvssSlider" class="block text-sm font-medium mb-2">CVSS Score</label>
         <div class="flex items-center">
           <input 
             type="range" 
@@ -92,9 +92,9 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
         </div>
       </div>
 
-      <!-- EPSS Score Slider -->
-      <div>
-        <label class="block text-sm font-medium mb-2">EPSS Score</label>
+      {/* EPSS Score Slider - Added py-2 for vertical spacing */}
+      <div class="py-2">
+        <label for="epssSlider" class="block text-sm font-medium mb-2">EPSS Score</label>
         <div class="flex items-center">
           <input 
             type="range" 
