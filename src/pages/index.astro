@@ -634,7 +634,8 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
   }
   
   @keyframes fadeOutHighlight {
-    from { @apply border-l-emerald-500; } /* Start with the color */
-    to { @apply border-l-transparent; } /* Fade to transparent */
+    /* Replace @apply with direct CSS properties */
+    from { border-left-color: #10b981; } /* Tailwind's emerald-500 */
+    to { border-left-color: transparent; } 
   }
 </style>
