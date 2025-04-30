@@ -29,6 +29,7 @@ A ready-to-use Astro website template featuring essential pages, components, sty
 - `ci.yml`: Basic CI workflow with linting and testing placeholders
 - `codeql-analysis.yml`: Security scanning using GitHub CodeQL
 - `dependency-review.yml`: Reviews dependencies for security issues on PRs
+- `sync_reports.yml`: Automatically syncs vulnerability reports from a source repository
 
 ### Issue & PR Templates
 
@@ -114,8 +115,12 @@ graph TD
 ### 5. Phased Development (This Repo)
 
 *   **Phase 1 (Implemented):** Initialize Astro project with Tailwind. Setup basic project structure (`src/content/reports`, basic layout, report page). Create basic layout/template (`src/layouts/`, `src/pages/reports/[slug].astro`) to display a single Markdown report from `src/content/`. Setup manual report copying. Setup basic CI/CD for building/testing.
-*   **Phase 2 (Implemented):** Implement index page (`src/pages/index.astro`) listing all available reports using Astro's content collections API. Refine styling and layout using Tailwind (created `ReportCard` component). Setup deployment CI/CD (using existing `deploy.yml`). *Note: Automated report syncing deferred.*
-*   **Phase 3 (Partially Implemented):** Add features like client-side search (Implemented using Pagefind integration). *Remaining: filtering/sorting reports, improve accessibility, enhance styling further, implement automated report syncing/fetching in CI/CD.*
+*   **Phase 2 (Implemented):** Implement index page (`src/pages/index.astro`) listing all available reports using Astro's content collections API. Refine styling and layout using Tailwind (created `ReportCard` component). Setup deployment CI/CD (using existing `deploy.yml`).
+*   **Phase 3 (Implementation Completed):**
+    * ✅ **Automated Report Syncing:** Added workflow to automatically sync reports from the vulnerability-intelligence-generator repository.
+    * ✅ **Search Functionality:** Implemented client-side search using Pagefind integration. Search UI integrated in header.
+    * ✅ **Table View & Filtering/Sorting:** Implemented a table-based view for the homepage with client-side filtering, sorting, and URL state persistence.
+    * ❌ **Accessibility Improvements:** Need to review and enhance accessibility features.
 
 ## How to Run Locally
 
@@ -130,6 +135,46 @@ This project uses [Vitest](https://vitest.dev/) for testing.
 
 - Run all tests: `npm run test`
 - Run tests in watch mode: `npm run test:watch`
+
+## Automated Report Syncing
+
+The project includes automated syncing of vulnerability reports from a source repository. This is configured through the `.github/workflows/sync_reports.yml` workflow, which can run on a schedule or be triggered manually.
+
+For details on how the report syncing works, see the [Report Syncing Documentation](./docs/report-syncing.md).
+
+## Search Functionality
+
+The site includes client-side search functionality powered by Pagefind. This allows users to search through vulnerability reports without requiring a backend server.
+
+For details on how the search functionality works and how to customize it, see the [Search Functionality Documentation](./docs/search-functionality.md).
+
+## Table View with Filtering and Sorting
+
+The homepage features a data-dense table view of vulnerability reports with advanced functionality:
+
+- **Sortable Columns:** Click on column headers to sort by CVE ID, title, CVSS score, EPSS score, severity, zero-day status, or date
+- **Text Search:** Filter reports by typing in the search box
+- **Severity Filter:** Filter reports by severity level (Critical, High, Medium, Low)
+- **Zero-Day Filter:** Show only zero-day vulnerabilities when enabled
+- **URL State Persistence:** All filters and sort settings are reflected in the URL, making it easy to share specific views
+- **New Report Highlighting:** Reports added since your last visit are highlighted with a subtle animation
+
+All filtering and sorting is performed client-side, ensuring fast response times and no server requirements.
+
+## Future Work and Known Issues
+
+### Future Enhancements
+
+- **Accessibility Improvements:** Conduct a thorough accessibility audit and implement improvements
+- **Enhanced Report Visualization:** Add visual charts for CVSS components and timeline visualization
+- **Performance Optimization:** Conduct Lighthouse audit and optimize image loading and CSS/JS bundles
+- **Test Coverage:** Expand test coverage and improve test reliability
+
+### Known Issues
+
+- Some component tests have been skipped due to JSDOM limitations with newer browser APIs
+- The VulnerabilityTable tests currently require a more comprehensive testing setup for proper DOM manipulation
+- The table view could benefit from responsive design improvements for very small screens
 
 ## Contributing
 

@@ -6,18 +6,22 @@ This document outlines the structure of the repository.
     - CONTRIBUTING.md
     - FILE_TREE.md
     - README.md
+    - SECURITY.md
     - dependabot.yml
-    - CLAUDE.md
     - astro.config.mjs
+    - guide.md
     - package.json
     - package-lock.json
+    - repomix-output.txt
     - tailwind.config.cjs
     - tsconfig.json
+    - vitest.config.ts
     - **.github/**
         - pull_request_template.md
         - **workflows/**
             - build_test.yml # Basic CI workflow (includes tests)
             - deploy.yml # GitHub Pages deployment workflow
+            - sync_reports.yml # Workflow for syncing vulnerability reports
             - codeql-analysis.yml # (Keep if desired)
             - dependency-review.yml # (Keep if desired)
         - **ISSUE_TEMPLATE/**
@@ -26,9 +30,15 @@ This document outlines the structure of the repository.
                 - config.yml
                 - feature_request.md
     - **.llmconfig/** - *Contains LLM agent configurations and rules*
-        - PROJECT_PLAN.md
-        - agent-rules.md
         - CLAUDE.md
+        - PROJECT_PLAN.md
+        - PROJECT_PLAN_UPDATED.md
+        - USAGE_GUIDE.md
+        - agent-rules.md
+        - publish.md
+        - styling.md
+        - todo.md
+        - ux-ui guide.md
         - **prompt-templates/**
             - .gitkeep
         - **context/**
@@ -36,6 +46,8 @@ This document outlines the structure of the repository.
     - **config/** - *Configuration files*
         - .gitkeep
     - **docs/** - *Documentation files*
+        - report-syncing.md # Documentation for the report syncing workflow
+        - search-functionality.md # Documentation for the search functionality
         - .gitkeep
     - **public/** - *Static assets*
         - favicon.svg
@@ -43,33 +55,56 @@ This document outlines the structure of the repository.
         - .gitkeep
     - **src/** - *Source code*
         - **components/** - *Reusable Astro components*
+            - AboutSection.astro
+            - AboutSection.test.ts
+            - CTASection.astro
+            - CTASection.test.ts
+            - Features.astro
+            - Features.test.ts
+            - Footer.astro
+            - Footer.test.ts
+            - Header.astro
+            - Header.test.ts
+            - Hero.astro
+            - Hero.test.ts
             - ReportCard.astro
-            - Search.astro # Added Pagefind search component
-            - .gitkeep
+            - ScoreDisplay.astro
+            - Search.astro # Pagefind search component
+            - SeverityTag.astro
+            - Styling.test.ts
+            - Testimonials.astro
+            - ZeroDayTag.astro
         - **content/** - *Markdown content collections*
             - config.ts # Content collection schema definitions
             - **reports/** # Synced/copied Markdown reports go here
                 - sample-cve.md # Sample report
+        - **data/** - *Data files*
+            - featuresData.ts
+            - navItems.ts
         - **env.d.ts** - *TypeScript environment definitions*
         - **layouts/** - *Base page layouts*
             - BaseLayout.astro
+            - Layout.astro
+            - Layout.test.ts
         - **pages/** - *Site pages/routes*
-            - **api/** # Example API route directory (if needed later)
-                - .gitkeep
+            - about.astro
+            - **blog/**
+                - index.astro
+                - sample-post.md
             - **reports/** # Directory for report pages
                 - [slug].astro # Dynamic route for displaying single reports
             - index.astro # Home page listing reports
+            - search.astro # Dedicated search page
         - **styles/** - *CSS styles*
             - global.css
     - **tests/** - *Test files*
         - **components/**
             - ReportCard.test.ts
         - **layouts/**
-             - BaseLayout.test.ts
+            - BaseLayout.test.ts
         - **pages/**
-            - index.test.ts # (Temporarily Disabled - Requires Astro Test Utils)
+            - index.test.ts
             - **reports/**
-              - '[slug].test.ts' # (Temporarily Disabled - Requires Astro Test Utils)
-        # - setup.ts # Optional setup file
-        - .gitkeep
-    - vitest.config.ts # Vitest configuration
+                - '[slug].test.ts'
+        - **workflows/**
+            - sync_reports.test.ts # Tests for report syncing workflow

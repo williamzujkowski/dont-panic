@@ -1,0 +1,43 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Search from '../components/Search.astro';
+
+const title = "Search Vulnerability Reports";
+const description = "Search through all vulnerability intelligence reports";
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-3xl font-bold mb-6">Search Vulnerability Reports</h1>
+      
+      <p class="mb-8 text-gray-600">
+        Enter keywords to search through our vulnerability intelligence reports. 
+        Search for CVE IDs, product names, vulnerability types, or any other relevant terms.
+      </p>
+      
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <Search className="w-full max-w-none" />
+      </div>
+      
+      <div class="mt-8">
+        <h2 class="text-xl font-semibold mb-4">Search Tips</h2>
+        <ul class="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-400">
+          <li>Use specific terms like CVE IDs (e.g., "CVE-2024-1234") for exact matches</li>
+          <li>Search by vendor names, product names, or vulnerability types</li>
+          <li>Try related terms if you don't find what you're looking for</li>
+          <li>Results are ranked by relevance to your search query</li>
+          <li>Click any result to go directly to the full vulnerability report</li>
+        </ul>
+      </div>
+      
+      <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <h2 class="text-xl font-semibold mb-4">Can't find what you're looking for?</h2>
+        <p class="text-gray-600 dark:text-gray-400">
+          If you can't find a specific vulnerability report, it may not be in our database yet.
+          Check back later or browse our <a href="/" class="text-primary hover:underline">latest reports</a> for the most recent additions.
+        </p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

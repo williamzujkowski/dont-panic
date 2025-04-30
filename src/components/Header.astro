@@ -1,46 +1,75 @@
 ---
 // src/components/Header.astro
 import type { NavItem } from '../data/navItems'; // Import the NavItem type
+import Search from './Search.astro'; // Import the Search component
 
 interface Props {
-	siteTitle: string;
+  siteTitle: string;
   navItems: NavItem[]; // Use the imported NavItem type
   currentPath: string; // Add prop for current path
+  showSearch?: boolean; // Option to show/hide search
 }
 
-const { siteTitle, navItems, currentPath } = Astro.props;
+const { 
+  siteTitle, 
+  navItems, 
+  currentPath,
+  showSearch = true // Default to showing search
+} = Astro.props;
+
 const base = Astro.config?.base ?? '/'; // Get base path
 ---
-{/* Apply Tailwind classes directly */}
-<header role="banner" class="sticky top-0 z-50 backdrop-blur-md bg-surface/90 border-b border-border"> {/* Adjusted transparency */}
-  <div class="container mx-auto flex justify-between items-center px-md py-sm"> {/* Use container and variables */}
+<header role="banner" class="sticky top-0 z-50 backdrop-blur-md bg-surface/90 border-b border-border">
+  <div class="container mx-auto flex justify-between items-center px-md py-sm">
     <div class="site-title flex items-center">
       {/* Optional: Add SVG icon here */}
       {/* Example Placeholder: Replace with actual SVG */}
     <!-- <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-primary inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
       <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg> -->
-      <a href={base} class="text-xl font-bold text-text hover:text-primary transition-colors">{siteTitle}</a> {/* Adjusted styles */}
+      <a href={base} class="text-xl font-bold text-text hover:text-primary transition-colors">{siteTitle}</a>
     </div>
-    <nav role="navigation" aria-label="Main navigation">
-      <ul class="flex items-center gap-sm md:gap-md"> {/* Use flex and gap */}
-        {navItems.map((item) => (
-          <li> {/* Removed nav-item class */}
-            <a
-              href={item.href}
-              class:list={[
-                "px-sm py-xs rounded hover:bg-primary/10 hover:text-primary transition-colors", // Base link styles
-                { 'text-primary font-medium': item.href === currentPath } // Active styles
-              ]}
-              aria-current={item.href === currentPath ? "page" : false}
-            >
-              {item.text}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
+    
+    <div class="flex items-center gap-md">
+      {/* Add search component */}
+      {showSearch && (
+        <div class="hidden md:block">
+          <Search 
+            placeholder="Search reports..." 
+            className="w-64"
+          />
+        </div>
+      )}
+      
+      <nav role="navigation" aria-label="Main navigation">
+        <ul class="flex items-center gap-sm md:gap-md">
+          {navItems.map((item) => (
+            // Check if item should be shown on mobile
+            <li class={item.showOnMobile === false ? 'hidden md:block' : ''}>
+              <a
+                href={item.href}
+                class:list={[
+                  "px-sm py-xs rounded hover:bg-primary/10 hover:text-primary transition-colors", // Base link styles
+                  { 'text-primary font-medium': item.href === currentPath } // Active styles
+                ]}
+                aria-current={item.href === currentPath ? "page" : false}
+              >
+                {item.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
   </div>
+  
+  {/* Mobile search - only shown on small screens */}
+  {showSearch && (
+    <div class="md:hidden px-md pb-sm">
+      <Search placeholder="Search reports..." />
+      <div class="text-center text-xs mt-1 text-gray-500">
+        <a href="/search" class="hover:text-primary hover:underline">Advanced Search</a>
+      </div>
+    </div>
+  )}
 </header>
-
-<!-- Removed <style> block -->

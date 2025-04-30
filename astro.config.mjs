@@ -1,7 +1,7 @@
 // @ts-check
-// @ts-check
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite'; // Import the Vite plugin
+import pagefind from 'astro-pagefind'; // Import the Pagefind integration
 
 // Determine base path and site URL based on environment
 // Fallback for local development
@@ -47,7 +47,25 @@ export default defineConfig({
   outDir: 'dist',
 
   integrations: [
-    // Pagefind integration removed as the package is unavailable
+    // Add Pagefind integration
+    pagefind({
+      // Pagefind configuration options
+      searchPagePath: '/search',  // Optional: path to a dedicated search page
+      indexDist: true, // Create search index in dist folder
+      customSelectors: [
+        // Add any custom CSS selectors you want to include in the search
+        { selector: "h1", defaultType: "header" },
+        { selector: "h2", defaultType: "header" },
+        { selector: "h3", defaultType: "header" },
+        { selector: "article", defaultType: "content" }
+      ],
+      excludeSelectors: [
+        // Add any selectors you want to exclude from search
+        "nav", 
+        "footer",
+        "[data-pagefind-ignore]"
+      ]
+    })
   ],
 
   // Add the Tailwind Vite plugin

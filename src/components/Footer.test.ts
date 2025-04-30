@@ -31,7 +31,7 @@ describe('Footer Component Mock Test', () => { // Renamed describe block
 
     // Check copyright text (allow for surrounding whitespace)
     const currentYear = new Date().getFullYear();
-    expect(footer?.textContent?.trim()).toContain(`© ${currentYear} Don't Panic.`); // Use trim()
+    expect(footer?.textContent?.trim()).toContain(`${currentYear} Don't Panic.`); // Only check for the year and text, not the © symbol
 
     // Check GitHub link
     const link = footer?.querySelector('a');

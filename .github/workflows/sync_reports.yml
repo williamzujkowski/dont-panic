@@ -1,0 +1,112 @@
+name: Sync Vulnerability Reports
+
+on:
+  # Allows manual triggering from the Actions tab
+  workflow_dispatch:
+    inputs:
+      source_repo:
+        description: 'Source repository to sync reports from'
+        required: true
+        default: 'owner/vulnerability-intelligence-generator'
+        type: string
+      source_branch:
+        description: 'Branch to sync from'
+        required: true
+        default: 'main'
+        type: string
+  
+  # Run on a schedule (daily at midnight UTC)
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  sync_reports:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout destination repository
+        uses: actions/checkout@v4
+        with:
+          path: dont-panic
+          # Fetch all history for proper commits
+          fetch-depth: 0
+
+      - name: Checkout source repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.inputs.source_repo || 'owner/vulnerability-intelligence-generator' }}
+          ref: ${{ github.event.inputs.source_branch || 'main' }}
+          path: source-repo
+          # Use a token with repo-scope permissions if the source repository is private
+          # token: ${{ secrets.SOURCE_REPO_PAT }}
+
+      - name: Setup Git
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+
+      - name: Check for new reports
+        id: check_reports
+        run: |
+          # Create reports directory if it doesn't exist
+          mkdir -p dont-panic/src/content/reports
+          
+          # Check if there are differences between source and destination report directories
+          DIFF_COUNT=$(diff -r source-repo/reports dont-panic/src/content/reports | wc -l)
+          
+          # Set output variable to determine if we need to sync
+          if [ $DIFF_COUNT -gt 0 ]; then
+            echo "reports_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "reports_changed=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Count new reports for commit message
+          NEW_COUNT=$(find source-repo/reports -type f -newer dont-panic/src/content/reports/sample-cve.md 2>/dev/null | wc -l)
+          echo "new_reports=$NEW_COUNT" >> $GITHUB_OUTPUT
+
+      - name: Sync reports
+        if: steps.check_reports.outputs.reports_changed == 'true'
+        run: |
+          # Remove all current reports except the sample
+          find dont-panic/src/content/reports -type f -not -name "sample-cve.md" -delete
+          
+          # Copy all reports from source to destination
+          cp -r source-repo/reports/* dont-panic/src/content/reports/
+          
+          # Ensure correct file structure and format if needed
+          # This step might need customization based on the source structure
+          
+          # Navigate to the repository directory
+          cd dont-panic
+          
+          # Stage changes
+          git add src/content/reports/
+          
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            # Commit changes
+            git commit -m "Update reports: ${{ steps.check_reports.outputs.new_reports }} new vulnerability reports synced"
+            
+            # Push changes
+            git push
+          fi
+
+  # Trigger the deploy workflow if reports were changed
+  trigger_deploy:
+    needs: sync_reports
+    if: needs.sync_reports.outputs.reports_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger deploy workflow
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy.yml',
+              ref: 'main'
+            })

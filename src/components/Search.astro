@@ -1,9 +1,20 @@
 ---
 // src/components/Search.astro
-// This component relies on the Pagefind integration to inject the necessary UI scripts and styles.
-// See: https://pagefind.app/docs/astro-integration/
+// This component uses the astro-pagefind integration for client-side search
+// See: https://github.com/shishkin/astro-pagefind
+
+interface Props {
+  placeholder?: string;
+  className?: string;
+}
+
+const { 
+  placeholder = "Search vulnerability reports...",
+  className = "" 
+} = Astro.props;
 ---
-<div id="search" class="pagefind-ui"></div>
+
+<div id="search" class={`pagefind-ui ${className}`} aria-label="Search vulnerability reports"></div>
 
 <style is:global>
 /* Basic styles for Pagefind UI - customize as needed */
@@ -11,162 +22,153 @@
 
 :root {
   /* Override Pagefind variables if desired */
-  /* Example: --pagefind-ui-primary: #007bff; */
-  /* See Pagefind docs for available variables */
+  --pagefind-ui-primary: var(--color-primary, #4f46e5);
+  --pagefind-ui-text: var(--color-text, #374151);
+  --pagefind-ui-background: var(--color-background, #ffffff);
+  --pagefind-ui-border: var(--color-border, #e5e7eb);
+  --pagefind-ui-border-width: 1px;
+  --pagefind-ui-border-radius: var(--border-radius, 0.375rem);
+  --pagefind-ui-font: system-ui, sans-serif;
 }
 
 .pagefind-ui {
   /* Container styling */
   margin-left: auto; /* Push search to the right in the header */
+  width: 100%;
+  max-width: 400px; /* Limit width */
+  position: relative;
+  z-index: 40; /* Ensure dropdown is above other content */
 }
 
 .pagefind-ui__search-input {
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius);
-  background-color: var(--color-background);
-  color: var(--color-text);
-  min-width: 200px; /* Adjust as needed */
+  padding: var(--spacing-xs, 0.5rem) var(--spacing-sm, 0.75rem);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--border-radius, 0.375rem);
+  background-color: var(--color-background, #ffffff);
+  color: var(--color-text, #374151);
+  width: 100%;
+  font-size: 0.875rem;
 }
 
 .pagefind-ui__search-input::placeholder {
-  color: var(--color-text-muted);
+  color: var(--color-text-muted, #9ca3af);
 }
 
 .pagefind-ui__search-input:focus {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-primary, #4f46e5);
   outline-offset: 1px;
-  border-color: var(--color-primary);
+  border-color: var(--color-primary, #4f46e5);
 }
 
 /* Style the modal/results */
 .pagefind-ui__drawer {
-  background-color: var(--color-surface);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-small);
+  background-color: var(--color-surface, #ffffff);
+  color: var(--color-text, #374151);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 0 0 var(--border-radius, 0.375rem) var(--border-radius, 0.375rem);
+  box-shadow: var(--shadow-small, 0 1px 3px rgba(0,0,0,0.1));
+  margin-top: 0.25rem;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
+.pagefind-ui__results-container {
+  padding: 0;
 }
 
 .pagefind-ui__result {
-  border-bottom: 1px solid var(--color-border);
-  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  padding: var(--spacing-md, 1rem);
 }
+
 .pagefind-ui__result:last-child {
   border-bottom: none;
 }
 
 .pagefind-ui__result-link {
-  color: var(--color-primary);
+  color: var(--color-primary, #4f46e5);
   text-decoration: none;
+  font-weight: 500;
 }
+
 .pagefind-ui__result-link:hover {
   text-decoration: underline;
-  color: var(--color-primary-dark);
+  color: var(--color-primary-dark, #4338ca);
 }
 
 .pagefind-ui__result-title {
   font-weight: bold;
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs, 0.5rem);
+  font-size: 1rem;
+}
+
+.pagefind-ui__result-excerpt {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-top: 0.5rem;
+  color: var(--color-text-muted, #6b7280);
 }
 
 .pagefind-ui__result-excerpt mark {
-  background-color: rgba(0, 123, 255, 0.2); /* Highlight color */
+  background-color: rgba(79, 70, 229, 0.2); /* Highlight color using primary */
   color: inherit;
+  padding: 0.125rem 0;
+  border-radius: 0.125rem;
 }
 
 .pagefind-ui__button {
   /* Style the close button if needed */
+  border-radius: var(--border-radius, 0.375rem);
+  padding: 0.25rem 0.75rem;
+  background-color: var(--color-background, #ffffff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.pagefind-ui__button:hover {
+  background-color: var(--color-surface, #f9fafb);
 }
 
 .pagefind-ui__message {
   /* Style messages like "No results" */
-  padding: var(--spacing-md);
-  color: var(--color-text-muted);
+  padding: var(--spacing-md, 1rem);
+  color: var(--color-text-muted, #6b7280);
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.pagefind-ui__loading-indicator {
+  border: 2px solid rgba(79, 70, 229, 0.2);
+  border-left-color: var(--color-primary, #4f46e5);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .pagefind-ui {
+    max-width: 100%;
+  }
 }
 </style>
----
-// src/components/Search.astro
-// This component relies on the Pagefind integration to inject the necessary UI scripts and styles.
-// See: https://pagefind.app/docs/astro-integration/
----
-<div id="search" class="pagefind-ui"></div>
 
-<style is:global>
-/* Basic styles for Pagefind UI - customize as needed */
-/* These styles target the elements Pagefind injects */
-
-:root {
-  /* Override Pagefind variables if desired */
-  /* Example: --pagefind-ui-primary: #007bff; */
-  /* See Pagefind docs for available variables */
-}
-
-.pagefind-ui {
-  /* Container styling */
-  margin-left: auto; /* Push search to the right in the header */
-}
-
-.pagefind-ui__search-input {
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius);
-  background-color: var(--color-background);
-  color: var(--color-text);
-  min-width: 200px; /* Adjust as needed */
-}
-
-.pagefind-ui__search-input::placeholder {
-  color: var(--color-text-muted);
-}
-
-.pagefind-ui__search-input:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 1px;
-  border-color: var(--color-primary);
-}
-
-/* Style the modal/results */
-.pagefind-ui__drawer {
-  background-color: var(--color-surface);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-small);
-}
-
-.pagefind-ui__result {
-  border-bottom: 1px solid var(--color-border);
-  padding: var(--spacing-md);
-}
-.pagefind-ui__result:last-child {
-  border-bottom: none;
-}
-
-.pagefind-ui__result-link {
-  color: var(--color-primary);
-  text-decoration: none;
-}
-.pagefind-ui__result-link:hover {
-  text-decoration: underline;
-  color: var(--color-primary-dark);
-}
-
-.pagefind-ui__result-title {
-  font-weight: bold;
-  margin-bottom: var(--spacing-xs);
-}
-
-.pagefind-ui__result-excerpt mark {
-  background-color: rgba(0, 123, 255, 0.2); /* Highlight color */
-  color: inherit;
-}
-
-.pagefind-ui__button {
-  /* Style the close button if needed */
-}
-
-.pagefind-ui__message {
-  /* Style messages like "No results" */
-  padding: var(--spacing-md);
-  color: var(--color-text-muted);
-}
-</style>
+<script>
+// With astro-pagefind integration, the PagefindUI is automatically loaded
+// We just need to initialize it with our configuration
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof window.PagefindUI === 'function') {
+    // Initialize the PagefindUI
+    new window.PagefindUI({
+      element: "#search",
+      showImages: false,
+      highlightParam: "highlight",
+      placeholderText: "Search vulnerability reports...",
+      resetStyles: false,
+      showSubResults: true
+    });
+    
+    console.log("Pagefind search initialized");
+  } else {
+    console.error("PagefindUI is not available. Make sure astro-pagefind integration is properly set up.");
+  }
+});
+</script>

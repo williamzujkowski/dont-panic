@@ -2,35 +2,361 @@
 // src/pages/index.astro
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import ReportCard from '../components/ReportCard.astro';
+import SeverityTag from '../components/SeverityTag.astro';
+import ZeroDayTag from '../components/ZeroDayTag.astro';
 
 // Fetch all reports, sort by publication date descending
-const allReports = await getCollection('reports', ({ data }) => {
+const reports = await getCollection('reports', ({ data }) => {
   // Optional: Filter out draft posts if you add a 'draft' field later
-  // return data.draft !== true;
-  return true; // Include all for now
+  return data.draft !== true;
 });
 
-allReports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf());
+reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf());
 ---
+
 <BaseLayout title="Vulnerability Reports">
-	<section class="mb-lg md:mb-xl text-center"> {/* Centered intro, use spacing vars */}
-		<h1 class="text-4xl font-bold mb-sm text-text">Latest Vulnerability Reports</h1> {/* Use text color, spacing var */}
-		<p class="text-lg text-text-muted max-w-2xl mx-auto"> {/* Constrained width */}
-			Stay informed about the latest security vulnerabilities and intelligence analysis.
-		</p>
-	</section>
+  <h1 class="text-xl font-semibold mb-4">Vulnerability Reports</h1>
 
-	{allReports.length === 0 ? (
-		<p class="text-center text-text-muted py-xl">No reports found.</p> {/* Use spacing var */}
-	) : (
-		<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md"> {/* Use spacing variable */}
-			{allReports.map(report =>
-				<ReportCard report={report} />
-			)}
-		</section>
-	)}
+  <!-- Filter Controls -->
+  <div class="flex flex-wrap gap-2 mb-4">
+    <input 
+      type="text" 
+      id="searchInput" 
+      placeholder="Search..." 
+      class="border rounded px-2 py-1 text-sm"
+    >
+    <select 
+      id="severityFilter" 
+      class="border rounded px-2 py-1 text-sm appearance-none"
+    >
+      <option value="">All Severities</option>
+      <option value="Critical">Critical</option>
+      <option value="High">High</option>
+      <option value="Medium">Medium</option>
+      <option value="Low">Low</option>
+    </select>
+    <label class="text-sm flex items-center gap-1">
+      <input type="checkbox" id="zeroDayFilter"> 
+      Show Only Zero-Days
+    </label>
+  </div>
 
-	<!-- Optional: Add pagination later if needed -->
-
+  <!-- Table Container -->
+  <div class="overflow-x-auto">
+    <table id="reportTable" class="w-full text-left text-sm">
+      <thead class="bg-gray-100 dark:bg-gray-700">
+        <tr>
+          <th scope="col" data-sort-key="cve" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">CVE ID <span>↕</span></th>
+          <th scope="col" data-sort-key="title" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Title/Summary <span>↕</span></th>
+          <th scope="col" data-sort-key="cvss" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">CVSS <span>↕</span></th>
+          <th scope="col" data-sort-key="epss" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">EPSS <span>↕</span></th>
+          <th scope="col" data-sort-key="severity" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Severity <span>↕</span></th>
+          <th scope="col" data-sort-key="zeroday" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Zero-Day? <span>↕</span></th>
+          <th scope="col" data-sort-key="date" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Date <span>↕</span></th>
+        </tr>
+      </thead>
+      <tbody id="reportTableBody">
+        {reports.map((report) => (
+          <tr 
+            class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50" 
+            data-cve={report.slug}
+            data-severity={report.data.severity || report.data.cvssSeverity}
+            data-date={report.data.publishDate.toISOString().split('T')[0]}
+            data-zeroday={report.data.isZeroDay.toString()}
+          >
+            <td class="px-3 py-2 whitespace-nowrap">
+              <a 
+                href={`/reports/${report.slug}`} 
+                class="text-blue-600 dark:text-blue-400 font-medium hover:underline"
+              >
+                {report.data.cveId}
+              </a>
+            </td>
+            <td class="px-3 py-2">{report.data.title}</td>
+            <td class="px-3 py-2 whitespace-nowrap font-mono" data-value={report.data.cvssScore}>
+              {report.data.cvssScore !== undefined ? report.data.cvssScore.toFixed(1) : 'N/A'}
+            </td>
+            <td class="px-3 py-2 whitespace-nowrap font-mono" data-value={report.data.epssScore}>
+              {report.data.epssScore !== undefined ? `${(report.data.epssScore * 100).toFixed(1)}%` : 'N/A'}
+            </td>
+            <td class="px-3 py-2 whitespace-nowrap">
+              {(report.data.severity || report.data.cvssSeverity) && 
+                <SeverityTag severity={report.data.severity || report.data.cvssSeverity} />
+              }
+            </td>
+            <td class="px-3 py-2 whitespace-nowrap">
+              {report.data.isZeroDay ? (
+                <span class="text-yellow-600 dark:text-yellow-400">✓ Yes</span>
+              ) : 'No'}
+            </td>
+            <td class="px-3 py-2 whitespace-nowrap" data-value={report.data.publishDate.valueOf()}>
+              {report.data.publishDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
 </BaseLayout>
+
+<script is:inline>
+  // DOM References
+  const table = document.getElementById('reportTable');
+  const tableBody = document.getElementById('reportTableBody');
+  const searchInput = document.getElementById('searchInput');
+  const severityFilter = document.getElementById('severityFilter');
+  const zeroDayFilter = document.getElementById('zeroDayFilter');
+  const sortableHeaders = document.querySelectorAll('th[data-sort-key]');
+
+  // State
+  let state = {
+    sort: 'date', // Default sort column
+    dir: 'desc',   // Default sort direction
+    search: '',    // Search text
+    severity: '',  // Severity filter
+    zeroday: false // Zero-day filter
+  };
+
+  // Initialization function
+  function initialize() {
+    // Read URL params for initial state
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    if (urlParams.has('sort')) state.sort = urlParams.get('sort');
+    if (urlParams.has('dir')) state.dir = urlParams.get('dir');
+    if (urlParams.has('search')) {
+      state.search = urlParams.get('search');
+      searchInput.value = state.search;
+    }
+    if (urlParams.has('severity')) {
+      state.severity = urlParams.get('severity');
+      severityFilter.value = state.severity;
+    }
+    if (urlParams.has('zeroday')) {
+      state.zeroday = urlParams.get('zeroday') === 'true';
+      zeroDayFilter.checked = state.zeroday;
+    }
+
+    // Add event listeners
+    sortableHeaders.forEach(header => {
+      header.addEventListener('click', (e) => handleSortClick(e));
+    });
+    
+    searchInput.addEventListener('input', debounce(handleFilterChange, 300));
+    severityFilter.addEventListener('change', handleFilterChange);
+    zeroDayFilter.addEventListener('change', handleFilterChange);
+
+    // Apply initial sort and filtering
+    applySorting();
+    applyFiltering();
+    handleHighlighting();
+  }
+
+  // Update URL with current state
+  function updateURL() {
+    const url = new URL(window.location);
+    
+    // Clear existing params
+    url.searchParams.delete('sort');
+    url.searchParams.delete('dir');
+    url.searchParams.delete('search');
+    url.searchParams.delete('severity');
+    url.searchParams.delete('zeroday');
+    
+    // Set new params
+    url.searchParams.set('sort', state.sort);
+    url.searchParams.set('dir', state.dir);
+    if (state.search) url.searchParams.set('search', state.search);
+    if (state.severity) url.searchParams.set('severity', state.severity);
+    if (state.zeroday) url.searchParams.set('zeroday', state.zeroday.toString());
+    
+    history.pushState({}, '', url);
+  }
+
+  // Sort click handler
+  function handleSortClick(e) {
+    const clickedKey = e.currentTarget.getAttribute('data-sort-key');
+    
+    // If clicking the same column, toggle direction
+    if (clickedKey === state.sort) {
+      state.dir = state.dir === 'asc' ? 'desc' : 'asc';
+    } else {
+      // New column, set as active sort and default to desc (except for title/summary)
+      state.sort = clickedKey;
+      state.dir = clickedKey === 'title' ? 'asc' : 'desc';
+    }
+    
+    applySorting();
+    updateURL();
+  }
+
+  // Apply sorting to table
+  function applySorting() {
+    // Clear sort indicators
+    sortableHeaders.forEach(header => {
+      const span = header.querySelector('span');
+      span.textContent = '↕';
+    });
+    
+    // Set active sort indicator
+    const activeHeader = document.querySelector(`th[data-sort-key="${state.sort}"]`);
+    if (activeHeader) {
+      const span = activeHeader.querySelector('span');
+      span.textContent = state.dir === 'asc' ? '↑' : '↓';
+    }
+    
+    // Get rows as array for sorting
+    const rows = Array.from(tableBody.querySelectorAll('tr'));
+    
+    // Sort rows
+    rows.sort((rowA, rowB) => {
+      // Get cell to sort by
+      const cellA = rowA.querySelector(`td[data-value]`) || rowA.cells[getColumnIndex(state.sort)];
+      const cellB = rowB.querySelector(`td[data-value]`) || rowB.cells[getColumnIndex(state.sort)];
+      
+      // Get values
+      let valueA, valueB;
+      
+      if (state.sort === 'zeroday') {
+        valueA = rowA.getAttribute('data-zeroday') === 'true';
+        valueB = rowB.getAttribute('data-zeroday') === 'true';
+      } else if (cellA.hasAttribute('data-value') && cellB.hasAttribute('data-value')) {
+        valueA = cellA.getAttribute('data-value');
+        valueB = cellB.getAttribute('data-value');
+        
+        // Convert numeric values
+        if (!isNaN(Number(valueA)) && !isNaN(Number(valueB))) {
+          valueA = Number(valueA);
+          valueB = Number(valueB);
+        }
+      } else {
+        valueA = cellA.textContent.trim().toLowerCase();
+        valueB = cellB.textContent.trim().toLowerCase();
+      }
+      
+      // Compare
+      if (valueA === valueB) return 0;
+      
+      const direction = state.dir === 'asc' ? 1 : -1;
+      return valueA > valueB ? direction : -direction;
+    });
+    
+    // Clear table body
+    while (tableBody.firstChild) {
+      tableBody.removeChild(tableBody.firstChild);
+    }
+    
+    // Add sorted rows
+    rows.forEach(row => tableBody.appendChild(row));
+  }
+
+  // Filter change handler
+  function handleFilterChange() {
+    state.search = searchInput.value.toLowerCase();
+    state.severity = severityFilter.value;
+    state.zeroday = zeroDayFilter.checked;
+    
+    applyFiltering();
+    updateURL();
+  }
+
+  // Apply filtering to table
+  function applyFiltering() {
+    const rows = tableBody.querySelectorAll('tr');
+    
+    rows.forEach(row => {
+      let visible = true;
+      
+      // Search filter
+      if (state.search) {
+        const text = row.textContent.toLowerCase();
+        if (!text.includes(state.search)) {
+          visible = false;
+        }
+      }
+      
+      // Severity filter
+      if (visible && state.severity) {
+        const severity = row.getAttribute('data-severity');
+        if (severity !== state.severity) {
+          visible = false;
+        }
+      }
+      
+      // Zero-day filter
+      if (visible && state.zeroday) {
+        const isZeroDay = row.getAttribute('data-zeroday') === 'true';
+        if (!isZeroDay) {
+          visible = false;
+        }
+      }
+      
+      row.hidden = !visible;
+    });
+  }
+
+  // Highlight new reports
+  function handleHighlighting() {
+    // Get last visit time from localStorage
+    const lastVisit = localStorage.getItem('lastVisitTimestamp');
+    const now = Date.now();
+    
+    if (lastVisit) {
+      const rows = tableBody.querySelectorAll('tr');
+      
+      rows.forEach(row => {
+        const dateCell = row.querySelector('td[data-value]');
+        if (dateCell) {
+          const reportDate = Number(dateCell.getAttribute('data-value'));
+          
+          // If report is newer than last visit, highlight it
+          if (reportDate > Number(lastVisit)) {
+            row.classList.add('new-report');
+          }
+        }
+      });
+    }
+    
+    // Update last visit timestamp
+    localStorage.setItem('lastVisitTimestamp', now);
+  }
+
+  // Utility: Get column index by sort key
+  function getColumnIndex(key) {
+    switch (key) {
+      case 'cve': return 0;
+      case 'title': return 1;
+      case 'cvss': return 2;
+      case 'epss': return 3;
+      case 'severity': return 4;
+      case 'zeroday': return 5;
+      case 'date': return 6;
+      default: return 0;
+    }
+  }
+
+  // Utility: Debounce function for search input
+  function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  }
+
+  // Initialize when DOM is loaded
+  document.addEventListener('DOMContentLoaded', initialize);
+</script>
+
+<style>
+  /* Highlight style for new reports */
+  tr.new-report {
+    border-left: 4px solid #10b981; /* Use hardcoded green-500 color */
+    animation: fadeOutHighlight 3s ease-out forwards;
+  }
+  
+  @keyframes fadeOutHighlight {
+    from { border-left-color: #10b981; /* Use hardcoded green-500 color */ }
+    to { border-left-color: transparent; }
+  }
+</style>

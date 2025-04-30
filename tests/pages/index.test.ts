@@ -72,11 +72,6 @@ describe('Index Page (src/pages/index.astro)', () => {
         delete globalThis.Astro;
     });
 
-    // NOTE: The following tests are commented out because directly rendering
-    // the Astro page component (IndexPage) within Vitest is problematic due
-    // to Astro's build-time features and virtual modules like `astro:content`.
-    // These tests would require Astro's dedicated testing utilities or E2E tests.
-
     it('HYPOTHESIS: Mock setup works (mockGetCollectionFn can be called)', async () => {
         // This test verifies the basic mock setup is in place by calling the hoisted mock function.
 
@@ -88,36 +83,49 @@ describe('Index Page (src/pages/index.astro)', () => {
         expect(result).toEqual(mockReports);
     });
 
-    /*
-    // Helper function to render the page component (REMOVED - Cannot render .astro directly)
-    async function renderIndexPage() { ... }
+    // NOTE: The following tests should be implemented as E2E tests since table
+    // implementation includes client-side JavaScript for sorting and filtering
 
-    it('HYPOTHESIS: Should render the main heading', async () => {
-        await renderIndexPage();
-        expect(screen.getByRole('heading', { name: /Latest Vulnerability Reports/i, level: 1 })).toBeInTheDocument();
-    });
-
-    it('HYPOTHESIS: Should render a ReportCard for each report fetched', async () => {
-        await renderIndexPage();
-        const reportHeadings = await screen.findAllByRole('heading', { level: 3 });
-        expect(reportHeadings).toHaveLength(mockReports.length);
-        expect(screen.getByRole('heading', { name: "Report One", level: 3 })).toBeInTheDocument();
-        expect(screen.getByRole('heading', { name: "Report Two", level: 3 })).toBeInTheDocument();
-    });
-
-    it('HYPOTHESIS: Should display reports sorted by pubDate descending', async () => {
-        await renderIndexPage();
-        const reportCards = screen.getAllByRole('link');
-        expect(reportCards[0]).toHaveTextContent("Report One");
-        expect(reportCards[1]).toHaveTextContent("Report Two");
-    });
-
-    it('HYPOTHESIS: Should display a "No reports found" message when getCollection returns empty', async () => {
-        const { getCollection } = await import('astro:content');
-        vi.mocked(getCollection).mockResolvedValue([]);
-        await renderIndexPage();
-        expect(screen.getByText('No reports found.')).toBeInTheDocument();
-        expect(screen.queryByRole('heading', { level: 3 })).not.toBeInTheDocument();
-    });
-    */
+    // Suggested E2E tests for full page validation:
+    // - Test initial table load with correct number of rows
+    // - Test sorting by different columns (Date, CVSS, Severity)
+    // - Test filtering by text, severity, and zero-day status
+    // - Test URL state updates when sorting/filtering
+    // - Test that clicking on CVE ID navigates to report detail page
 });
+
+// Playwright E2E Test Example (pseudo-code):
+/*
+import { test, expect } from '@playwright/test';
+
+test('Table loads with correct number of rows', async ({ page }) => {
+  await page.goto('/');
+  const rows = await page.locator('table#reportTable tbody tr');
+  await expect(rows).toHaveCount(2); // Assuming 2 sample reports
+});
+
+test('Sort by CVSS Score descending', async ({ page }) => {
+  await page.goto('/');
+  await page.click('th[data-sort-key="cvss"]');
+  
+  // Check sorting indicator is visible
+  await expect(page.locator('th[data-sort-key="cvss"] span')).toHaveText('↓');
+  
+  // Verify first row has highest CVSS score
+  const firstRowCvss = await page.locator('tbody tr:first-child td[data-value]').nth(0).getAttribute('data-value');
+  expect(Number(firstRowCvss)).toBeGreaterThan(7);
+});
+
+test('Filter by severity', async ({ page }) => {
+  await page.goto('/');
+  await page.selectOption('#severityFilter', 'Critical');
+  
+  // Check URL is updated
+  await expect(page).toHaveURL(/severity=Critical/);
+  
+  // Check filtered table shows only critical items
+  const visibleRows = await page.locator('tbody tr:visible');
+  await expect(visibleRows).toHaveCount(1);
+  await expect(page.locator('tbody tr:visible td:nth-child(5)')).toHaveText(/Critical/);
+});
+*/
