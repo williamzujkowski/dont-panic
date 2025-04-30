@@ -24,42 +24,54 @@ threeMonthsAgo.setMonth(today.getMonth() - 3);
 const formatDate = (date: Date) => date.toISOString().split('T')[0];
 ---
 
-<aside class="w-full md:w-64 lg:w-72 bg-white dark:bg-gray-800 p-4 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700">
+<aside id="filterSidebar" class="w-full bg-white dark:bg-gray-800 p-4 border md:border-0 border-gray-200 dark:border-gray-700 hidden md:block rounded-lg shadow-sm md:sticky md:top-20 md:max-h-[calc(100vh-5rem)] md:overflow-y-auto">
   <div class="mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
-    <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Filters</h2>
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Filters</h2>
+      <!-- Mobile close button -->
+      <button 
+        id="closeSidebarBtn" 
+        class="md:hidden p-1 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+        aria-label="Close filters"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
     <button id="resetFilters" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">Reset All</button>
   </div>
 
   <!-- Quick Filters / Status -->
   <details open class="mb-4">
-    <summary class="font-medium text-gray-700 dark:text-gray-300 cursor-pointer py-1 select-none">
+    <summary class="font-medium text-gray-700 dark:text-gray-300 cursor-pointer py-3 select-none min-h-[44px] flex items-center">
       Quick Filters
     </summary>
-    <div class="mt-2 pl-2 space-y-2">
-      <label class="flex items-center text-sm">
-        <input type="checkbox" id="kevFilter" class="mr-2">
-        Known Exploited (KEV)
+    <div class="mt-2 pl-2 space-y-3">
+      <label class="flex items-center text-sm min-h-[44px] py-2">
+        <input type="checkbox" id="kevFilter" class="mr-2 h-5 w-5">
+        <span class="ml-1">Known Exploited (KEV)</span>
       </label>
-      <label class="flex items-center text-sm">
-        <input type="checkbox" id="zeroDayFilter" class="mr-2">
-        Zero-Day/Preliminary
+      <label class="flex items-center text-sm min-h-[44px] py-2">
+        <input type="checkbox" id="zeroDayFilter" class="mr-2 h-5 w-5">
+        <span class="ml-1">Zero-Day/Preliminary</span>
       </label>
-      <label class="flex items-center text-sm">
-        <input type="checkbox" id="patchAvailableFilter" class="mr-2">
-        Patch Available
+      <label class="flex items-center text-sm min-h-[44px] py-2">
+        <input type="checkbox" id="patchAvailableFilter" class="mr-2 h-5 w-5">
+        <span class="ml-1">Patch Available</span>
       </label>
     </div>
   </details>
 
   <!-- Severity & Risk Score -->
   <details open class="mb-4">
-    <summary class="font-medium text-gray-700 dark:text-gray-300 cursor-pointer py-1 select-none">
+    <summary class="font-medium text-gray-700 dark:text-gray-300 cursor-pointer py-3 select-none min-h-[44px] flex items-center">
       Severity & Risk Score
     </summary>
-    <div class="mt-2 pl-2 space-y-3">
+    <div class="mt-2 pl-2 space-y-4">
       <!-- CVSS Score Slider -->
       <div>
-        <label class="block text-sm font-medium">CVSS Score</label>
+        <label class="block text-sm font-medium mb-2">CVSS Score</label>
         <div class="flex items-center">
           <input 
             type="range" 
@@ -68,15 +80,15 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
             max="10" 
             step="0.1" 
             value="0" 
-            class="w-full"
+            class="w-full h-6"
           >
-          <span id="cvssValue" class="ml-2 text-sm">0+</span>
+          <span id="cvssValue" class="ml-2 text-sm min-w-[32px]">0+</span>
         </div>
       </div>
 
       <!-- EPSS Score Slider -->
       <div>
-        <label class="block text-sm font-medium">EPSS Score</label>
+        <label class="block text-sm font-medium mb-2">EPSS Score</label>
         <div class="flex items-center">
           <input 
             type="range" 
@@ -85,31 +97,31 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
             max="100" 
             step="1" 
             value="0" 
-            class="w-full"
+            class="w-full h-6"
           >
-          <span id="epssValue" class="ml-2 text-sm">0%+</span>
+          <span id="epssValue" class="ml-2 text-sm min-w-[36px]">0%+</span>
         </div>
       </div>
 
       <!-- Severity Levels -->
       <div>
-        <label class="block text-sm font-medium">Severity Levels</label>
-        <div class="space-y-1 mt-1">
-          <label class="flex items-center text-sm">
-            <input type="checkbox" id="criticalFilter" class="mr-2" name="severityLevel">
-            Critical
+        <label class="block text-sm font-medium mb-2">Severity Levels</label>
+        <div class="space-y-2 mt-1">
+          <label class="flex items-center text-sm min-h-[44px] py-2">
+            <input type="checkbox" id="criticalFilter" class="mr-2 h-5 w-5" name="severityLevel">
+            <span class="ml-1">Critical</span>
           </label>
-          <label class="flex items-center text-sm">
-            <input type="checkbox" id="highFilter" class="mr-2" name="severityLevel">
-            High
+          <label class="flex items-center text-sm min-h-[44px] py-2">
+            <input type="checkbox" id="highFilter" class="mr-2 h-5 w-5" name="severityLevel">
+            <span class="ml-1">High</span>
           </label>
-          <label class="flex items-center text-sm">
-            <input type="checkbox" id="mediumFilter" class="mr-2" name="severityLevel">
-            Medium
+          <label class="flex items-center text-sm min-h-[44px] py-2">
+            <input type="checkbox" id="mediumFilter" class="mr-2 h-5 w-5" name="severityLevel">
+            <span class="ml-1">Medium</span>
           </label>
-          <label class="flex items-center text-sm">
-            <input type="checkbox" id="lowFilter" class="mr-2" name="severityLevel">
-            Low
+          <label class="flex items-center text-sm min-h-[44px] py-2">
+            <input type="checkbox" id="lowFilter" class="mr-2 h-5 w-5" name="severityLevel">
+            <span class="ml-1">Low</span>
           </label>
         </div>
       </div>
@@ -118,42 +130,42 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
   <!-- Date Ranges -->
   <details open class="mb-4">
-    <summary class="font-medium text-gray-700 dark:text-gray-300 cursor-pointer py-1 select-none">
+    <summary class="font-medium text-gray-700 dark:text-gray-300 cursor-pointer py-3 select-none min-h-[44px] flex items-center">
       Date Ranges
     </summary>
-    <div class="mt-2 pl-2 space-y-3">
+    <div class="mt-2 pl-2 space-y-4">
       <div>
-        <label class="block text-sm">Start Date</label>
+        <label class="block text-sm font-medium mb-2">Start Date</label>
         <input 
           type="date" 
           id="startDateFilter" 
-          class="w-full border rounded p-1 text-sm bg-white dark:bg-gray-700"
+          class="w-full border rounded p-2 text-sm bg-white dark:bg-gray-700 min-h-[44px]"
         >
       </div>
       <div>
-        <label class="block text-sm">End Date</label>
+        <label class="block text-sm font-medium mb-2">End Date</label>
         <input 
           type="date" 
           id="endDateFilter" 
-          class="w-full border rounded p-1 text-sm bg-white dark:bg-gray-700"
+          class="w-full border rounded p-2 text-sm bg-white dark:bg-gray-700 min-h-[44px]"
         >
       </div>
       <div class="flex flex-wrap gap-2">
         <button 
           data-days="7" 
-          class="text-xs bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded px-2 py-1 date-preset"
+          class="text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded px-3 py-2 date-preset min-h-[44px]"
         >
           Last 7 days
         </button>
         <button 
           data-days="30" 
-          class="text-xs bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded px-2 py-1 date-preset"
+          class="text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded px-3 py-2 date-preset min-h-[44px]"
         >
           Last 30 days
         </button>
         <button 
           data-days="90" 
-          class="text-xs bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded px-2 py-1 date-preset"
+          class="text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded px-3 py-2 date-preset min-h-[44px]"
         >
           Last 90 days
         </button>
@@ -164,24 +176,24 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
   <!-- Vendor/Product/OS -->
   {(vendors.length > 0 || products.length > 0) && (
     <details class="mb-4">
-      <summary class="font-medium text-gray-700 dark:text-gray-300 cursor-pointer py-1 select-none">
+      <summary class="font-medium text-gray-700 dark:text-gray-300 cursor-pointer py-3 select-none min-h-[44px] flex items-center">
         Vendors & Products
       </summary>
-      <div class="mt-2 pl-2 space-y-3">
+      <div class="mt-2 pl-2 space-y-4">
         {vendors.length > 0 && (
           <div>
-            <label class="block text-sm font-medium">Vendors</label>
+            <label class="block text-sm font-medium mb-2">Vendors</label>
             <input 
               type="text" 
               id="vendorSearch" 
               placeholder="Search vendors..." 
-              class="w-full border rounded p-1 text-sm mt-1 mb-1 bg-white dark:bg-gray-700"
+              class="w-full border rounded p-2 text-sm mt-1 mb-2 bg-white dark:bg-gray-700 min-h-[44px]"
             >
-            <div class="max-h-40 overflow-y-auto space-y-1 vendor-checkboxes">
+            <div class="max-h-40 overflow-y-auto space-y-2 vendor-checkboxes">
               {vendors.map(vendor => (
-                <label class="flex items-center text-sm">
-                  <input type="checkbox" class="mr-2 vendor-filter" value={vendor}>
-                  {vendor}
+                <label class="flex items-center text-sm min-h-[44px] py-2">
+                  <input type="checkbox" class="mr-2 vendor-filter h-5 w-5" value={vendor}>
+                  <span class="ml-1">{vendor}</span>
                 </label>
               ))}
             </div>
@@ -190,18 +202,18 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
         {products.length > 0 && (
           <div>
-            <label class="block text-sm font-medium">Products</label>
+            <label class="block text-sm font-medium mb-2">Products</label>
             <input 
               type="text" 
               id="productSearch" 
               placeholder="Search products..." 
-              class="w-full border rounded p-1 text-sm mt-1 mb-1 bg-white dark:bg-gray-700"
+              class="w-full border rounded p-2 text-sm mt-1 mb-2 bg-white dark:bg-gray-700 min-h-[44px]"
             >
-            <div class="max-h-40 overflow-y-auto space-y-1 product-checkboxes">
+            <div class="max-h-40 overflow-y-auto space-y-2 product-checkboxes">
               {products.map(product => (
-                <label class="flex items-center text-sm">
-                  <input type="checkbox" class="mr-2 product-filter" value={product}>
-                  {product}
+                <label class="flex items-center text-sm min-h-[44px] py-2">
+                  <input type="checkbox" class="mr-2 product-filter h-5 w-5" value={product}>
+                  <span class="ml-1">{product}</span>
                 </label>
               ))}
             </div>
@@ -213,7 +225,7 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
   <button 
     id="applyFiltersBtn" 
-    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded"
+    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded min-h-[48px] text-base"
   >
     Apply Filters
   </button>
@@ -393,6 +405,50 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
     document.dispatchEvent(event);
   }
   
+  // Handle close button on mobile
+  const closeBtn = document.getElementById('closeSidebarBtn');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      const sidebar = document.getElementById('filterSidebar');
+      const toggleBtn = document.getElementById('filterToggleBtn');
+      const overlay = document.getElementById('sidebarOverlay');
+      
+      if (sidebar) {
+        // Start animations
+        if (overlay) {
+          overlay.style.opacity = '0';
+        }
+        
+        // Animate sidebar
+        if (window.innerWidth < 768) {
+          sidebar.style.transform = 'translateX(-100%)';
+        }
+        
+        // Wait for animations to complete before hiding
+        setTimeout(() => {
+          sidebar.classList.add('hidden');
+          sidebar.classList.remove('fixed', 'inset-y-0', 'left-0', 'z-50', 'pt-16', 'pb-4', 'overflow-y-auto', 'w-[85%]', 'max-w-sm');
+          sidebar.style.transform = '';
+          
+          if (overlay) {
+            overlay.classList.add('hidden');
+          }
+        }, 300);
+        
+        // Update toggle button state
+        if (toggleBtn) {
+          toggleBtn.setAttribute('aria-expanded', 'false');
+          toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+          </svg> Show Filters`;
+        }
+        
+        // Allow body scrolling again
+        document.body.classList.remove('overflow-hidden');
+      }
+    });
+  }
+
   // Initialize when DOM is loaded
   document.addEventListener('DOMContentLoaded', initializeControls);
 </script>

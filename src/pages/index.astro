@@ -16,13 +16,30 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
 ---
 
 <BaseLayout title="Vulnerability Reports">
-  <!-- Two-column layout -->
-  <div class="flex flex-col md:flex-row">
-    <!-- Filter Sidebar -->
-    <FilterSidebar reports={reports} />
+  <!-- Two-column layout for desktop, single column for mobile -->
+  <div class="flex flex-col md:flex-row md:gap-4 md:min-h-[600px]">
+    <!-- Mobile Filter Toggle Button -->
+    <div class="md:hidden mb-4 px-4">
+      <button 
+        id="filterToggleBtn" 
+        aria-controls="filterSidebar"
+        aria-expanded="false"
+        class="w-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium py-2 px-4 rounded flex items-center justify-center min-h-[44px]"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+        </svg>
+        Show Filters
+      </button>
+    </div>
+    
+    <!-- Filter Sidebar: hidden on mobile, fixed width on desktop -->
+    <div class="md:w-64 lg:w-72 xl:w-80 md:flex-shrink-0">
+      <FilterSidebar reports={reports} />
+    </div>
 
-    <!-- Main Content -->
-    <div class="flex-grow p-4">
+    <!-- Main Content: full width on mobile, flex-grow on desktop -->
+    <div class="flex-grow p-4 md:flex-1">
       <h1 class="text-xl font-semibold mb-4">Vulnerability Reports</h1>
 
       <!-- Active Filter Summary -->
@@ -35,18 +52,18 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
         </div>
       </div>
 
-      <!-- Table Container -->
-      <div class="overflow-x-auto">
-        <table id="reportTable" class="w-full text-left text-sm">
+      <!-- Table Container - Add overflow-x-auto to allow horizontal scrolling on small screens -->
+      <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
+        <table id="reportTable" class="w-full text-left text-sm border-collapse min-w-[480px]">
           <thead class="bg-gray-100 dark:bg-gray-700">
             <tr>
-              <th scope="col" data-sort-key="cve" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">CVE ID <span>↕</span></th>
-              <th scope="col" data-sort-key="title" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Title/Summary <span>↕</span></th>
-              <th scope="col" data-sort-key="cvss" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">CVSS <span>↕</span></th>
-              <th scope="col" data-sort-key="epss" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">EPSS <span>↕</span></th>
-              <th scope="col" data-sort-key="severity" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Severity <span>↕</span></th>
-              <th scope="col" data-sort-key="zeroday" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Zero-Day? <span>↕</span></th>
-              <th scope="col" data-sort-key="date" class="px-3 py-2 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Date <span>↕</span></th>
+              <th scope="col" data-sort-key="cve" class="px-2 sm:px-3 py-3 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">CVE ID <span>↕</span></th>
+              <th scope="col" data-sort-key="title" class="hidden sm:table-cell px-2 sm:px-3 py-3 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Title/Summary <span>↕</span></th>
+              <th scope="col" data-sort-key="cvss" class="px-2 sm:px-3 py-3 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">CVSS <span>↕</span></th>
+              <th scope="col" data-sort-key="epss" class="hidden md:table-cell px-2 sm:px-3 py-3 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">EPSS <span>↕</span></th>
+              <th scope="col" data-sort-key="severity" class="px-2 sm:px-3 py-3 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Severity <span>↕</span></th>
+              <th scope="col" data-sort-key="zeroday" class="hidden sm:table-cell px-2 sm:px-3 py-3 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Zero-Day? <span>↕</span></th>
+              <th scope="col" data-sort-key="date" class="px-2 sm:px-3 py-3 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Date <span>↕</span></th>
             </tr>
           </thead>
           <tbody id="reportTableBody">
@@ -63,7 +80,7 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
                 data-product={report.data.product}
                 data-patch-available={report.data.patchAvailable.toString()}
               >
-                <td class="px-3 py-2 whitespace-nowrap">
+                <td class="px-2 sm:px-3 py-3 whitespace-nowrap">
                   <a 
                     href={`/reports/${report.slug}`} 
                     class="text-blue-600 dark:text-blue-400 font-medium hover:underline"
@@ -71,24 +88,24 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
                     {report.data.cveId}
                   </a>
                 </td>
-                <td class="px-3 py-2">{report.data.title}</td>
-                <td class="px-3 py-2 whitespace-nowrap font-mono" data-value={report.data.cvssScore}>
+                <td class="hidden sm:table-cell px-2 sm:px-3 py-3">{report.data.title}</td>
+                <td class="px-2 sm:px-3 py-3 whitespace-nowrap font-mono" data-value={report.data.cvssScore}>
                   {report.data.cvssScore !== undefined ? report.data.cvssScore.toFixed(1) : 'N/A'}
                 </td>
-                <td class="px-3 py-2 whitespace-nowrap font-mono" data-value={report.data.epssScore}>
+                <td class="hidden md:table-cell px-2 sm:px-3 py-3 whitespace-nowrap font-mono" data-value={report.data.epssScore}>
                   {report.data.epssScore !== undefined ? `${(report.data.epssScore * 100).toFixed(1)}%` : 'N/A'}
                 </td>
-                <td class="px-3 py-2 whitespace-nowrap">
+                <td class="px-2 sm:px-3 py-3 whitespace-nowrap">
                   {(report.data.severity || report.data.cvssSeverity) && 
                     <SeverityTag severity={report.data.severity || report.data.cvssSeverity} />
                   }
                 </td>
-                <td class="px-3 py-2 whitespace-nowrap">
+                <td class="hidden sm:table-cell px-2 sm:px-3 py-3 whitespace-nowrap">
                   {report.data.isZeroDay ? (
                     <span class="text-yellow-600 dark:text-yellow-400">✓ Yes</span>
                   ) : 'No'}
                 </td>
-                <td class="px-3 py-2 whitespace-nowrap" data-value={report.data.publishDate.valueOf()}>
+                <td class="px-2 sm:px-3 py-3 whitespace-nowrap" data-value={report.data.publishDate.valueOf()}>
                   {report.data.publishDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                 </td>
               </tr>
@@ -473,8 +490,132 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
     }
   }
 
+  // Mobile filter sidebar toggle
+  function setupFilterToggle() {
+    const toggleBtn = document.getElementById('filterToggleBtn');
+    const sidebar = document.getElementById('filterSidebar');
+    let overlay;
+    
+    // Create overlay element for mobile
+    function createOverlay() {
+      overlay = document.createElement('div');
+      overlay.id = 'sidebarOverlay';
+      overlay.className = 'fixed inset-0 bg-black/50 z-40 hidden md:hidden';
+      overlay.style.opacity = '0';
+      overlay.style.transition = 'opacity 0.3s ease';
+      document.body.appendChild(overlay);
+      
+      // Close sidebar when clicking overlay
+      overlay.addEventListener('click', () => {
+        closeSidebar();
+      });
+    }
+    
+    // Close sidebar and hide overlay
+    function closeSidebar() {
+      if (sidebar) {
+        // Animate out
+        if (overlay) {
+          overlay.style.opacity = '0';
+        }
+        
+        // Add animation to sidebar if on mobile
+        if (window.innerWidth < 768) {
+          sidebar.style.transform = 'translateX(-100%)';
+        }
+        
+        // Wait for animation before hiding
+        setTimeout(() => {
+          sidebar.classList.add('hidden');
+          sidebar.classList.remove('fixed', 'inset-y-0', 'left-0', 'z-50', 'pt-16', 'pb-4', 'overflow-y-auto', 'w-[85%]', 'max-w-sm');
+          sidebar.style.transform = '';
+          
+          if (overlay) {
+            overlay.classList.add('hidden');
+          }
+          
+          document.body.classList.remove('overflow-hidden');
+        }, 300);
+        
+        if (toggleBtn) {
+          toggleBtn.setAttribute('aria-expanded', 'false');
+          toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+          </svg> Show Filters`;
+        }
+      }
+    }
+    
+    if (toggleBtn && sidebar) {
+      // Create overlay on init
+      createOverlay();
+      
+      // Set transition for sidebar
+      sidebar.style.transition = 'transform 0.3s ease';
+      
+      toggleBtn.addEventListener('click', () => {
+        const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+        const newState = !isExpanded;
+        
+        // Update button state
+        toggleBtn.setAttribute('aria-expanded', newState.toString());
+        toggleBtn.innerHTML = newState 
+          ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+             </svg> Hide Filters` 
+          : `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+             </svg> Show Filters`;
+             
+        // Toggle sidebar visibility with proper mobile styling
+        if (newState) {
+          // On mobile, make it fixed position and add slide-in animation
+          if (window.innerWidth < 768) {
+            // Show overlay first (with animation)
+            overlay.classList.remove('hidden');
+            // Force a reflow
+            void overlay.offsetWidth;
+            overlay.style.opacity = '1';
+            
+            // Position sidebar off-screen first 
+            sidebar.classList.remove('hidden');
+            sidebar.classList.add('fixed', 'inset-y-0', 'left-0', 'z-50', 'pt-16', 'pb-4', 'overflow-y-auto', 'w-[85%]', 'max-w-sm');
+            sidebar.style.transform = 'translateX(-100%)';
+            
+            // Force a reflow
+            void sidebar.offsetWidth;
+            
+            // Then animate in
+            sidebar.style.transform = 'translateX(0)';
+            
+            document.body.classList.add('overflow-hidden'); // Prevent background scrolling
+          } else {
+            // On desktop just show normally
+            sidebar.classList.remove('hidden');
+          }
+        } else {
+          closeSidebar();
+        }
+      });
+      
+      // Handle window resize
+      window.addEventListener('resize', () => {
+        // Show sidebar by default on desktop
+        if (window.innerWidth >= 768) {
+          sidebar.classList.remove('hidden', 'fixed', 'inset-0', 'z-50', 'pt-16', 'pb-4');
+          sidebar.classList.add('md:block');
+          if (overlay) overlay.classList.add('hidden');
+          document.body.classList.remove('overflow-hidden');
+        }
+      });
+    }
+  }
+
   // Initialize when DOM is loaded
-  document.addEventListener('DOMContentLoaded', initialize);
+  document.addEventListener('DOMContentLoaded', () => {
+    initialize();
+    setupFilterToggle();
+  });
 </script>
 
 <style>
