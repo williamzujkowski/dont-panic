@@ -9,5 +9,4 @@ export const navItems: NavItem[] = [
   { text: 'Home', href: '/' },
   { text: 'About', href: '/about' },
   { text: 'Blog', href: '/blog' },
-  { text: 'Search', href: '/search', showOnMobile: false }, // Hide on mobile as it's already in header
 ];

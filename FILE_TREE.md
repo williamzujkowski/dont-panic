@@ -93,8 +93,7 @@ This document outlines the structure of the repository.
                 - sample-post.md
             - **reports/** # Directory for report pages
                 - [slug].astro # Dynamic route for displaying single reports
-            - index.astro # Home page listing reports
-            - search.astro # Dedicated search page
+            - index.astro # Home page with table view and search functionality
         - **styles/** - *CSS styles*
             - global.css
     - **tests/** - *Test files*

@@ -118,7 +118,7 @@ graph TD
 *   **Phase 2 (Implemented):** Implement index page (`src/pages/index.astro`) listing all available reports using Astro's content collections API. Refine styling and layout using Tailwind (created `ReportCard` component). Setup deployment CI/CD (using existing `deploy.yml`).
 *   **Phase 3 (Implementation Completed):**
     * ✅ **Automated Report Syncing:** Added workflow to automatically sync reports from the vulnerability-intelligence-generator repository.
-    * ✅ **Search Functionality:** Implemented client-side search using Pagefind integration. Search UI integrated in header.
+    * ✅ **Search Functionality:** Implemented client-side search using Pagefind integration directly in the header.
     * ✅ **Table View & Filtering/Sorting:** Implemented a table-based view for the homepage with client-side filtering, sorting, and URL state persistence.
     * ❌ **Accessibility Improvements:** Need to review and enhance accessibility features.
 
@@ -144,7 +144,7 @@ For details on how the report syncing works, see the [Report Syncing Documentati
 
 ## Search Functionality
 
-The site includes client-side search functionality powered by Pagefind. This allows users to search through vulnerability reports without requiring a backend server.
+The site includes client-side search functionality powered by Pagefind directly in the header. This allows users to search through vulnerability reports without requiring a backend server. The search component is present on all pages for easy access.
 
 For details on how the search functionality works and how to customize it, see the [Search Functionality Documentation](./docs/search-functionality.md).
 
