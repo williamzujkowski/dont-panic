@@ -26,6 +26,7 @@ const faviconUrl = `${base}favicon.svg`; // Construct base-aware favicon URL
 		<meta charset="UTF-8" />
 		<meta name="description" content={description} />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<base href={base} />
 		<link rel="icon" type="image/svg+xml" href={faviconUrl} />
 		<meta name="generator" content={Astro.generator} />
 		<title>{pageTitle}</title>
@@ -47,13 +48,15 @@ const faviconUrl = `${base}favicon.svg`; // Construct base-aware favicon URL
 		<meta property="twitter:description" content={description} />
 		{/* <meta property="twitter:image" content={new URL(image, Astro.url)} /> */}
 
+		{/* Pagefind UI Script */}
+		<script src={`${base}pagefind/pagefind-ui.js`} is:inline></script>
 	</head>
 	<body class="bg-background text-text min-h-screen flex flex-col antialiased font-sans"> 
 		{/* Use Header and Footer Components */}
 		<Header siteTitle="Don't Panic" navItems={[]} currentPath={Astro.url.pathname} />
 
-		{/* Adjusted padding - Temporarily removed max-w-5xl to test */}
-		<main class="flex-grow container mx-auto px-2 sm:px-4 md:px-6 py-4 md:py-6 w-full"> {/* Responsive padding */}
+		{/* Main content container with proper responsive constraints */}
+		<main class="flex-grow container mx-auto px-2 sm:px-4 md:px-6 py-4 md:py-6 w-full max-w-7xl"> {/* Responsive padding with max-width for very large screens */}
 			<slot /> {/* Page content will be injected here */}
 		</main>
 

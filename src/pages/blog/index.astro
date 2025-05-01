@@ -2,9 +2,20 @@
 // src/pages/blog/index.astro
 import Layout from '../../layouts/Layout.astro';
 
-// Fetch all Markdown posts from the current directory
-// Ensure you don't fetch this index page itself if it were Markdown
-const posts = await Astro.glob('./*.md');
+// Fetch all Markdown posts from the current directory using import.meta.glob instead of Astro.glob
+// This is the recommended approach for Astro moving forward
+const postImports = await import.meta.glob('./*.md');
+
+// Convert the imports object into an array of posts
+const posts = await Promise.all(
+  Object.entries(postImports).map(async ([path, importPost]) => {
+    const post = await importPost();
+    return {
+      ...post,
+      url: path.replace(/^\./, '').replace(/\.md$/, '')
+    };
+  })
+);
 
 // Sort posts by date, newest first
 posts.sort((a, b) => new Date(b.frontmatter.pubDate).valueOf() - new Date(a.frontmatter.pubDate).valueOf());

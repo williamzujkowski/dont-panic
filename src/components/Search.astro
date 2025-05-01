@@ -155,20 +155,39 @@ const {
 // With astro-pagefind integration, the PagefindUI is automatically loaded
 // We just need to initialize it with our configuration
 document.addEventListener('DOMContentLoaded', function() {
-  if (typeof window.PagefindUI === 'function') {
-    // Initialize the PagefindUI
-    new window.PagefindUI({
-      element: "#search",
-      showImages: false,
-      highlightParam: "highlight",
-      placeholderText: "Search vulnerability reports...",
-      resetStyles: false,
-      showSubResults: true
-    });
-    
-    console.log("Pagefind search initialized");
-  } else {
-    console.error("PagefindUI is not available. Make sure astro-pagefind integration is properly set up.");
+  // For development mode, we need to manually load the pagefind UI if it's not available
+  // In production it should be loaded automatically via the script tag in BaseLayout
+  if (typeof window.PagefindUI !== 'function') {
+    console.log("Loading Pagefind UI script for development mode");
+    const script = document.createElement('script');
+    // Get base path - default to '/' if not available
+    const base = document.querySelector('base')?.getAttribute('href') || '/';
+    script.src = `${base}pagefind/pagefind-ui.js`;
+    script.onload = () => console.log("Pagefind UI script loaded dynamically");
+    script.onerror = (e) => console.error("Failed to load Pagefind UI script:", e);
+    document.head.appendChild(script);
   }
+  const checkPagefind = () => {
+    if (typeof window.PagefindUI === 'function') {
+      // Initialize the PagefindUI
+      new window.PagefindUI({
+        element: "#search",
+        showImages: false,
+        highlightParam: "highlight",
+        placeholderText: "Search vulnerability reports...",
+        resetStyles: false,
+        showSubResults: true
+      });
+      
+      console.log("Pagefind search initialized");
+    } else {
+      console.warn("PagefindUI not available yet, waiting...");
+      // Try again after a delay - useful for dev mode
+      setTimeout(checkPagefind, 1000);
+    }
+  };
+  
+  // Start checking
+  checkPagefind();
 });
 </script>

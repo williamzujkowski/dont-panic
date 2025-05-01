@@ -16,55 +16,59 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
 ---
 
 <BaseLayout title="Vulnerability Reports">
-  <!-- Two-column layout for desktop, single column for mobile -->
-  <div class="flex flex-col md:flex-row md:gap-4 md:min-h-[600px]">
-    <!-- Mobile Filter Toggle Button -->
-    <div class="md:hidden mb-4 px-4">
-      <button 
-        id="filterToggleBtn" 
-        aria-controls="filterSidebar"
-        aria-expanded="false"
-        class="w-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium py-2 px-4 rounded flex items-center justify-center min-h-[44px] md:hidden" /* Added md:hidden directly to button */
-      >
-        {/* Restored icon size to h-5 w-5 */}
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-        </svg>
-        Show Filters
-      </button>
-    </div>
-    
-    <!-- Filter Sidebar: hidden on mobile, fixed width on desktop -->
-    <div class="md:w-64 lg:w-72 xl:w-80 md:flex-shrink-0">
+  <!-- Mobile Filter Toggle Button (only visible on mobile) -->
+  <div class="md:hidden mb-4 px-4">
+    <button 
+      id="filterToggleBtn" 
+      aria-controls="filterSidebar"
+      aria-expanded="false"
+      class="w-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium py-2 px-4 rounded flex items-center justify-center min-h-[44px]"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+      </svg>
+      Show Filters
+    </button>
+  </div>
+  
+  <!-- Main two-column layout for desktop, single column for mobile -->
+  <div class="md:grid md:grid-cols-[280px_1fr] md:gap-6 md:min-h-[600px]">
+    <!-- Filter Sidebar (left column on desktop, hidden by default on mobile) -->
+    <div class="hidden md:block">
       <FilterSidebar reports={reports} />
     </div>
 
-    <!-- Main Content: full width on mobile, flex-grow on desktop -->
-    <div class="flex-grow p-4 md:flex-1">
-      <h1 class="text-xl font-semibold mb-4">Vulnerability Reports</h1>
+    <!-- Main Content (right column on desktop, full width on mobile) -->
+    <main class="p-4">
+      <!-- Use CSS Grid for the report section layout -->
+      <div class="grid grid-cols-1 gap-4">
+        <!-- Header section -->
+        <div>
+          <h1 class="text-xl font-semibold">Vulnerability Reports</h1>
+        </div>
 
-      <!-- Active Filter Summary -->
-      <div id="activeFilters" class="mb-4 text-sm text-gray-700 dark:text-gray-300 hidden">
-        <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded">
-          <h2 class="font-medium mb-1">Active Filters:</h2>
-          <div id="activeFiltersList" class="flex flex-wrap gap-2">
-            <!-- Active filters will be inserted here via JS -->
+        <!-- Active Filter Summary -->
+        <div id="activeFilters" class="text-sm text-gray-700 dark:text-gray-300 hidden">
+          <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded">
+            <h2 class="font-medium mb-1">Active Filters:</h2>
+            <div id="activeFiltersList" class="flex flex-wrap gap-2">
+              <!-- Active filters will be inserted here via JS -->
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Table Container - Add overflow-x-auto to allow horizontal scrolling on small screens -->
-      <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
-        <table id="reportTable" class="w-full text-left text-sm border-collapse min-w-[480px]">
+        <!-- Table Container - Uses grid cell with overflow handling -->
+        <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
+          <table id="reportTable" class="w-full text-left text-sm border-collapse min-w-[360px]">
           <thead class="bg-gray-100 dark:bg-gray-700">
             <tr>
-              <th scope="col" data-sort-key="cve" class="px-2 sm:px-3 py-3 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">CVE ID <span>↕</span></th>
-              <th scope="col" data-sort-key="title" class="hidden sm:table-cell px-2 sm:px-3 py-3 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Title/Summary <span>↕</span></th>
-              <th scope="col" data-sort-key="cvss" class="px-2 sm:px-3 py-3 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">CVSS <span>↕</span></th>
-              <th scope="col" data-sort-key="epss" class="hidden md:table-cell px-2 sm:px-3 py-3 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">EPSS <span>↕</span></th>
-              <th scope="col" data-sort-key="severity" class="px-2 sm:px-3 py-3 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Severity <span>↕</span></th>
-              <th scope="col" data-sort-key="zeroday" class="hidden sm:table-cell px-2 sm:px-3 py-3 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Zero-Day? <span>↕</span></th>
-              <th scope="col" data-sort-key="date" class="px-2 sm:px-3 py-3 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Date <span>↕</span></th>
+              <th scope="col" data-sort-key="cve" class="px-2 sm:px-3 py-3 sm:py-4 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">CVE ID <span>↕</span></th>
+              <th scope="col" data-sort-key="title" class="hidden sm:table-cell px-2 sm:px-3 py-3 sm:py-4 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Title/Summary <span>↕</span></th>
+              <th scope="col" data-sort-key="cvss" class="px-2 sm:px-3 py-3 sm:py-4 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">CVSS <span>↕</span></th>
+              <th scope="col" data-sort-key="epss" class="hidden md:table-cell px-2 sm:px-3 py-3 sm:py-4 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">EPSS <span>↕</span></th>
+              <th scope="col" data-sort-key="severity" class="px-2 sm:px-3 py-3 sm:py-4 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Severity <span>↕</span></th>
+              <th scope="col" data-sort-key="zeroday" class="hidden sm:table-cell px-2 sm:px-3 py-3 sm:py-4 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Zero-Day? <span>↕</span></th>
+              <th scope="col" data-sort-key="date" class="px-2 sm:px-3 py-3 sm:py-4 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Date <span>↕</span></th>
             </tr>
           </thead>
           <tbody id="reportTableBody">
@@ -81,40 +85,44 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
                 data-product={report.data.product}
                 data-patch-available={report.data.patchAvailable.toString()}
               >
-                <td class="px-2 sm:px-3 py-3 whitespace-nowrap">
+                <td class="px-2 sm:px-3 py-3 sm:py-4 whitespace-nowrap">
                   <a 
                     href={`/reports/${report.slug}`} 
-                    class="text-blue-600 dark:text-blue-400 font-medium hover:underline"
+                    class="text-blue-600 dark:text-blue-400 font-medium hover:underline inline-block py-1"
                   >
                     {report.data.cveId}
                   </a>
                 </td>
-                <td class="hidden sm:table-cell px-2 sm:px-3 py-3">{report.data.title}</td>
-                <td class="px-2 sm:px-3 py-3 whitespace-nowrap font-mono" data-value={report.data.cvssScore}>
+                <td class="hidden sm:table-cell px-2 sm:px-3 py-3 sm:py-4">{report.data.title}</td>
+                <td class="px-2 sm:px-3 py-3 sm:py-4 whitespace-nowrap font-mono" data-value={report.data.cvssScore}>
                   {report.data.cvssScore !== undefined ? report.data.cvssScore.toFixed(1) : 'N/A'}
                 </td>
-                <td class="hidden md:table-cell px-2 sm:px-3 py-3 whitespace-nowrap font-mono" data-value={report.data.epssScore}>
+                <td class="hidden md:table-cell px-2 sm:px-3 py-3 sm:py-4 whitespace-nowrap font-mono" data-value={report.data.epssScore}>
                   {report.data.epssScore !== undefined ? `${(report.data.epssScore * 100).toFixed(1)}%` : 'N/A'}
                 </td>
-                <td class="px-2 sm:px-3 py-3 whitespace-nowrap">
+                <td class="px-2 sm:px-3 py-3 sm:py-4 whitespace-nowrap">
                   {(report.data.severity || report.data.cvssSeverity) && 
                     <SeverityTag severity={report.data.severity || report.data.cvssSeverity} />
                   }
                 </td>
-                <td class="hidden sm:table-cell px-2 sm:px-3 py-3 whitespace-nowrap">
+                <td class="hidden sm:table-cell px-2 sm:px-3 py-3 sm:py-4 whitespace-nowrap">
                   {report.data.isZeroDay ? (
                     <span class="text-yellow-600 dark:text-yellow-400">✓ Yes</span>
                   ) : 'No'}
                 </td>
-                <td class="px-2 sm:px-3 py-3 whitespace-nowrap" data-value={report.data.publishDate.valueOf()}>
+                <td class="px-2 sm:px-3 py-3 sm:py-4 whitespace-nowrap" data-value={report.data.publishDate.valueOf()}>
                   {report.data.publishDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+        <div id="resultsCount" class="p-3 text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-750 border-t border-gray-200 dark:border-gray-700">
+          Showing {reports.length} vulnerability reports
+        </div>
       </div>
-    </div>
+      </div>
+    </main>
   </div>
 </BaseLayout>
 
@@ -374,15 +382,10 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
     // Re-apply sorting to the filtered rows
     applySorting();
     
-    // Show count in UI (optional)
-    const resultCount = document.createElement('div');
-    resultCount.textContent = `Showing ${visibleCount} reports`;
-    resultCount.className = 'text-sm text-gray-500 dark:text-gray-400 mt-2';
-    const existingCount = document.querySelector('.overflow-x-auto + div');
-    if (existingCount) {
-      existingCount.replaceWith(resultCount);
-    } else {
-      document.querySelector('.overflow-x-auto').after(resultCount);
+    // Update count in UI
+    const resultsCount = document.getElementById('resultsCount');
+    if (resultsCount) {
+      resultsCount.textContent = `Showing ${visibleCount} vulnerability reports`;
     }
   }
 
@@ -566,8 +569,14 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
       // Check initial screen size and set sidebar visibility accordingly
       if (window.innerWidth >= 768) {
         // Desktop: Ensure sidebar is visible and styled correctly on load
-        sidebar.classList.remove('hidden', 'fixed', 'inset-y-0', 'left-0', 'z-50', 'pt-16', 'pb-4', 'overflow-y-auto', 'w-[85%]', 'max-w-sm');
+        sidebar.classList.remove('hidden', 'fixed', 'inset-y-0', 'left-0', 'z-50', 'pt-16', 'pb-4', 'w-[85%]', 'max-w-sm');
         sidebar.style.transform = ''; // Clear any transform
+        // Make sure the parent container is visible on desktop
+        const parentContainer = sidebar.closest('div');
+        if (parentContainer) {
+          parentContainer.classList.remove('hidden');
+          parentContainer.classList.add('block');
+        }
       } else {
         // Mobile: Ensure sidebar is hidden on load
         sidebar.classList.add('hidden');
@@ -597,8 +606,10 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
             void overlay.offsetWidth;
             overlay.style.opacity = '1';
             
-            // Position sidebar off-screen first 
+            // Make sure the sidebar is visible 
             sidebar.classList.remove('hidden');
+            
+            // Add mobile-specific classes
             sidebar.classList.add('fixed', 'inset-y-0', 'left-0', 'z-50', 'pt-16', 'pb-4', 'overflow-y-auto', 'w-[85%]', 'max-w-sm');
             sidebar.style.transform = 'translateX(-100%)';
             
@@ -610,7 +621,7 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
             
             document.body.classList.add('overflow-hidden'); // Prevent background scrolling
           } else {
-            // On desktop just show normally
+            // On desktop, the sidebar is already visible through CSS grid
             sidebar.classList.remove('hidden');
           }
         } else {
@@ -622,8 +633,16 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
       window.addEventListener('resize', () => {
         if (window.innerWidth >= 768) {
           // Resized to Desktop: Ensure sidebar is visible and styled correctly
-          sidebar.classList.remove('hidden', 'fixed', 'inset-y-0', 'left-0', 'z-50', 'pt-16', 'pb-4', 'overflow-y-auto', 'w-[85%]', 'max-w-sm');
+          sidebar.classList.remove('hidden', 'fixed', 'inset-y-0', 'left-0', 'z-50', 'pt-16', 'pb-4', 'w-[85%]', 'max-w-sm');
           sidebar.style.transform = ''; // Ensure transform is cleared
+          
+          // Make sure the parent container is visible on desktop
+          const parentContainer = sidebar.closest('div');
+          if (parentContainer) {
+            parentContainer.classList.remove('hidden');
+            parentContainer.classList.add('block');
+          }
+          
           if (overlay) overlay.classList.add('hidden');
           document.body.classList.remove('overflow-hidden');
           // Reset toggle button state if resizing to desktop
