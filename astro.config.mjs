@@ -68,8 +68,10 @@ export default defineConfig({
     })
   ],
 
-  // Add the Tailwind Vite plugin
+  // Add the Tailwind Vite plugin and configure the dev server
   vite: {
+    // Use port 4321 if available; fallback to next free port if not
+    server: { port: 4321 },
     plugins: [tailwindcss()]
   }
 });

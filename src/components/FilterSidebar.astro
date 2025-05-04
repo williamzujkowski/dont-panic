@@ -25,7 +25,7 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
 ---
 
 {/* Removed 'hidden' class to make it visible by default on desktop */}
-<aside id="filterSidebar" class="w-full bg-white dark:bg-gray-800 p-4 border md:border-0 border-gray-200 dark:border-gray-700 md:block rounded-lg shadow-sm md:sticky md:top-20 md:max-h-[calc(100vh-5rem)] md:overflow-y-auto">
+<aside id="filterSidebar" class="w-full bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm md:sticky md:top-16 md:w-[280px] md:h-[calc(100vh-4rem)] md:overflow-y-auto">
   <div class="mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
     <div class="flex items-center justify-between">
       <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Filters</h2>
@@ -35,7 +35,7 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
         class="md:hidden p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-gray-800"
         aria-label="Close filters"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
@@ -242,20 +242,26 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
   // This script handles sidebar filter controls
   // Will be linked to the main filtering logic in the index.astro page
   
-  // DOM References
+  // DOM element references
   const resetButton = document.getElementById('resetFilters');
   const applyButton = document.getElementById('applyFiltersBtn');
-  const cvssSlider = document.getElementById('cvssSlider') as HTMLInputElement;
+  /** @type {HTMLInputElement | null} */
+  const cvssSlider = document.getElementById('cvssSlider');
   const cvssValue = document.getElementById('cvssValue');
-  const epssSlider = document.getElementById('epssSlider') as HTMLInputElement;
+  /** @type {HTMLInputElement | null} */
+  const epssSlider = document.getElementById('epssSlider');
   const epssValue = document.getElementById('epssValue');
-  const vendorSearch = document.getElementById('vendorSearch') as HTMLInputElement;
-  const productSearch = document.getElementById('productSearch') as HTMLInputElement;
+  /** @type {HTMLInputElement | null} */
+  const vendorSearch = document.getElementById('vendorSearch');
+  /** @type {HTMLInputElement | null} */
+  const productSearch = document.getElementById('productSearch');
   const vendorCheckboxes = document.querySelectorAll('.vendor-filter');
   const productCheckboxes = document.querySelectorAll('.product-filter');
   const datePresets = document.querySelectorAll('.date-preset');
-  const startDateInput = document.getElementById('startDateFilter') as HTMLInputElement;
-  const endDateInput = document.getElementById('endDateFilter') as HTMLInputElement;
+  /** @type {HTMLInputElement | null} */
+  const startDateInput = document.getElementById('startDateFilter');
+  /** @type {HTMLInputElement | null} */
+  const endDateInput = document.getElementById('endDateFilter');
   
   // Initialize controls
   function initializeControls() {
@@ -279,15 +285,11 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
     if (vendorSearch) {
       vendorSearch.addEventListener('input', () => {
         const searchTerm = vendorSearch.value.toLowerCase();
-        vendorCheckboxes.forEach((checkbox: HTMLInputElement) => {
+        vendorCheckboxes.forEach(checkbox => {
           const label = checkbox.parentElement;
           const vendorName = checkbox.value.toLowerCase();
           if (label) {
-            if (vendorName.includes(searchTerm)) {
-              label.style.display = '';
-            } else {
-              label.style.display = 'none';
-            }
+            label.style.display = vendorName.includes(searchTerm) ? '' : 'none';
           }
         });
       });
@@ -297,15 +299,11 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
     if (productSearch) {
       productSearch.addEventListener('input', () => {
         const searchTerm = productSearch.value.toLowerCase();
-        productCheckboxes.forEach((checkbox: HTMLInputElement) => {
+        productCheckboxes.forEach(checkbox => {
           const label = checkbox.parentElement;
           const productName = checkbox.value.toLowerCase();
           if (label) {
-            if (productName.includes(searchTerm)) {
-              label.style.display = '';
-            } else {
-              label.style.display = 'none';
-            }
+            label.style.display = productName.includes(searchTerm) ? '' : 'none';
           }
         });
       });
@@ -335,7 +333,7 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
     if (resetButton) {
       resetButton.addEventListener('click', () => {
         // Reset all inputs
-        document.querySelectorAll('input[type="checkbox"]').forEach((checkbox: HTMLInputElement) => {
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
           checkbox.checked = false;
         });
         
@@ -352,12 +350,12 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
         if (productSearch) productSearch.value = '';
         
         // Reset displayed checkboxes
-        vendorCheckboxes.forEach((checkbox: HTMLInputElement) => {
+        vendorCheckboxes.forEach(checkbox => {
           const label = checkbox.parentElement;
           if (label) label.style.display = '';
         });
         
-        productCheckboxes.forEach((checkbox: HTMLInputElement) => {
+        productCheckboxes.forEach(checkbox => {
           const label = checkbox.parentElement;
           if (label) label.style.display = '';
         });
@@ -381,27 +379,27 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
   function dispatchFilterEvent() {
     // Get all filter values
     const filterData = {
-      kev: (document.getElementById('kevFilter') as HTMLInputElement)?.checked || false,
-      zeroDay: (document.getElementById('zeroDayFilter') as HTMLInputElement)?.checked || false,
-      patchAvailable: (document.getElementById('patchAvailableFilter') as HTMLInputElement)?.checked || false,
+      kev: (document.getElementById('kevFilter')?.checked) || false,
+      zeroDay: (document.getElementById('zeroDayFilter')?.checked) || false,
+      patchAvailable: (document.getElementById('patchAvailableFilter')?.checked) || false,
       cvssMin: parseFloat(cvssSlider?.value || '0'),
       epssMin: parseFloat(epssSlider?.value || '0') / 100, // Convert percentage to decimal
       severity: {
-        critical: (document.getElementById('criticalFilter') as HTMLInputElement)?.checked || false,
-        high: (document.getElementById('highFilter') as HTMLInputElement)?.checked || false,
-        medium: (document.getElementById('mediumFilter') as HTMLInputElement)?.checked || false,
-        low: (document.getElementById('lowFilter') as HTMLInputElement)?.checked || false
+        critical: (document.getElementById('criticalFilter')?.checked) || false,
+        high: (document.getElementById('highFilter')?.checked) || false,
+        medium: (document.getElementById('mediumFilter')?.checked) || false,
+        low: (document.getElementById('lowFilter')?.checked) || false
       },
       dateRange: {
         start: startDateInput?.value || '',
         end: endDateInput?.value || ''
       },
       vendors: Array.from(vendorCheckboxes)
-        .filter((cb: HTMLInputElement) => cb.checked)
-        .map((cb: HTMLInputElement) => cb.value),
+        .filter(cb => cb.checked)
+        .map(cb => cb.value),
       products: Array.from(productCheckboxes)
-        .filter((cb: HTMLInputElement) => cb.checked)
-        .map((cb: HTMLInputElement) => cb.value)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value)
     };
     
     // Dispatch a custom event with filter data

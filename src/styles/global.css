@@ -29,6 +29,8 @@
   --dark-color-background: #111827; /* gray-900 */
   --dark-color-surface: #1f2937; /* gray-800 */
   --dark-color-border: #374151; /* gray-700 */
+  /* Highlight color for new reports */
+  --color-highlight: #fefcbf; /* Tailwind yellow-100 */
 
   /* Spacing Scale */
   --spacing-xs: 0.25rem; /* 4px */
@@ -61,12 +63,23 @@ html.dark {
   --color-background: var(--dark-color-background);
   --color-surface: var(--dark-color-surface);
   --color-border: var(--dark-color-border);
+  /* Highlight color for new reports in dark mode */
+  --dark-color-highlight: #92400e; /* Tailwind yellow-800 */
 }
 
 
 /* Tailwind Directives */
 @tailwind base;
 @tailwind components;
+/* Highlight rows for new reports */
+@layer components {
+  tr.new-report {
+    background-color: var(--color-highlight);
+  }
+  html.dark tr.new-report {
+    background-color: var(--dark-color-highlight);
+  }
+}
 @tailwind utilities;
 
 /* Global Styles & Overrides */

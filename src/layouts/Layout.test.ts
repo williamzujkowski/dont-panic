@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 // Removed testing-library/dom import as we'll query the element directly
-import Layout from './Layout.astro'; // Assuming direct import works
+// import Layout from './Layout.astro'; // Disabled direct import, using mock render helper instead
 
 // Mock render helper - Simulates the expected output structure
 // NOTE: This does NOT render the actual Astro component.

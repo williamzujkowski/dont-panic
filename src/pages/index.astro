@@ -16,30 +16,21 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
 ---
 
 <BaseLayout title="Vulnerability Reports">
-  <!-- Mobile Filter Toggle Button (only visible on mobile) -->
-  <div class="md:hidden mb-4 px-4">
-    <button 
-      id="filterToggleBtn" 
-      aria-controls="filterSidebar"
-      aria-expanded="false"
-      class="w-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium py-2 px-4 rounded flex items-center justify-center min-h-[44px]"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-      </svg>
+  <!-- Mobile filter toggle button -->
+  <div class="md:hidden mb-4">
+    <button id="mobileFilterToggle" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded">
       Show Filters
     </button>
   </div>
-  
-  <!-- Main two-column layout for desktop, single column for mobile -->
-  <div class="md:grid md:grid-cols-[280px_1fr] md:gap-6 md:min-h-[600px]">
-    <!-- Filter Sidebar (left column on desktop, hidden by default on mobile) -->
-    <div class="hidden md:block">
+  <!-- Layout container: sidebar + main content -->
+  <div class="flex flex-col md:flex-row md:gap-6">
+    <!-- Filter Sidebar: hidden on mobile (toggle), visible on desktop -->
+    <div id="filterSidebarWrapper" class="hidden md:block w-full md:w-[280px]">
       <FilterSidebar reports={reports} />
     </div>
 
-    <!-- Main Content (right column on desktop, full width on mobile) -->
-    <main class="p-4">
+    <!-- Main Content -->
+    <main class="flex-1 p-4">
       <!-- Use CSS Grid for the report section layout -->
       <div class="grid grid-cols-1 gap-4">
         <!-- Header section -->
@@ -84,6 +75,7 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
                 data-vendor={report.data.vendor}
                 data-product={report.data.product}
                 data-patch-available={report.data.patchAvailable.toString()}
+                data-kev={report.data.kev ? 'true' : 'false'}
               >
                 <td class="px-2 sm:px-3 py-3 sm:py-4 whitespace-nowrap">
                   <a 
@@ -302,8 +294,11 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
         if (!isZeroDay) visible = false;
       }
       
-      // Apply KEV filter (this would need corresponding data attributes)
-      // if (visible && state.filters.kev) { ... }
+      // Apply KEV filter
+      if (visible && state.filters.kev) {
+        const kev = row.getAttribute('data-kev') === 'true';
+        if (!kev) visible = false;
+      }
       
       // Apply Patch Available filter
       if (visible && state.filters.patchAvailable) {
@@ -447,11 +442,43 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
     document.querySelectorAll('#activeFiltersList button').forEach(button => {
       button.addEventListener('click', (e) => {
         const filterLabel = e.currentTarget.getAttribute('data-filter');
-        // Handle removal based on label
-        // This is a simplification - you'd need to map back to your filter state
-        // and then dispatch an event or call applyFiltering()
+        if (!filterLabel) return;
+        // Remove filter based on label
+        switch (filterLabel) {
+          case 'Zero-Day':
+            state.filters.zeroDay = false;
+            break;
+          case 'Known Exploited':
+            state.filters.kev = false;
+            break;
+          case 'Patch Available':
+            state.filters.patchAvailable = false;
+            break;
+          default:
+            if (filterLabel.startsWith('CVSS ≥ ')) {
+              state.filters.cvssMin = 0;
+            } else if (filterLabel.startsWith('EPSS ≥ ')) {
+              state.filters.epssMin = 0;
+            } else if (['Critical', 'High', 'Medium', 'Low'].includes(filterLabel)) {
+              const key = filterLabel.toLowerCase();
+              if (state.filters.severity) state.filters.severity[key] = false;
+            } else if (filterLabel.startsWith('From: ')) {
+              state.filters.dateRange.start = '';
+            } else if (filterLabel.startsWith('To: ')) {
+              state.filters.dateRange.end = '';
+            } else if (filterLabel.startsWith('Vendor: ')) {
+              const vendor = filterLabel.replace('Vendor: ', '');
+              state.filters.vendors = state.filters.vendors.filter(v => v !== vendor);
+            } else if (filterLabel.startsWith('Product: ')) {
+              const product = filterLabel.replace('Product: ', '');
+              state.filters.products = state.filters.products.filter(p => p !== product);
+            }
+        }
+        applyFiltering();
+        updateActiveFiltersDisplay();
+        updateURL();
       });
-    }); // Close the forEach loop here
+    });
   } // Close the updateActiveFiltersDisplay function here
 
   // Listen for close request from sidebar component
@@ -464,15 +491,14 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
     // Get last visit time from localStorage
     const lastVisit = localStorage.getItem('lastVisitTimestamp');
     const now = Date.now();
-    
+
     if (lastVisit) {
       const rows = tableBody.querySelectorAll('tr');
-      
+
       rows.forEach(row => {
-        const dateCell = row.querySelector('td[data-value]');
-        if (dateCell) {
-          const reportDate = Number(dateCell.getAttribute('data-value'));
-          
+        const dateStr = row.getAttribute('data-date');
+        if (dateStr) {
+          const reportDate = new Date(dateStr).getTime();
           // If report is newer than last visit, highlight it
           if (reportDate > Number(lastVisit)) {
             row.classList.add('new-report');
@@ -480,7 +506,7 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
         }
       });
     }
-    
+
     // Update last visit timestamp
     localStorage.setItem('lastVisitTimestamp', now);
   }
@@ -531,7 +557,7 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
        
       if (toggleBtn) {
         toggleBtn.setAttribute('aria-expanded', 'false');
-        toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"> {/* Restored icon size to h-5 w-5 */}
+        toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
         </svg> Show Filters`;
       }
@@ -588,11 +614,11 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
         
         // Update button state
         toggleBtn.setAttribute('aria-expanded', newState.toString());
-        toggleBtn.innerHTML = newState 
-          ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"> {/* Restored icon size to h-5 w-5 */}
+          toggleBtn.innerHTML = newState 
+          ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
              </svg> Hide Filters` 
-          : `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"> {/* Restored icon size to h-5 w-5 */}
+            : `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
              </svg> Show Filters`;
              
@@ -647,7 +673,7 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
           document.body.classList.remove('overflow-hidden');
           // Reset toggle button state if resizing to desktop
           toggleBtn.setAttribute('aria-expanded', 'false');
-          toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"> {/* Restored icon size to h-5 w-5 */}
+          toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
             </svg> Show Filters`;
         } else {
@@ -669,7 +695,22 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
   // Initialize when DOM is loaded
   document.addEventListener('DOMContentLoaded', () => {
     initialize();
-    setupFilterToggle();
+    // Removed legacy desktop/mobile toggle; using mobile-specific toggle only
+    // Mobile filter toggle behavior
+    const mobileToggle = document.getElementById('mobileFilterToggle');
+    const sidebarWrapper = document.getElementById('filterSidebarWrapper');
+    if (mobileToggle && sidebarWrapper) {
+      mobileToggle.addEventListener('click', () => {
+        const isHidden = sidebarWrapper.classList.contains('hidden');
+        if (isHidden) {
+          sidebarWrapper.classList.remove('hidden');
+          mobileToggle.textContent = 'Hide Filters';
+        } else {
+          sidebarWrapper.classList.add('hidden');
+          mobileToggle.textContent = 'Show Filters';
+        }
+      });
+    }
   });
 </script>
 

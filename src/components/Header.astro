@@ -1,7 +1,7 @@
 ---
 // src/components/Header.astro
 import type { NavItem } from '../data/navItems'; // Import the NavItem type
-import Search from './Search.astro'; // Import the Search component
+import Search from 'astro-pagefind/components/Search'; // Use plugin-provided Search component
 
 interface Props {
   siteTitle: string;
