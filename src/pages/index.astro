@@ -18,7 +18,10 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
 <BaseLayout title="Vulnerability Reports">
   <!-- Mobile filter toggle button -->
   <div class="md:hidden mb-4">
-    <button id="mobileFilterToggle" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded">
+    <button
+      id="mobileFilterToggle"
+      class="w-full bg-primary-dark hover:bg-primary text-white py-2 px-4 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary transition-colors"
+    >
       Show Filters
     </button>
   </div>
@@ -51,15 +54,15 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
         <!-- Table Container - Uses grid cell with overflow handling -->
         <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
           <table id="reportTable" class="w-full text-left text-sm border-collapse min-w-[360px]">
-          <thead class="bg-gray-100 dark:bg-gray-700">
+          <thead class="bg-surface dark:bg-surface border-b border-border">
             <tr>
-              <th scope="col" data-sort-key="cve" class="px-2 sm:px-3 py-3 sm:py-4 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">CVE ID <span>↕</span></th>
-              <th scope="col" data-sort-key="title" class="hidden sm:table-cell px-2 sm:px-3 py-3 sm:py-4 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Title/Summary <span>↕</span></th>
-              <th scope="col" data-sort-key="cvss" class="px-2 sm:px-3 py-3 sm:py-4 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">CVSS <span>↕</span></th>
-              <th scope="col" data-sort-key="epss" class="hidden md:table-cell px-2 sm:px-3 py-3 sm:py-4 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">EPSS <span>↕</span></th>
-              <th scope="col" data-sort-key="severity" class="px-2 sm:px-3 py-3 sm:py-4 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Severity <span>↕</span></th>
-              <th scope="col" data-sort-key="zeroday" class="hidden sm:table-cell px-2 sm:px-3 py-3 sm:py-4 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Zero-Day? <span>↕</span></th>
-              <th scope="col" data-sort-key="date" class="px-2 sm:px-3 py-3 sm:py-4 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Date <span>↕</span></th>
+              <th scope="col" data-sort-key="cve" class="px-2 sm:px-3 py-3 sm:py-4 font-medium text-text dark:text-text cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700">CVE ID <span>↕</span></th>
+              <th scope="col" data-sort-key="title" class="hidden sm:table-cell px-2 sm:px-3 py-3 sm:py-4 font-medium text-text dark:text-text cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700">Title/Summary <span>↕</span></th>
+              <th scope="col" data-sort-key="cvss" class="px-2 sm:px-3 py-3 sm:py-4 font-medium text-text dark:text-text cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700">CVSS <span>↕</span></th>
+              <th scope="col" data-sort-key="epss" class="hidden md:table-cell px-2 sm:px-3 py-3 sm:py-4 font-medium text-text dark:text-text cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700">EPSS <span>↕</span></th>
+              <th scope="col" data-sort-key="severity" class="px-2 sm:px-3 py-3 sm:py-4 font-medium text-text dark:text-text cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700">Severity <span>↕</span></th>
+              <th scope="col" data-sort-key="zeroday" class="hidden sm:table-cell px-2 sm:px-3 py-3 sm:py-4 font-medium text-text dark:text-text cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700">Zero-Day? <span>↕</span></th>
+              <th scope="col" data-sort-key="date" class="px-2 sm:px-3 py-3 sm:py-4 font-medium text-text dark:text-text cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700">Date <span>↕</span></th>
             </tr>
           </thead>
           <tbody id="reportTableBody" class="odd:bg-surface even:bg-background">

@@ -61,7 +61,11 @@ const base = Astro.config?.base ?? '/'; // Get base path
         </ul>
       </nav>
       <!-- Theme Toggle -->
-      <button id="themeToggleBtn" aria-label="Toggle theme" class="p-2 rounded hover:bg-primary/10 transition-colors text-text dark:text-text">
+      <button
+        id="themeToggleBtn"
+        aria-label="Toggle theme"
+        class="p-2 rounded hover:bg-primary/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary text-text dark:text-text"
+      >
         🌙
       </button>
     </div>

@@ -65,6 +65,8 @@ html.dark {
   --color-border: var(--dark-color-border);
   /* Highlight color for new reports in dark mode */
   --dark-color-highlight: #92400e; /* Tailwind yellow-800 */
+  /* Use dark highlight variant */
+  --color-highlight: var(--dark-color-highlight);
 }
 
 
@@ -75,9 +77,6 @@ html.dark {
 @layer components {
   tr.new-report {
     background-color: var(--color-highlight);
-  }
-  html.dark tr.new-report {
-    background-color: var(--dark-color-highlight);
   }
 }
 @tailwind utilities;
