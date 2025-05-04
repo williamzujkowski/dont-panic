@@ -41,7 +41,7 @@ const base = Astro.config?.base ?? '/'; // Get base path
         </div>
       )}
       
-      <nav role="navigation" aria-label="Main navigation">
+      <nav role="navigation" aria-label="Main navigation" class="flex items-center gap-sm md:gap-md">
         <ul class="flex items-center gap-sm md:gap-md">
           {navItems.map((item) => (
             // Check if item should be shown on mobile
@@ -60,6 +60,10 @@ const base = Astro.config?.base ?? '/'; // Get base path
           ))}
         </ul>
       </nav>
+      <!-- Theme Toggle -->
+      <button id="themeToggleBtn" aria-label="Toggle theme" class="p-2 rounded hover:bg-primary/10 transition-colors text-text dark:text-text">
+        🌙
+      </button>
     </div>
   </div>
   

@@ -62,7 +62,7 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
               <th scope="col" data-sort-key="date" class="px-2 sm:px-3 py-3 sm:py-4 font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">Date <span>↕</span></th>
             </tr>
           </thead>
-          <tbody id="reportTableBody">
+          <tbody id="reportTableBody" class="odd:bg-surface even:bg-background">
             {reports.map((report) => (
               <tr 
                 class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50" 
