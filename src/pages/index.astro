@@ -5,6 +5,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import SeverityTag from '../components/SeverityTag.astro';
 import ZeroDayTag from '../components/ZeroDayTag.astro';
 import FilterSidebar from '../components/FilterSidebar.astro';
+import Button from '../components/Button.astro';
+import ReportCard from '../components/ReportCard.astro';
 
 // Fetch all reports, sort by publication date descending
 const reports = await getCollection('reports', ({ data }) => {
@@ -13,62 +15,186 @@ const reports = await getCollection('reports', ({ data }) => {
 });
 
 reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf());
+
+// Calculate stats for the header
+const criticalCount = reports.filter(r => (r.data.severity || r.data.cvssSeverity) === 'Critical').length;
+const highCount = reports.filter(r => (r.data.severity || r.data.cvssSeverity) === 'High').length;
+const zerodays = reports.filter(r => r.data.isZeroDay).length;
+const recentReports = reports.filter(r => r.data.publishDate > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length;
 ---
 
 <BaseLayout title="Vulnerability Reports">
-  <!-- Mobile filter toggle button -->
-  <div class="md:hidden mb-4">
-    <button
-      id="mobileFilterToggle"
-      class="w-full bg-primary-dark hover:bg-primary text-white font-medium text-base py-3 px-4 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary transition-colors min-h-[48px]"
-    >
-      Show Filters
-    </button>
-  </div>
-  <!-- Layout container: sidebar + main content -->
-  <div class="flex flex-col md:flex-row md:gap-6">
-    <!-- Filter Sidebar: hidden on mobile (toggle), visible on desktop -->
-    <div id="filterSidebarWrapper" class="hidden md:block w-full md:w-[280px]">
-      <FilterSidebar reports={reports} />
-    </div>
-
-    <!-- Main Content -->
-    <main class="flex-1 p-4">
-      <!-- Use CSS Grid for the report section layout -->
-      <div class="grid grid-cols-1 gap-4">
-        <!-- Header section -->
-        <div>
-          <h1 class="text-xl font-semibold">Vulnerability Reports</h1>
+  <!-- Compact Stats Header - Full Width -->
+  <div class="bg-surface border-b border-border">
+    <div class="w-full mx-auto px-3 py-2 flex flex-wrap justify-center sm:justify-between items-center text-sm">
+      <h1 class="text-lg font-medium mb-2 sm:mb-0 text-text w-full sm:w-auto text-center sm:text-left">
+        <span class="text-primary font-semibold">Don't Panic</span> - Vulnerability Intelligence
+      </h1>
+      
+      <div class="flex flex-wrap justify-center gap-3 sm:gap-4">
+        <div class="flex items-center">
+          <span class="text-primary font-bold text-base">{reports.length}</span>
+          <span class="ml-1 text-text-secondary">Reports</span>
         </div>
+        <div class="flex items-center">
+          <span class="text-red-600 dark:text-red-400 font-bold text-base">{criticalCount}</span>
+          <span class="ml-1 text-text-secondary">Critical</span>
+        </div>
+        <div class="flex items-center">
+          <span class="text-amber-600 dark:text-amber-400 font-bold text-base">{zerodays}</span>
+          <span class="ml-1 text-text-secondary">Zero-Days</span>
+        </div>
+        <div class="flex items-center">
+          <span class="text-green-600 dark:text-green-400 font-bold text-base">{recentReports}</span>
+          <span class="ml-1 text-text-secondary">New</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Responsive Layout Container - Full Width -->
+  <div class="w-full max-w-[1800px] mx-auto px-2 sm:px-4 py-0 sm:py-6 flex flex-col md:flex-row md:gap-6">
+    <!-- Sidebar - Visible on desktop, off-canvas on mobile -->
+    <aside 
+      id="filterSidebarWrapper" 
+      class="md:block md:w-80 lg:w-80 xl:w-80 bg-surface z-40 transition-all duration-300 ease-out border-border md:border md:rounded-lg md:shadow-md flex-shrink-0 order-2 md:order-1 hidden"
+    >
+      <div id="sidebarContent" class="p-4 md:sticky md:top-[80px] md:max-h-[calc(100vh-80px)] md:overflow-y-auto">
+        <div class="mb-3 flex md:hidden justify-between items-center">
+          <h2 class="text-lg font-semibold">Filters</h2>
+          <button 
+            id="closeSidebarBtn" 
+            class="text-text-muted hover:text-primary px-2 py-1 active:text-primary transition-colors text-xs border border-border rounded"
+            aria-label="Close sidebar"
+          >
+            Close
+          </button>
+        </div>
+        
+        <FilterSidebar reports={reports} />
+      </div>
+    </aside>
+    
+    <!-- Mobile Overlay for Sidebar -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden opacity-0 transition-opacity duration-300 ease-out"></div>
 
-        <!-- Active Filter Summary -->
-        <div id="activeFilters" class="text-sm text-gray-700 dark:text-gray-300 hidden">
-          <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded">
-            <h2 class="font-medium mb-1">Active Filters:</h2>
-            <div id="activeFiltersList" class="flex flex-wrap gap-2">
-              <!-- Active filters will be inserted here via JS -->
+    <!-- Main Content Area - Full Width -->
+    <main class="flex-1 md:pr-4 flex flex-col min-h-screen w-full order-1 md:order-2">
+      <!-- Page Header and View Controls -->
+      <header class="mb-6 pb-4 border-b border-border">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-text mb-1">Vulnerability Reports</h1>
+            <p class="text-sm text-text-secondary" id="resultsCount">
+              Showing {reports.length} vulnerability reports
+            </p>
+          </div>
+          
+          <div class="flex items-center gap-3">
+            <!-- Filter count display only (button is in header) -->
+            <div id="filterCountDisplay" class="hidden text-xs md:hidden">
+              <span id="mobileFilterCount" class="hidden ml-0.5 bg-primary text-white text-xs px-1 py-px rounded-full text-[10px] min-w-[16px] flex items-center justify-center">0</span>
+            </div>
+            
+            <!-- Enhanced View Toggle -->
+            <div class="inline-flex rounded-md border border-border overflow-hidden shadow-sm" role="group">
+              <button 
+                type="button" 
+                id="tableViewBtn"
+                class="px-3 py-1.5 text-xs font-medium bg-surface text-text-secondary hover:bg-surface-accent/50 active:bg-surface-accent/70 focus:z-10 transition-colors min-h-[32px] flex items-center gap-1.5"
+                aria-current="true"
+                aria-label="Switch to table view"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18M3 18h18M3 6h18" />
+                </svg>
+                <span>Table</span>
+              </button>
+              <button 
+                type="button" 
+                id="cardViewBtn"
+                class="px-3 py-1.5 text-xs font-medium bg-surface text-text-secondary hover:bg-surface-accent/50 active:bg-surface-accent/70 transition-colors min-h-[32px] flex items-center gap-1.5"
+                aria-label="Switch to card view"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                <span>Cards</span>
+              </button>
             </div>
           </div>
         </div>
+        
+        <!-- Active Filter Summary -->
+        <!-- Enhanced Active Filter Summary -->
+        <div id="activeFilters" class="text-xs px-3 py-3 rounded-lg bg-surface-accent/30 border border-primary/10 mb-3 hidden transform transition-all duration-300 ease-in-out">
+          <div class="flex items-center justify-between mb-2">
+            <div class="font-medium text-primary flex items-center text-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              Active Filters
+              <span id="activeFiltersCount" class="ml-1.5 bg-primary text-white text-xs px-1.5 py-0.5 rounded-full">0</span>
+            </div>
+            <button id="clearAllFilters" class="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Clear All
+            </button>
+          </div>
+          <div id="activeFiltersList" class="flex flex-wrap gap-1.5">
+            <!-- Active filters will be inserted here via JS -->
+          </div>
+        </div>
+      </header>
 
-        <!-- Table Container - Uses grid cell with overflow handling -->
-        <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
-          <table id="reportTable" class="w-full text-left text-sm border-collapse min-w-[360px]">
-          <thead class="bg-surface dark:bg-surface border-b border-border">
+      <!-- Table View -->
+      <div id="tableContainer" class="bg-surface overflow-x-auto rounded-lg border border-border shadow-md flex-1 relative w-full max-w-full">
+        <table id="reportTable" class="w-full text-left text-sm border-collapse table-fixed sm:table-auto">
+          <thead class="bg-surface-accent border-b border-border sticky top-[0] z-10">
             <tr>
-              <th scope="col" data-sort-key="cve" class="px-2 sm:px-3 py-3 sm:py-4 font-medium text-text dark:text-text cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700">CVE ID <span>↕</span></th>
-              <th scope="col" data-sort-key="title" class="hidden sm:table-cell px-2 sm:px-3 py-3 sm:py-4 font-medium text-text dark:text-text cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700">Title/Summary <span>↕</span></th>
-              <th scope="col" data-sort-key="cvss" class="px-2 sm:px-3 py-3 sm:py-4 font-medium text-text dark:text-text cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700">CVSS <span>↕</span></th>
-              <th scope="col" data-sort-key="epss" class="hidden md:table-cell px-2 sm:px-3 py-3 sm:py-4 font-medium text-text dark:text-text cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700">EPSS <span>↕</span></th>
-              <th scope="col" data-sort-key="severity" class="px-2 sm:px-3 py-3 sm:py-4 font-medium text-text dark:text-text cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700">Severity <span>↕</span></th>
-              <th scope="col" data-sort-key="zeroday" class="hidden sm:table-cell px-2 sm:px-3 py-3 sm:py-4 font-medium text-text dark:text-text cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700">Zero-Day? <span>↕</span></th>
-              <th scope="col" data-sort-key="date" class="px-2 sm:px-3 py-3 sm:py-4 font-medium text-text dark:text-text cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700">Date <span>↕</span></th>
+              <th scope="col" data-sort-key="cve" class="px-4 py-3 font-medium text-text-secondary text-xs cursor-pointer hover:bg-surface-accent/80 whitespace-nowrap w-[100px]">
+                <div class="flex items-center">
+                  CVE ID
+                </div>
+              </th>
+              <th scope="col" data-sort-key="title" class="hidden sm:table-cell px-4 py-3 font-medium text-text-secondary text-xs cursor-pointer hover:bg-surface-accent/80 w-auto">
+                <div class="flex items-center">
+                  Title <span class="ml-1 text-text-muted text-xs">↕</span>
+                </div>
+              </th>
+              <th scope="col" data-sort-key="cvss" class="px-4 py-3 font-medium text-text-secondary text-xs cursor-pointer hover:bg-surface-accent/80 whitespace-nowrap w-[70px]">
+                <div class="flex items-center">
+                  CVSS <span class="ml-1 text-text-muted text-xs">↕</span>
+                </div>
+              </th>
+              <th scope="col" data-sort-key="epss" class="hidden md:table-cell px-4 py-3 font-medium text-text-secondary text-xs cursor-pointer hover:bg-surface-accent/80 whitespace-nowrap w-[70px]">
+                <div class="flex items-center">
+                  EPSS <span class="ml-1 text-text-muted text-xs">↕</span>
+                </div>
+              </th>
+              <th scope="col" data-sort-key="severity" class="px-4 py-3 font-medium text-text-secondary text-xs cursor-pointer hover:bg-surface-accent/80 whitespace-nowrap w-[90px]">
+                <div class="flex items-center">
+                  Severity <span class="ml-1 text-text-muted text-xs">↕</span>
+                </div>
+              </th>
+              <th scope="col" data-sort-key="zeroday" class="hidden sm:table-cell px-4 py-3 font-medium text-text-secondary text-xs cursor-pointer hover:bg-surface-accent/80 whitespace-nowrap w-[70px]">
+                <div class="flex items-center">
+                  0-Day <span class="ml-1 text-text-muted text-xs">↕</span>
+                </div>
+              </th>
+              <th scope="col" data-sort-key="date" class="px-4 py-3 font-medium text-text-secondary text-xs cursor-pointer hover:bg-surface-accent/80 whitespace-nowrap w-[100px]">
+                <div class="flex items-center">
+                  Date <span class="ml-1 text-text-muted text-xs">↕</span>
+                </div>
+              </th>
             </tr>
           </thead>
-          <tbody id="reportTableBody" class="odd:bg-surface even:bg-background">
-            {reports.map((report) => (
+          <tbody id="reportTableBody" class="divide-y divide-border">
+            {reports.map((report, index) => (
               <tr 
-                class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50" 
+                class="hover:bg-surface-accent/30 transition-colors"
                 data-cve={report.slug}
                 data-severity={report.data.severity || report.data.cvssSeverity}
                 data-date={report.data.publishDate.toISOString().split('T')[0]}
@@ -80,46 +206,75 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
                 data-patch-available={report.data.patchAvailable.toString()}
                 data-kev={report.data.kev ? 'true' : 'false'}
               >
-                <td class="px-2 sm:px-3 py-3 sm:py-4 whitespace-nowrap">
+                <td class="px-4 py-3 whitespace-nowrap w-[100px]">
                   <a 
                     href={`/reports/${report.slug}`} 
-                    class="text-blue-600 dark:text-blue-400 font-medium hover:underline inline-block py-1"
+                    class="text-primary font-medium hover:underline inline-block text-sm"
                   >
                     {report.data.cveId}
                   </a>
                 </td>
-                <td class="hidden sm:table-cell px-2 sm:px-3 py-3 sm:py-4">{report.data.title}</td>
-                <td class="px-2 sm:px-3 py-3 sm:py-4 whitespace-nowrap font-mono" data-value={report.data.cvssScore}>
-                  {report.data.cvssScore !== undefined ? report.data.cvssScore.toFixed(1) : 'N/A'}
+                <td class="hidden sm:table-cell px-4 py-3 max-w-[280px] truncate text-sm w-auto">{report.data.title}</td>
+                <td class="px-4 py-3 whitespace-nowrap font-mono font-medium text-sm w-[70px]" data-value={report.data.cvssScore}>
+                  <span class={`${report.data.cvssScore >= 7.0 ? 'text-red-600 dark:text-red-400' : (report.data.cvssScore >= 4.0 ? 'text-amber-600 dark:text-amber-400' : 'text-text-muted')}`}>
+                    {report.data.cvssScore !== undefined ? report.data.cvssScore.toFixed(1) : '-'}
+                  </span>
                 </td>
-                <td class="hidden md:table-cell px-2 sm:px-3 py-3 sm:py-4 whitespace-nowrap font-mono" data-value={report.data.epssScore}>
-                  {report.data.epssScore !== undefined ? `${(report.data.epssScore * 100).toFixed(1)}%` : 'N/A'}
+                <td class="hidden md:table-cell px-4 py-3 whitespace-nowrap font-mono text-sm w-[70px]" data-value={report.data.epssScore}>
+                  {report.data.epssScore !== undefined ? `${(report.data.epssScore * 100).toFixed(1)}%` : '-'}
                 </td>
-                <td class="px-2 sm:px-3 py-3 sm:py-4 whitespace-nowrap">
-                  {(report.data.severity || report.data.cvssSeverity) && 
+                <td class="px-4 py-3 whitespace-nowrap w-[90px]">
+                  {(report.data.severity || report.data.cvssSeverity) ? 
                     <SeverityTag severity={report.data.severity || report.data.cvssSeverity} />
-                  }
+                  : <span class="text-xs">-</span>}
                 </td>
-                <td class="hidden sm:table-cell px-2 sm:px-3 py-3 sm:py-4 whitespace-nowrap">
-                  {report.data.isZeroDay ? (
-                    <span class="text-yellow-600 dark:text-yellow-400">✓ Yes</span>
-                  ) : 'No'}
+                <td class="hidden sm:table-cell px-4 py-3 whitespace-nowrap text-sm w-[70px]">
+                  {report.data.isZeroDay ? 
+                    <span class="text-amber-600 dark:text-amber-400 font-medium text-xs">
+                      Yes
+                    </span>
+                  : <span class="text-text-muted">No</span>}
                 </td>
-                <td class="px-2 sm:px-3 py-3 sm:py-4 whitespace-nowrap" data-value={report.data.publishDate.valueOf()}>
+                <td class="px-4 py-3 whitespace-nowrap text-text-secondary text-sm w-[100px]" data-value={report.data.publishDate.valueOf()}>
                   {report.data.publishDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        <div id="resultsCount" class="p-3 text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-750 border-t border-gray-200 dark:border-gray-700">
-          Showing {reports.length} vulnerability reports
-        </div>
       </div>
+      
+      <!-- Card View - hidden by default, grid columns increase responsively -->
+      <div id="cardView" class="hidden grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 p-0 bg-background w-full">
+        {reports.map((report) => (
+          <div 
+            data-cve={report.slug}
+            data-severity={report.data.severity || report.data.cvssSeverity}
+            data-date={report.data.publishDate.toISOString().split('T')[0]}
+            data-zeroday={report.data.isZeroDay.toString()}
+            data-cvss={report.data.cvssScore}
+            data-epss={report.data.epssScore}
+            data-vendor={report.data.vendor}
+            data-product={report.data.product}
+            data-patch-available={report.data.patchAvailable.toString()}
+            data-kev={report.data.kev ? 'true' : 'false'}
+            class="h-full" 
+          >
+            <ReportCard 
+              report={report} 
+              isHighlighted={report.data.publishDate > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)} 
+            />
+          </div>
+        ))}
       </div>
     </main>
   </div>
 </BaseLayout>
+
+<script>
+  // This code is replaced by the centralized toggle code in the main DOMContentLoaded handler
+  // No duplicate listeners needed
+</script>
 
 <script>
   // DOM References
@@ -285,39 +440,42 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
   function applyFiltering() {
     if (!state.filters) return;
     
-    const rows = tableBody.querySelectorAll('tr');
+    // Apply filters to both table and card view
+    const tableRows = tableBody.querySelectorAll('tr');
+    const cardItems = document.querySelectorAll('#cardView > div');
     let visibleCount = 0;
     
-    rows.forEach(row => {
+    // Helper function to determine if an item should be visible
+    const shouldBeVisible = (item) => {
       let visible = true;
       
       // Apply Zero-Day filter
       if (visible && state.filters.zeroDay) {
-        const isZeroDay = row.getAttribute('data-zeroday') === 'true';
+        const isZeroDay = item.getAttribute('data-zeroday') === 'true';
         if (!isZeroDay) visible = false;
       }
       
       // Apply KEV filter
       if (visible && state.filters.kev) {
-        const kev = row.getAttribute('data-kev') === 'true';
+        const kev = item.getAttribute('data-kev') === 'true';
         if (!kev) visible = false;
       }
       
       // Apply Patch Available filter
       if (visible && state.filters.patchAvailable) {
-        const patchAvailable = row.getAttribute('data-patch-available') === 'true';
+        const patchAvailable = item.getAttribute('data-patch-available') === 'true';
         if (!patchAvailable) visible = false;
       }
       
       // Apply CVSS Min filter
       if (visible && state.filters.cvssMin > 0) {
-        const cvssScore = parseFloat(row.getAttribute('data-cvss') || '0');
+        const cvssScore = parseFloat(item.getAttribute('data-cvss') || '0');
         if (cvssScore < state.filters.cvssMin) visible = false;
       }
       
       // Apply EPSS Min filter
       if (visible && state.filters.epssMin > 0) {
-        const epssScore = parseFloat(row.getAttribute('data-epss') || '0');
+        const epssScore = parseFloat(item.getAttribute('data-epss') || '0');
         if (epssScore < state.filters.epssMin) visible = false;
       }
       
@@ -328,14 +486,14 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
            state.filters.severity.medium || 
            state.filters.severity.low)) {
         
-        const rowSeverity = row.getAttribute('data-severity');
+        const itemSeverity = item.getAttribute('data-severity');
         
-        if (rowSeverity) {
+        if (itemSeverity) {
           const matchesSeverity = 
-            (rowSeverity === 'Critical' && state.filters.severity.critical) ||
-            (rowSeverity === 'High' && state.filters.severity.high) ||
-            (rowSeverity === 'Medium' && state.filters.severity.medium) ||
-            (rowSeverity === 'Low' && state.filters.severity.low);
+            (itemSeverity === 'Critical' && state.filters.severity.critical) ||
+            (itemSeverity === 'High' && state.filters.severity.high) ||
+            (itemSeverity === 'Medium' && state.filters.severity.medium) ||
+            (itemSeverity === 'Low' && state.filters.severity.low);
             
           if (!matchesSeverity) visible = false;
         }
@@ -343,14 +501,14 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
       
       // Apply Date Range filters
       if (visible && state.filters.dateRange) {
-        const rowDate = row.getAttribute('data-date');
+        const itemDate = item.getAttribute('data-date');
         
-        if (rowDate) {
-          if (state.filters.dateRange.start && rowDate < state.filters.dateRange.start) {
+        if (itemDate) {
+          if (state.filters.dateRange.start && itemDate < state.filters.dateRange.start) {
             visible = false;
           }
           
-          if (state.filters.dateRange.end && rowDate > state.filters.dateRange.end) {
+          if (state.filters.dateRange.end && itemDate > state.filters.dateRange.end) {
             visible = false;
           }
         }
@@ -358,7 +516,7 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
       
       // Apply Vendor filters
       if (visible && state.filters.vendors && state.filters.vendors.length > 0) {
-        const vendor = row.getAttribute('data-vendor');
+        const vendor = item.getAttribute('data-vendor');
         if (!vendor || !state.filters.vendors.includes(vendor)) {
           visible = false;
         }
@@ -366,15 +524,27 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
       
       // Apply Product filters
       if (visible && state.filters.products && state.filters.products.length > 0) {
-        const product = row.getAttribute('data-product');
+        const product = item.getAttribute('data-product');
         if (!product || !state.filters.products.includes(product)) {
           visible = false;
         }
       }
       
-      // Update visibility
+      return visible;
+    };
+    
+    // Apply to table rows
+    tableRows.forEach(row => {
+      const visible = shouldBeVisible(row);
       row.hidden = !visible;
       if (visible) visibleCount++;
+    });
+    
+    // Apply to card items
+    cardItems.forEach(card => {
+      const visible = shouldBeVisible(card);
+      card.hidden = !visible;
+      // No need to increment visibleCount as we already counted in the table view
     });
     
     // Re-apply sorting to the filtered rows
@@ -387,7 +557,7 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
     }
   }
 
-  // Update active filters display
+  // Enhanced active filters display with animations and improved styling
   function updateActiveFiltersDisplay() {
     if (!state.filters || !activeFiltersContainer || !activeFiltersList) return;
     
@@ -396,97 +566,320 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
     
     // Track if we have any active filters
     let hasActiveFilters = false;
+    let filterCount = 0;
     
-    // Helper to add a filter chip
-    const addFilterChip = (label) => {
+    // Helper to add a filter chip with custom styling based on type
+    const addFilterChip = (label, type = 'default') => {
       hasActiveFilters = true;
-      const chip = document.createElement('span');
-      chip.className = 'px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-xs flex items-center';
-      chip.innerHTML = `${label} <button class="ml-1 text-xs font-bold" data-filter="${label}">&times;</button>`;
+      filterCount++;
+      
+      const chip = document.createElement('div');
+      chip.setAttribute('data-filter', label);
+      chip.classList.add('filter-chip', 'animate-fade-in');
+      
+      // Define color scheme based on filter type
+      let chipClass, iconSvg;
+      
+      switch (type) {
+        case 'zeroday':
+          chipClass = 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800/50';
+          iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>';
+          break;
+        case 'kev':
+          chipClass = 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800/50';
+          iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>';
+          break;
+        case 'patch':
+          chipClass = 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800/50';
+          iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
+          break;
+        case 'severity':
+          const severityColor = {
+            'Critical': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800/50',
+            'High': 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800/50',
+            'Medium': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800/50',
+            'Low': 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800/50'
+          };
+          chipClass = severityColor[label] || 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700';
+          iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>';
+          break;
+        case 'score':
+          chipClass = 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800/50';
+          iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>';
+          break;
+        case 'date':
+          chipClass = 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800/50';
+          iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>';
+          break;
+        case 'vendor':
+          chipClass = 'bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-900/30 dark:text-cyan-300 dark:border-cyan-800/50';
+          iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>';
+          break;
+        case 'product':
+          chipClass = 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800/50';
+          iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>';
+          break;
+        default:
+          chipClass = 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700';
+          iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>';
+      }
+      
+      chip.className = `px-2 py-1 ${chipClass} border rounded-full text-xs flex items-center justify-between gap-1 filter-chip transform transition-all duration-200 ease-in-out hover:shadow-sm group`;
+      chip.style.animationDelay = `${filterCount * 0.05}s`;
+      
+      // Create wrapper for label with icon
+      const labelWrapper = document.createElement('div');
+      labelWrapper.className = 'flex items-center pr-1';
+      labelWrapper.innerHTML = `${iconSvg}<span>${label}</span>`;
+      
+      // Create remove button
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'ml-1 text-xs opacity-50 hover:opacity-100 w-4 h-4 rounded-full flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors';
+      removeBtn.setAttribute('data-filter', label);
+      removeBtn.setAttribute('aria-label', `Remove ${label} filter`);
+      removeBtn.innerHTML = '×';
+      
+      chip.appendChild(labelWrapper);
+      chip.appendChild(removeBtn);
       activeFiltersList.appendChild(chip);
     };
     
-    // Add chips for each active filter
-    if (state.filters.zeroDay) addFilterChip('Zero-Day');
-    if (state.filters.kev) addFilterChip('Known Exploited');
-    if (state.filters.patchAvailable) addFilterChip('Patch Available');
+    // Add chips for each active filter with appropriate styling
+    if (state.filters.zeroDay) addFilterChip('Zero-Day', 'zeroday');
+    if (state.filters.kev) addFilterChip('Known Exploited', 'kev');
+    if (state.filters.patchAvailable) addFilterChip('Patch Available', 'patch');
     
-    if (state.filters.cvssMin > 0) addFilterChip(`CVSS ≥ ${state.filters.cvssMin}`);
-    if (state.filters.epssMin > 0) addFilterChip(`EPSS ≥ ${state.filters.epssMin * 100}%`);
+    if (state.filters.cvssMin > 0) {
+      const cvssValue = parseFloat(state.filters.cvssMin);
+      let scoreType = 'score';
+      if (cvssValue >= 9.0) scoreType = 'severity'; // Use severity styling for high scores
+      addFilterChip(`CVSS ≥ ${state.filters.cvssMin}`, scoreType);
+    }
+    
+    if (state.filters.epssMin > 0) {
+      addFilterChip(`EPSS ≥ ${(state.filters.epssMin * 100).toFixed(0)}%`, 'score');
+    }
     
     // Severity filters
     if (state.filters.severity) {
-      if (state.filters.severity.critical) addFilterChip('Critical');
-      if (state.filters.severity.high) addFilterChip('High');
-      if (state.filters.severity.medium) addFilterChip('Medium');
-      if (state.filters.severity.low) addFilterChip('Low');
+      if (state.filters.severity.critical) addFilterChip('Critical', 'severity');
+      if (state.filters.severity.high) addFilterChip('High', 'severity');
+      if (state.filters.severity.medium) addFilterChip('Medium', 'severity');
+      if (state.filters.severity.low) addFilterChip('Low', 'severity');
     }
     
     // Date range
     if (state.filters.dateRange) {
-      if (state.filters.dateRange.start) addFilterChip(`From: ${state.filters.dateRange.start}`);
-      if (state.filters.dateRange.end) addFilterChip(`To: ${state.filters.dateRange.end}`);
+      if (state.filters.dateRange.start) {
+        const formattedDate = new Date(state.filters.dateRange.start)
+          .toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        addFilterChip(`From: ${formattedDate}`, 'date');
+      }
+      if (state.filters.dateRange.end) {
+        const formattedDate = new Date(state.filters.dateRange.end)
+          .toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        addFilterChip(`To: ${formattedDate}`, 'date');
+      }
     }
     
     // Vendors
     if (state.filters.vendors && state.filters.vendors.length > 0) {
-      state.filters.vendors.forEach(vendor => addFilterChip(`Vendor: ${vendor}`));
+      state.filters.vendors.forEach(vendor => addFilterChip(`Vendor: ${vendor}`, 'vendor'));
     }
     
     // Products
     if (state.filters.products && state.filters.products.length > 0) {
-      state.filters.products.forEach(product => addFilterChip(`Product: ${product}`));
+      state.filters.products.forEach(product => addFilterChip(`Product: ${product}`, 'product'));
+    }
+    
+    // Update filter counters (both in sidebar and mobile button)
+    const activeFiltersCount = document.getElementById('activeFiltersCount');
+    const mobileFilterCount = document.getElementById('mobileFilterCount');
+    const filterButtonText = document.getElementById('filterButtonText');
+    
+    if (activeFiltersCount) {
+      activeFiltersCount.textContent = filterCount;
+    }
+    
+    // Update mobile filter button
+    if (mobileFilterCount && filterButtonText) {
+      if (filterCount > 0) {
+        mobileFilterCount.textContent = filterCount;
+        mobileFilterCount.classList.remove('hidden');
+        filterButtonText.textContent = 'Filters';
+      } else {
+        mobileFilterCount.classList.add('hidden');
+        filterButtonText.textContent = 'Filters';
+      }
     }
     
     // Show/hide the container based on whether there are active filters
     activeFiltersContainer.classList.toggle('hidden', !hasActiveFilters);
+    
+    // Create filter animations style if not exists
+    if (hasActiveFilters && !document.getElementById('filter-animations-style')) {
+      const style = document.createElement('style');
+      style.id = 'filter-animations-style';
+      style.textContent = `
+        @keyframes filterFadeIn {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .filter-chip {
+          animation: filterFadeIn 0.3s ease-out forwards;
+          opacity: 0;
+        }
+        @keyframes filterBackgroundPulse {
+          0% { background-opacity: 0.3; }
+          50% { background-opacity: 0.1; }
+          100% { background-opacity: 0.3; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    // Add animation to container when shown
+    if (hasActiveFilters) {
+      activeFiltersContainer.classList.add('animate-fade-in');
+      setTimeout(() => {
+        activeFiltersContainer.classList.remove('animate-fade-in');
+      }, 500);
+    }
     
     // Add click handlers to remove filter buttons
     document.querySelectorAll('#activeFiltersList button').forEach(button => {
       button.addEventListener('click', (e) => {
         const filterLabel = e.currentTarget.getAttribute('data-filter');
         if (!filterLabel) return;
-        // Remove filter based on label
-        switch (filterLabel) {
-          case 'Zero-Day':
-            state.filters.zeroDay = false;
-            break;
-          case 'Known Exploited':
-            state.filters.kev = false;
-            break;
-          case 'Patch Available':
-            state.filters.patchAvailable = false;
-            break;
-          default:
-            if (filterLabel.startsWith('CVSS ≥ ')) {
-              state.filters.cvssMin = 0;
-            } else if (filterLabel.startsWith('EPSS ≥ ')) {
-              state.filters.epssMin = 0;
-            } else if (['Critical', 'High', 'Medium', 'Low'].includes(filterLabel)) {
-              const key = filterLabel.toLowerCase();
-              if (state.filters.severity) state.filters.severity[key] = false;
-            } else if (filterLabel.startsWith('From: ')) {
-              state.filters.dateRange.start = '';
-            } else if (filterLabel.startsWith('To: ')) {
-              state.filters.dateRange.end = '';
-            } else if (filterLabel.startsWith('Vendor: ')) {
-              const vendor = filterLabel.replace('Vendor: ', '');
-              state.filters.vendors = state.filters.vendors.filter(v => v !== vendor);
-            } else if (filterLabel.startsWith('Product: ')) {
-              const product = filterLabel.replace('Product: ', '');
-              state.filters.products = state.filters.products.filter(p => p !== product);
+        
+        // Animate chip removal
+        const chip = e.currentTarget.closest('.filter-chip');
+        if (chip) {
+          chip.style.opacity = '0';
+          chip.style.transform = 'translateX(10px)';
+          chip.style.transition = 'opacity 0.2s, transform 0.2s';
+          
+          // After animation, remove filter
+          setTimeout(() => {
+            // Remove filter based on label
+            switch (filterLabel) {
+              case 'Zero-Day':
+                state.filters.zeroDay = false;
+                break;
+              case 'Known Exploited':
+                state.filters.kev = false;
+                break;
+              case 'Patch Available':
+                state.filters.patchAvailable = false;
+                break;
+              default:
+                if (filterLabel.startsWith('CVSS ≥ ')) {
+                  state.filters.cvssMin = 0;
+                } else if (filterLabel.startsWith('EPSS ≥ ')) {
+                  state.filters.epssMin = 0;
+                } else if (['Critical', 'High', 'Medium', 'Low'].includes(filterLabel)) {
+                  const key = filterLabel.toLowerCase();
+                  if (state.filters.severity) state.filters.severity[key] = false;
+                } else if (filterLabel.startsWith('From: ')) {
+                  state.filters.dateRange.start = '';
+                } else if (filterLabel.startsWith('To: ')) {
+                  state.filters.dateRange.end = '';
+                } else if (filterLabel.startsWith('Vendor: ')) {
+                  const vendor = filterLabel.replace('Vendor: ', '');
+                  state.filters.vendors = state.filters.vendors.filter(v => v !== vendor);
+                } else if (filterLabel.startsWith('Product: ')) {
+                  const product = filterLabel.replace('Product: ', '');
+                  state.filters.products = state.filters.products.filter(p => p !== product);
+                }
             }
+            
+            applyFiltering();
+            updateActiveFiltersDisplay();
+            updateURL();
+          }, 200);
         }
-        applyFiltering();
-        updateActiveFiltersDisplay();
-        updateURL();
       });
     });
+    
+    // Setup clear all button
+    const clearAllBtn = document.getElementById('clearAllFilters');
+    if (clearAllBtn && hasActiveFilters) {
+      clearAllBtn.addEventListener('click', () => {
+        // Animate all chips out
+        const chips = document.querySelectorAll('.filter-chip');
+        chips.forEach((chip, index) => {
+          chip.style.opacity = '0';
+          chip.style.transform = 'translateY(10px)';
+          chip.style.transition = 'opacity 0.2s, transform 0.2s';
+          chip.style.transitionDelay = `${index * 0.02}s`;
+        });
+        
+        // After animation completes for all chips
+        setTimeout(() => {
+          // Reset all filter values
+          if (state.filters) {
+            state.filters = {
+              kev: false,
+              zeroDay: false,
+              patchAvailable: false,
+              cvssMin: 0,
+              epssMin: 0,
+              severity: {
+                critical: false,
+                high: false,
+                medium: false,
+                low: false
+              },
+              dateRange: {
+                start: '',
+                end: ''
+              },
+              vendors: [],
+              products: []
+            };
+          }
+          
+          // Apply changes
+          applyFiltering();
+          updateActiveFiltersDisplay();
+          updateURL();
+          
+          // Show success message
+          const successMsg = document.createElement('div');
+          successMsg.className = 'fixed bottom-4 right-4 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-4 py-2 rounded shadow-md z-50 animate-scale-in';
+          successMsg.innerHTML = '<span class="flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>All filters cleared</span>';
+          document.body.appendChild(successMsg);
+          
+          setTimeout(() => {
+            successMsg.style.opacity = '0';
+            successMsg.style.transform = 'translateY(10px)';
+            successMsg.style.transition = 'opacity 0.3s, transform 0.3s';
+            
+            setTimeout(() => {
+              document.body.removeChild(successMsg);
+            }, 300);
+          }, 2000);
+        }, 300);
+      });
+    }
   } // Close the updateActiveFiltersDisplay function here
 
   // Listen for close request from sidebar component
   document.addEventListener('closeSidebarRequest', () => {
-    closeSidebar();
+    const sidebarWrapper = document.getElementById('filterSidebarWrapper');
+    const overlay = document.getElementById('sidebarOverlay');
+    
+    if (sidebarWrapper && sidebarWrapper.classList.contains('fixed')) {
+      // Trigger the animation
+      if (overlay) overlay.classList.remove('opacity-100');
+      sidebarWrapper.classList.add('-translate-x-full');
+      
+      // Clean up after animation completes
+      setTimeout(() => {
+        if (overlay) overlay.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      }, 300);
+    }
   });
 
   // Highlight new reports
@@ -514,27 +907,40 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
     localStorage.setItem('lastVisitTimestamp', now);
   }
 
-  // Utility: Get column index by sort key
+  // Utility: Get column index by sort key, accounting for responsive visibility
   function getColumnIndex(key) {
-    switch (key) {
-      case 'cve': return 0;
-      case 'title': return 1;
-      case 'cvss': return 2;
-      case 'epss': return 3;
-      case 'severity': return 4;
-      case 'zeroday': return 5;
-      case 'date': return 6;
-      default: return 0;
+    // For desktop view
+    if (window.innerWidth >= 640) { // sm breakpoint in Tailwind
+      switch (key) {
+        case 'cve': return 0;
+        case 'title': return 1;
+        case 'cvss': return 2;
+        case 'epss': return 3;
+        case 'severity': return 4;
+        case 'zeroday': return 5;
+        case 'date': return 6;
+        default: return 0;
+      }
+    } 
+    // For mobile view (some columns are hidden)
+    else {
+      switch (key) {
+        case 'cve': return 0;
+        case 'cvss': return 1;
+        case 'severity': return 2;
+        case 'date': return 3;
+        default: return 0;
+      }
     }
   }
 
   // Define closeSidebar function in a higher scope
   function closeSidebar() {
-    const sidebar = document.getElementById('filterSidebar');
-    const toggleBtn = document.getElementById('filterToggleBtn');
+    const sidebarWrapper = document.getElementById('filterSidebarWrapper');
+    const mobileToggleBtn = document.getElementById('mobileFilterToggleBtn');
     const overlay = document.getElementById('sidebarOverlay');
 
-    if (sidebar) {
+    if (sidebarWrapper) {
       // Animate out
       if (overlay) {
         overlay.style.opacity = '0';
@@ -542,14 +948,15 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
        
       // Add animation to sidebar if on mobile
       if (window.innerWidth < 768) {
-        sidebar.style.transform = 'translateX(-100%)';
+        sidebarWrapper.classList.add('transform', '-translate-x-full');
       }
        
       // Wait for animation before hiding
       setTimeout(() => {
-        sidebar.classList.add('hidden');
-        sidebar.classList.remove('fixed', 'inset-y-0', 'left-0', 'z-50', 'pt-16', 'pb-4', 'overflow-y-auto', 'w-[85%]', 'max-w-sm');
-        sidebar.style.transform = '';
+        if (window.innerWidth < 768) {
+          sidebarWrapper.classList.remove('fixed', 'inset-y-0', 'left-0', 'z-50', 'pt-16', 'pb-4', 'overflow-y-auto', 'w-[280px]', 'max-w-[90vw]');
+        }
+        sidebarWrapper.style.transform = '';
          
         if (overlay) {
           overlay.classList.add('hidden');
@@ -558,137 +965,288 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
         document.body.classList.remove('overflow-hidden');
       }, 300);
        
-      if (toggleBtn) {
-        toggleBtn.setAttribute('aria-expanded', 'false');
-        toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-        </svg> Show Filters`;
+      if (mobileToggleBtn) {
+        mobileToggleBtn.setAttribute('aria-expanded', 'false');
       }
     }
   }
 
-  // Mobile filter sidebar toggle
-  function setupFilterToggle() {
-    const toggleBtn = document.getElementById('filterToggleBtn');
-    const sidebar = document.getElementById('filterSidebar');
-    let overlay;
-     
-    // Create overlay element for mobile
-    function createOverlay() {
-      overlay = document.createElement('div');
-      overlay.id = 'sidebarOverlay';
-      overlay.className = 'fixed inset-0 bg-black/50 z-40 hidden md:hidden';
-      overlay.style.opacity = '0';
-      overlay.style.transition = 'opacity 0.3s ease';
-      document.body.appendChild(overlay);
-       
-      // Close sidebar when clicking overlay
-      overlay.addEventListener('click', () => {
-        closeSidebar(); // Now calls the function in the higher scope
-      });
-    }
-     
-    if (toggleBtn && sidebar) {
-      // Create overlay on init
-      createOverlay();
-      
-      // Set transition for sidebar
-      sidebar.style.transition = 'transform 0.3s ease';
+  // This function will be replaced by our improved toggleSidebar() implementation
 
-      // Check initial screen size and set sidebar visibility accordingly
-      if (window.innerWidth >= 768) {
-        // Desktop: Ensure sidebar is visible and styled correctly on load
-        sidebar.classList.remove('hidden', 'fixed', 'inset-y-0', 'left-0', 'z-50', 'pt-16', 'pb-4', 'w-[85%]', 'max-w-sm');
-        sidebar.style.transform = ''; // Clear any transform
-        // Make sure the parent container is visible on desktop
-        const parentContainer = sidebar.closest('div');
-        if (parentContainer) {
-          parentContainer.classList.remove('hidden');
-          parentContainer.classList.add('block');
+  // Enhanced view toggle between table and card layout with animations
+  function setupViewToggle() {
+    const tableViewBtn = document.getElementById('tableViewBtn');
+    const cardViewBtn = document.getElementById('cardViewBtn');
+    const tableView = document.querySelector('.overflow-x-auto'); // Table container
+    const cardView = document.getElementById('cardView');
+    const resultsCount = document.getElementById('resultsCount');
+    
+    if (tableViewBtn && cardViewBtn && tableView && cardView) {
+      // Add animations via stylesheet
+      const styleSheet = document.createElement('style');
+      styleSheet.textContent = `
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-      } else {
-        // Mobile: Ensure sidebar is hidden on load
-        sidebar.classList.add('hidden');
+        @keyframes fadeOut {
+          from { opacity: 1; transform: translateY(0); }
+          to { opacity: 0; transform: translateY(10px); }
+        }
+        @keyframes scaleIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slideInRight {
+          from { opacity: 0; transform: translateX(20px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes tableRowsAppear {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .animate-fade-in {
+          animation: fadeIn 0.3s ease-out forwards;
+        }
+        .animate-fade-out {
+          animation: fadeOut 0.3s ease-out forwards;
+        }
+        .animate-scale-in {
+          animation: scaleIn 0.3s ease-out forwards;
+        }
+        .animate-slide-in-right {
+          animation: slideInRight 0.3s ease-out forwards;
+        }
+        .table-rows-appear tr {
+          opacity: 0;
+          animation: tableRowsAppear 0.5s ease-out forwards;
+        }
+        .table-rows-appear tr:nth-child(1) { animation-delay: 0.05s; }
+        .table-rows-appear tr:nth-child(2) { animation-delay: 0.1s; }
+        .table-rows-appear tr:nth-child(3) { animation-delay: 0.15s; }
+        .table-rows-appear tr:nth-child(4) { animation-delay: 0.2s; }
+        .table-rows-appear tr:nth-child(5) { animation-delay: 0.25s; }
+        .table-rows-appear tr:nth-child(6) { animation-delay: 0.3s; }
+        .table-rows-appear tr:nth-child(7) { animation-delay: 0.35s; }
+        .table-rows-appear tr:nth-child(8) { animation-delay: 0.4s; }
+        .table-rows-appear tr:nth-child(9) { animation-delay: 0.45s; }
+        .table-rows-appear tr:nth-child(10) { animation-delay: 0.5s; }
+        .view-toggle-active {
+          background-color: var(--color-primary-50, rgba(59, 130, 246, 0.1)) !important;
+          color: var(--color-primary, #3b82f6) !important;
+          font-weight: 500 !important;
+          box-shadow: inset 0 0 0 1px var(--color-primary, #3b82f6) !important;
+        }
+        .view-toggle-active svg {
+          stroke: var(--color-primary, #3b82f6) !important;
+          stroke-width: 2.5px !important;
+        }
+      `;
+      document.head.appendChild(styleSheet);
+      
+      // Set initial active state for table view
+      tableViewBtn.classList.add('view-toggle-active');
+      tableViewBtn.setAttribute('aria-current', 'true');
+      tableViewBtn.setAttribute('aria-pressed', 'true');
+      cardViewBtn.setAttribute('aria-pressed', 'false');
+      
+      // Show a brief help tooltip on first visit
+      const isFirstVisit = !localStorage.getItem('viewToggleUsed');
+      if (isFirstVisit) {
+        const tooltip = document.createElement('div');
+        tooltip.className = 'absolute top-10 right-0 bg-white dark:bg-gray-800 border border-primary rounded shadow-lg p-2 text-xs max-w-[200px] z-10 animate-fade-in';
+        tooltip.innerHTML = 'Try switching between views to find your preferred way to browse reports! <button class="mt-1 px-2 py-0.5 bg-primary/10 text-primary rounded hover:bg-primary/20 text-center w-full">Got it</button>';
+        tooltip.style.zIndex = '100';
+        
+        // Append to parent container
+        const viewToggleParent = tableViewBtn.closest('div').parentElement;
+        if (viewToggleParent) {
+          viewToggleParent.style.position = 'relative';
+          viewToggleParent.appendChild(tooltip);
+          
+          // Remove tooltip on click
+          tooltip.querySelector('button').addEventListener('click', () => {
+            tooltip.classList.add('animate-fade-out');
+            setTimeout(() => tooltip.remove(), 300);
+            localStorage.setItem('viewToggleUsed', 'true');
+          });
+          
+          // Auto-remove tooltip after 8 seconds
+          setTimeout(() => {
+            if (document.body.contains(tooltip)) {
+              tooltip.classList.add('animate-fade-out');
+              setTimeout(() => tooltip.remove(), 300);
+            }
+          }, 8000);
+        }
       }
       
-      toggleBtn.addEventListener('click', () => {
-        const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
-        const newState = !isExpanded;
+      // Function to toggle active state with enhanced animations
+      const setActiveView = (view) => {
+        // Update button states
+        tableViewBtn.classList.toggle('view-toggle-active', view === 'table');
+        cardViewBtn.classList.toggle('view-toggle-active', view === 'card');
+        tableViewBtn.setAttribute('aria-current', view === 'table');
+        cardViewBtn.setAttribute('aria-current', view === 'card');
         
-        // Update button state
-        toggleBtn.setAttribute('aria-expanded', newState.toString());
-          toggleBtn.innerHTML = newState 
-          ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-             </svg> Hide Filters` 
-            : `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-             </svg> Show Filters`;
-             
-        // Toggle sidebar visibility with proper mobile styling
-        if (newState) {
-          // On mobile, make it fixed position and add slide-in animation
-          if (window.innerWidth < 768) {
-            // Show overlay first (with animation)
-            overlay.classList.remove('hidden');
-            // Force a reflow
-            void overlay.offsetWidth;
-            overlay.style.opacity = '1';
-            
-            // Make sure the sidebar is visible 
-            sidebar.classList.remove('hidden');
-            
-            // Add mobile-specific classes
-            sidebar.classList.add('fixed', 'inset-y-0', 'left-0', 'z-50', 'pt-16', 'pb-4', 'overflow-y-auto', 'w-[85%]', 'max-w-sm');
-            sidebar.style.transform = 'translateX(-100%)';
-            
-            // Force a reflow
-            void sidebar.offsetWidth;
-            
-            // Then animate in
-            sidebar.style.transform = 'translateX(0)';
-            
-            document.body.classList.add('overflow-hidden'); // Prevent background scrolling
-          } else {
-            // On desktop, the sidebar is already visible through CSS grid
-            sidebar.classList.remove('hidden');
+        // Update button accessibility attributes
+        tableViewBtn.setAttribute('aria-pressed', view === 'table');
+        cardViewBtn.setAttribute('aria-pressed', view === 'card');
+        
+        // Add haptic feedback on mobile if available
+        if ('vibrate' in navigator) {
+          try {
+            navigator.vibrate(5); // Subtle vibration on mobile for both view changes
+          } catch (e) {
+            // Ignore errors if vibration is not available
           }
+        }
+        
+        // Update results count text based on view
+        if (resultsCount) {
+          const currentText = resultsCount.textContent || '';
+          const number = currentText.match(/\d+/);
+          if (number) {
+            resultsCount.textContent = `Showing ${number[0]} vulnerability reports in ${view === 'table' ? 'table' : 'card'} view`;
+          }
+        }
+        
+        // Show view transition message
+        const viewChangeMsg = document.createElement('div');
+        viewChangeMsg.className = 'fixed left-1/2 transform -translate-x-1/2 top-4 bg-primary/90 text-white px-3 py-1.5 rounded-full shadow-lg text-xs font-medium z-50 flex items-center animate-scale-in';
+        viewChangeMsg.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>Switched to ${view === 'table' ? 'table' : 'card'} view`;
+        document.body.appendChild(viewChangeMsg);
+        
+        // Remove message after animation
+        setTimeout(() => {
+          viewChangeMsg.style.opacity = '0';
+          viewChangeMsg.style.transform = 'translate(-50%, -20px)';
+          viewChangeMsg.style.transition = 'opacity 0.3s, transform 0.3s';
+          setTimeout(() => viewChangeMsg.remove(), 300);
+        }, 1500);
+        
+        // Show/hide views with enhanced transition
+        if (view === 'card') {
+          // Animate out table view
+          tableView.style.transition = 'opacity 0.2s ease-out';
+          tableView.style.opacity = '0';
+          
+          // After fade out, swap views
+          setTimeout(() => {
+            tableView.classList.add('hidden');
+            tableView.style.opacity = '';
+            
+            // Show card view with staggered animation
+            cardView.classList.remove('hidden');
+            cardView.classList.add('grid', 'animate-fade-in');
+            
+            // Add staggered animation to card items
+            const cards = cardView.querySelectorAll('div[data-cve]');
+            cards.forEach((card, index) => {
+              card.style.opacity = '0';
+              card.style.transform = 'translateY(15px)';
+              card.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
+              card.style.transitionDelay = `${index * 0.05}s`;
+              
+              // Force reflow to apply initial styles
+              void card.offsetWidth;
+              
+              // Animate in
+              setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+              }, 50);
+            });
+          }, 200);
         } else {
-          closeSidebar();
+          // Animate out card view
+          if (!cardView.classList.contains('hidden')) {
+            cardView.style.transition = 'opacity 0.2s ease-out';
+            cardView.style.opacity = '0';
+            
+            // After fade out, swap views
+            setTimeout(() => {
+              cardView.classList.add('hidden');
+              cardView.classList.remove('grid', 'animate-fade-in');
+              cardView.style.opacity = '';
+              
+              // Show table view with animation
+              tableView.classList.remove('hidden');
+              tableView.style.opacity = '0';
+              tableView.style.transition = 'opacity 0.3s ease-out';
+              
+              // Force reflow
+              void tableView.offsetWidth;
+              
+              // Animate in table
+              tableView.style.opacity = '1';
+              
+              // Add staggered row animation effect
+              const tableBody = document.getElementById('reportTableBody');
+              if (tableBody) {
+                tableBody.classList.add('table-rows-appear');
+                setTimeout(() => {
+                  tableBody.classList.remove('table-rows-appear');
+                }, 1000);
+              }
+            }, 200);
+          }
+        }
+        
+        // Save preference to localStorage
+        localStorage.setItem('preferredView', view);
+        localStorage.setItem('viewToggleUsed', 'true');
+      };
+      
+      // Handle click on table view button with animation
+      tableViewBtn.addEventListener('click', () => {
+        if (!tableViewBtn.classList.contains('view-toggle-active')) {
+          // Add click animation
+          tableViewBtn.classList.add('animate-pulse');
+          setTimeout(() => {
+            tableViewBtn.classList.remove('animate-pulse');
+            setActiveView('table');
+          }, 150);
         }
       });
       
-      // Handle window resize
+      // Handle click on card view button with animation
+      cardViewBtn.addEventListener('click', () => {
+        if (!cardViewBtn.classList.contains('view-toggle-active')) {
+          // Add click animation
+          cardViewBtn.classList.add('animate-pulse');
+          setTimeout(() => {
+            cardViewBtn.classList.remove('animate-pulse');
+            setActiveView('card');
+          }, 150);
+        }
+      });
+      
+      // Check for saved preference
+      const savedView = localStorage.getItem('preferredView');
+      if (savedView) {
+        setActiveView(savedView);
+      } else {
+        // Set default to table view if no preference
+        setActiveView('table');
+        
+        // Adjust view based on screen size if no preference is set
+        if (window.innerWidth < 640) {
+          // On small screens, default to card view
+          setActiveView('card');
+        }
+      }
+      
+      // Listen for screen size changes to adjust view if needed
       window.addEventListener('resize', () => {
-        if (window.innerWidth >= 768) {
-          // Resized to Desktop: Ensure sidebar is visible and styled correctly
-          sidebar.classList.remove('hidden', 'fixed', 'inset-y-0', 'left-0', 'z-50', 'pt-16', 'pb-4', 'w-[85%]', 'max-w-sm');
-          sidebar.style.transform = ''; // Ensure transform is cleared
-          
-          // Make sure the parent container is visible on desktop
-          const parentContainer = sidebar.closest('div');
-          if (parentContainer) {
-            parentContainer.classList.remove('hidden');
-            parentContainer.classList.add('block');
-          }
-          
-          if (overlay) overlay.classList.add('hidden');
-          document.body.classList.remove('overflow-hidden');
-          // Reset toggle button state if resizing to desktop
-          toggleBtn.setAttribute('aria-expanded', 'false');
-          toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-            </svg> Show Filters`;
-        } else {
-          // Resized to Mobile: Hide sidebar unless it was explicitly open
-          const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
-          if (!isExpanded) {
-             sidebar.classList.add('hidden');
-             // Clean up mobile positioning classes if they were somehow left
-             sidebar.classList.remove('fixed', 'inset-y-0', 'left-0', 'z-50', 'pt-16', 'pb-4', 'overflow-y-auto', 'w-[85%]', 'max-w-sm');
-             sidebar.style.transform = '';
-             if (overlay) overlay.classList.add('hidden');
-             document.body.classList.remove('overflow-hidden');
+        // Only auto-switch if no user preference has been set
+        if (!localStorage.getItem('viewToggleUsed')) {
+          if (window.innerWidth < 640 && tableViewBtn.classList.contains('view-toggle-active')) {
+            setActiveView('card');
+          } else if (window.innerWidth >= 1200 && cardViewBtn.classList.contains('view-toggle-active')) {
+            setActiveView('table');
           }
         }
       });
@@ -697,23 +1255,160 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
 
   // Initialize when DOM is loaded
   document.addEventListener('DOMContentLoaded', () => {
-    initialize();
-    // Removed legacy desktop/mobile toggle; using mobile-specific toggle only
-    // Mobile filter toggle behavior
-    const mobileToggle = document.getElementById('mobileFilterToggle');
+    // Initialize layout based on screen size
     const sidebarWrapper = document.getElementById('filterSidebarWrapper');
-    if (mobileToggle && sidebarWrapper) {
-      mobileToggle.addEventListener('click', () => {
-        const isHidden = sidebarWrapper.classList.contains('hidden');
-        if (isHidden) {
-          sidebarWrapper.classList.remove('hidden');
-          mobileToggle.textContent = 'Hide Filters';
-        } else {
-          sidebarWrapper.classList.add('hidden');
-          mobileToggle.textContent = 'Show Filters';
+    if (sidebarWrapper) {
+      if (window.innerWidth >= 768) {
+        // On desktop, show sidebar by default
+        sidebarWrapper.classList.remove('hidden');
+        
+        // Add margin to main content
+        const mainContent = document.querySelector('main.flex-1');
+        if (mainContent) {
+          mainContent.classList.add('md:ml-80');
         }
-      });
+        
+        // Update toggle button state
+        const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+        if (sidebarToggleBtn) {
+          sidebarToggleBtn.setAttribute('aria-expanded', 'true');
+          sidebarToggleBtn.classList.add('bg-primary/10', 'text-primary', 'border-primary/30');
+        }
+      } else {
+        // On mobile, hide sidebar by default
+        sidebarWrapper.classList.add('hidden');
+        
+        // Update toggle button state
+        const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+        if (sidebarToggleBtn) {
+          sidebarToggleBtn.setAttribute('aria-expanded', 'false');
+        }
+      }
     }
+    
+    // Initialize regular components
+    initialize();
+    setupViewToggle();
+    
+    // Set up filter toggle behavior consistently
+    const sidebarToggleBtn = document.getElementById('sidebarToggleBtn'); // This is in the header
+    const filterSidebarWrapper = document.getElementById('filterSidebarWrapper');
+    const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+    const existingOverlay = document.getElementById('sidebarOverlay');
+    let overlay = existingOverlay;
+    
+    // Create overlay if it doesn't exist yet
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'sidebarOverlay';
+      overlay.className = 'fixed inset-0 bg-black/50 z-40 hidden md:hidden opacity-0 transition-opacity duration-300 ease-out';
+      document.body.appendChild(overlay);
+    }
+    
+    // Enhanced toggle sidebar function that handles both desktop and mobile
+    function toggleSidebar() {
+      if (window.innerWidth < 768) {
+        // Mobile behavior: off-canvas sidebar
+        const isHidden = sidebarWrapper.classList.contains('hidden') || 
+                        sidebarWrapper.classList.contains('-translate-x-full');
+        
+        if (isHidden) {
+          // Show sidebar
+          sidebarWrapper.classList.remove('hidden');
+          
+          // First show the overlay with opacity 0
+          overlay.classList.remove('hidden');
+          
+          // Force a reflow to ensure transition starts from opacity 0
+          void overlay.offsetWidth;
+          
+          // Animate the opacity
+          overlay.classList.add('opacity-100');
+          
+          // Prepare sidebar
+          sidebarWrapper.classList.add('fixed', 'inset-y-0', 'left-0', 'z-50', 'bg-surface', 'w-[280px]', 'max-w-[90vw]', 'shadow-lg', 'overflow-y-auto');
+          sidebarWrapper.classList.remove('-translate-x-full');
+          document.body.classList.add('overflow-hidden');
+          
+          // Update mobile filter button if exists
+          const mobileFilterCount = document.getElementById('mobileFilterCount');
+          const mobileFilterBtn = document.getElementById('mobileFilterToggleBtn');
+          if (mobileFilterBtn) {
+            mobileFilterBtn.classList.add('active', 'bg-primary/10', 'text-primary');
+            mobileFilterBtn.setAttribute('aria-expanded', 'true');
+          }
+        } else {
+          // Hide sidebar
+          // Animate out
+          overlay.classList.remove('opacity-100');
+          sidebarWrapper.classList.add('-translate-x-full');
+          
+          // Wait for animations to complete before hiding
+          setTimeout(() => {
+            sidebarWrapper.classList.add('hidden');
+            overlay.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+            
+            // Reset sidebar position classes
+            sidebarWrapper.classList.remove('fixed', 'inset-y-0', 'left-0', 'z-50', '-translate-x-full');
+          }, 300); // Match the duration in the CSS transition
+          
+          // Update mobile filter button if exists
+          const mobileFilterBtn = document.getElementById('mobileFilterToggleBtn');
+          if (mobileFilterBtn) {
+            mobileFilterBtn.classList.remove('active', 'bg-primary/10', 'text-primary');
+            mobileFilterBtn.setAttribute('aria-expanded', 'false');
+          }
+        }
+      } else {
+        // Desktop behavior: toggle sidebar visibility
+        // Simply show/hide the sidebar element
+        sidebarWrapper.classList.toggle('hidden');
+        
+        // Update display in main content area
+        const mainContent = document.querySelector('main.flex-1');
+        if (mainContent) {
+          if (sidebarWrapper.classList.contains('hidden')) {
+            // Sidebar is now hidden, expand main content
+            mainContent.classList.remove('md:ml-80');
+            mainContent.classList.add('expanded');
+          } else {
+            // Sidebar is now visible, make space for it
+            mainContent.classList.add('md:ml-80');
+            mainContent.classList.remove('expanded');
+          }
+        }
+      }
+    }
+    
+    // Attach event listeners
+    if (sidebarToggleBtn) {
+      sidebarToggleBtn.addEventListener('click', toggleSidebar);
+    }
+    
+    if (closeSidebarBtn) {
+      closeSidebarBtn.addEventListener('click', toggleSidebar);
+    }
+    
+    if (overlay) {
+      overlay.addEventListener('click', toggleSidebar);
+    }
+    
+    // Handle resize events
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 768) {
+        // On desktop - ensure visible
+        sidebarWrapper.classList.remove('fixed', 'inset-y-0', 'left-0', 'z-50', '-translate-x-full', 'transform');
+        sidebarWrapper.style.transform = '';
+        if (overlay) overlay.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      } else {
+        // On mobile - hide by default (if not explicitly shown)
+        if (!document.body.classList.contains('overflow-hidden')) {
+          sidebarWrapper.classList.add('-translate-x-full', 'transform');
+        }
+      }
+    });
   });
 </script>
 
@@ -730,5 +1425,337 @@ reports.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf
     /* Replace @apply with direct CSS properties */
     from { border-left-color: #10b981; } /* Tailwind's emerald-500 */
     to { border-left-color: transparent; } 
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* View toggle buttons */
+  #tableViewBtn.active, #cardViewBtn.active {
+    background-color: rgba(var(--color-primary-rgb, 59, 130, 246), 0.15);
+    color: var(--color-primary, #3b82f6);
+    font-weight: 500;
+    box-shadow: inset 0 0 0 1px var(--color-primary);
+  }
+  
+  /* Table row hover effect */
+  #reportTable tbody tr:hover {
+    background-color: rgba(var(--color-primary-rgb, 59, 130, 246), 0.05);
+  }
+  
+  /* Add some spacing for better mobile experience */
+  /* Enhanced responsive styles for card view on small screens */
+  @media (max-width: 640px) {
+    #cardView {
+      gap: 0.75rem;
+      padding: 0.5rem;
+    }
+    
+    /* Improve card sizing on very small screens */
+    #cardView > div {
+      min-height: 120px;
+    }
+    
+    /* Adjust filter chips for better mobile view */
+    .filter-chip {
+      max-width: 95vw;
+    }
+    
+    .filter-chip span {
+      max-width: 180px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    /* Adjust active filters display */
+    #activeFilters {
+      padding: 0.5rem;
+    }
+    
+    /* Ensure view toggle buttons have equal width */
+    #tableViewBtn, #cardViewBtn {
+      flex: 1;
+      justify-content: center;
+    }
+    
+    /* Make status header more compact */
+    .w-full.mx-auto.px-3.py-2 {
+      padding: 0.5rem 0.25rem;
+    }
+    
+    /* Make filter sidebar wider when open */
+    #filterSidebarWrapper.fixed {
+      width: 85% !important;
+      max-width: 320px !important;
+    }
+    
+    /* Smaller section titles in the filter sidebar */
+    .filter-section summary {
+      font-size: 0.875rem;
+      min-height: 40px;
+    }
+  }
+  
+  /* Medium-sized screens */
+  @media (min-width: 641px) and (max-width: 768px) {
+    #cardView {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.875rem;
+    }
+  }
+  
+  /* Fix positioning issues on mobile */
+  @media (max-width: 768px) {
+    /* Ensure the mobile filters overlay properly */
+    #filterSidebarWrapper {
+      z-index: 50;
+      max-height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+      height: 100%;
+      -webkit-overflow-scrolling: touch;
+      overflow-y: auto;
+      position: fixed;
+      top: env(safe-area-inset-top, 0px);
+      bottom: env(safe-area-inset-bottom, 0px);
+    }
+    
+    /* Fix table overlapping issues */
+    #tableContainer {
+      min-width: 100%;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      border-radius: 0.375rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Optimize table headers for mobile */
+    #reportTable thead th {
+      position: sticky;
+      top: 0;
+      background-color: var(--color-surface-accent, #f9fafb);
+      z-index: 10;
+      padding-top: 0.625rem;
+      padding-bottom: 0.625rem;
+      border-bottom: 1px solid var(--color-border, #e5e7eb);
+    }
+    
+    /* Smaller font on mobile */
+    #reportTable {
+      font-size: 0.75rem; /* Smaller text on mobile */
+    }
+    
+    /* Ensure sizing for the table cells */
+    #reportTable th, #reportTable td {
+      box-sizing: border-box;
+      padding: 0.5rem 0.75rem; /* Tighter padding on mobile */
+    }
+
+    /* Make sure cells don't grow too wide */
+    #reportTable th, #reportTable td {
+      max-width: 90vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    /* Fix cards in card view */
+    #cardView > div {
+      display: flex;
+    }
+
+    /* Prevent overflow on mobile */
+    body {
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+
+    /* Ensure main content container doesn't overflow */
+    .w-full {
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+    
+    /* Better mobile-first approach for the main layout */
+    .flex.flex-col.md\\:flex-row.md\\:gap-6 {
+      gap: 0.5rem;
+    }
+    
+    /* Improve filter button positioning */
+    #mobileFilterToggleBtn {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.375rem 0.75rem;
+      background-color: var(--color-surface, #ffffff);
+      border: 1px solid var(--color-border, #e5e7eb);
+      border-radius: 0.375rem;
+      font-size: 0.75rem;
+    }
+    
+    /* Fix mobile active filter display */
+    #activeFiltersCount {
+      padding: 0.125rem 0.375rem;
+      min-width: 1.125rem;
+      text-align: center;
+      font-size: 0.625rem;
+    }
+    
+    /* Improve any SVGs in the layout */
+    svg {
+      min-width: 1rem;
+      min-height: 1rem;
+    }
+    
+    /* Prevent filter sidebar jumps during transitions */
+    #filterSidebarWrapper.transform {
+      will-change: transform;
+    }
+  }
+  
+  /* Improved larger screen support */
+  @media (min-width: 1200px) {
+    /* Adjust main content padding for better breathing space */
+    main.flex-1 {
+      padding-left: 1rem;
+    }
+    
+    /* Wider table on larger screens */
+    #reportTable {
+      table-layout: fixed;
+    }
+    
+    /* Distribute table columns more evenly */
+    #reportTable th:nth-child(1) { width: 10%; } /* CVE ID */
+    #reportTable th:nth-child(2) { width: 30%; } /* Title */
+    #reportTable th:nth-child(3) { width: 8%; }  /* CVSS */
+    #reportTable th:nth-child(4) { width: 8%; }  /* EPSS */
+    #reportTable th:nth-child(5) { width: 10%; } /* Severity */
+    #reportTable th:nth-child(6) { width: 9%; }  /* Zero-day */
+    #reportTable th:nth-child(7) { width: 15%; } /* Date */
+    
+    /* Improved table row styling */
+    #reportTable tbody tr {
+      height: 3rem;
+      transition: background-color 0.15s;
+    }
+    
+    #reportTable tbody tr:hover {
+      background-color: var(--color-surface-accent, #f9fafb) !important;
+    }
+    
+    /* Improved focus state for table rows */
+    #reportTable tbody tr:focus-within {
+      outline: 2px solid var(--color-primary, #3b82f6);
+      outline-offset: -2px;
+    }
+  }
+  
+  /* Ultra-wide screen optimizations */
+  @media (min-width: 1600px) {
+    /* Add extra columns for wide screens */
+    #cardView {
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1.5rem;
+    }
+    
+    /* Center the main container with max width */
+    .w-full.max-w-\\[1800px\\] {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+  
+  /* Transition properties for sidebar and content */
+  #filterSidebarWrapper {
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out, width 0.3s ease-out;
+  }
+  
+  /* Desktop layout with sidebar */
+  @media (min-width: 768px) {
+    /* Create space for sidebar when visible */
+    main.flex-1.md\\:ml-80 {
+      margin-left: 20rem;
+      transition: margin-left 0.3s ease-out;
+    }
+    
+    /* Animation for when sidebar is toggled off */
+    main.flex-1.expanded {
+      margin-left: 0;
+      transition: margin-left 0.3s ease-out;
+    }
+    
+    /* Ensure content adjusts smoothly when sidebar toggle changes */
+    .w-full.max-w-\\[1800px\\] {
+      transition: padding-left 0.3s ease-out;
+    }
+  }
+  
+  @media (min-width: 2000px) {
+    /* Add even more columns for ultra-wide screens */
+    #cardView {
+      grid-template-columns: repeat(6, 1fr);
+    }
+  }
+  
+  /* Make sure content doesn't get too stretched on ultra-wide screens */
+  @media (min-width: 2400px) {
+    .w-full {
+      max-width: 2400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+  
+  /* Dark mode improvements */
+  @media (prefers-color-scheme: dark) {
+    #tableContainer {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    }
+    
+    #reportTable thead th {
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    
+    .filter-chip {
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+  }
+  
+  /* Accessibility improvements */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+  
+  /* Full width layout optimizations */
+  @media (min-width: 1600px) {
+    /* Add extra columns for wide screens */
+    #cardView {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+  
+  @media (min-width: 2000px) {
+    /* Add even more columns for ultra-wide screens */
+    #cardView {
+      grid-template-columns: repeat(6, 1fr);
+    }
+  }
+  
+  /* Make sure content doesn't get too stretched on ultra-wide screens */
+  @media (min-width: 2400px) {
+    .w-full {
+      max-width: 2400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
   }
 </style>
