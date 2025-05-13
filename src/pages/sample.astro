@@ -1,0 +1,51 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import Card from '../components/Card.astro';
+import Button from '../components/Button.astro';
+---
+
+<MainLayout title="Component Showcase">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">Component Showcase</h1>
+        
+        <section class="mb-10">
+            <h2 class="text-2xl font-semibold mb-4 border-b border-border pb-2">Cards</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <Card>
+                    <span slot="title">Vulnerability Reports</span>
+                    <p class="mb-4">Access the latest vulnerability intelligence reports and stay informed about critical security issues.</p>
+                    <Button href="/reports">View Reports</Button>
+                </Card>
+                
+                <Card>
+                    <span slot="title">Security Resources</span>
+                    <p class="mb-4">Find helpful resources and guides to enhance your organization's security posture.</p>
+                    <Button variant="outline" href="/about">Learn More</Button>
+                </Card>
+            </div>
+        </section>
+        
+        <section class="mb-10">
+            <h2 class="text-2xl font-semibold mb-4 border-b border-border pb-2">Button Variants</h2>
+            <div class="flex flex-wrap gap-4 mb-8">
+                <Button>Primary Button</Button>
+                <Button variant="secondary">Secondary Button</Button>
+                <Button variant="outline">Outline Button</Button>
+            </div>
+        </section>
+        
+        <section class="mb-10">
+            <h2 class="text-2xl font-semibold mb-4 border-b border-border pb-2">Button Sizes</h2>
+            <div class="flex flex-wrap gap-4 items-center">
+                <Button size="sm">Small Button</Button>
+                <Button>Medium Button</Button>
+                <Button size="lg">Large Button</Button>
+            </div>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-2xl font-semibold mb-4 border-b border-border pb-2">Navigation</h2>
+            <p class="mb-4">The header above is using the astro-navbar component with our site's navigation items. It includes responsive design with mobile menu and theme toggling.</p>
+        </section>
+    </div>
+</MainLayout>

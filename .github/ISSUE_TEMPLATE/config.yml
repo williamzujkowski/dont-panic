@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security Vulnerability
+    url: https://github.com/username/dont-panic/security/policy
+    about: Please report security vulnerabilities according to our security policy.
+  - name: Documentation Issue
+    url: https://github.com/username/dont-panic/issues/new?labels=documentation&template=feature_request.md
+    about: Report issues with the documentation or suggest improvements.

@@ -83,3 +83,5 @@ yarn-error.log*
 # Astro build output and cache
 dist/
 .astro/
+
+**/.claude/settings.local.json

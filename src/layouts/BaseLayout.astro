@@ -54,6 +54,31 @@ const currentPath = Astro.url.pathname;
                         document.documentElement.classList.remove("dark");
                     }
                     
+                    // Set up theme toggle button display
+                    const themeToggleBtn = document.getElementById("themeToggleBtn");
+                    if (themeToggleBtn) {
+                        const updateThemeDisplay = (isDark) => {
+                            const darkIcon = themeToggleBtn.querySelector(".dark-icon");
+                            const lightIcon = themeToggleBtn.querySelector(".light-icon");
+                            
+                            if (isDark) {
+                                darkIcon.style.display = "block";
+                                lightIcon.style.display = "none";
+                                themeToggleBtn.setAttribute('aria-label', 'Currently in dark mode. Switch to light mode');
+                                themeToggleBtn.setAttribute('title', 'Switch to light mode');
+                                themeToggleBtn.setAttribute('aria-pressed', 'true');
+                            } else {
+                                darkIcon.style.display = "none";
+                                lightIcon.style.display = "block";
+                                themeToggleBtn.setAttribute('aria-label', 'Currently in light mode. Switch to dark mode');
+                                themeToggleBtn.setAttribute('title', 'Switch to dark mode');
+                                themeToggleBtn.setAttribute('aria-pressed', 'false');
+                            }
+                        };
+                        
+                        updateThemeDisplay(document.documentElement.classList.contains("dark"));
+                    }
+                    
                     // Add class to enable transitions (but only after initial theme is set)
                     setTimeout(() => {
                         document.documentElement.classList.add('theme-transitions-enabled');
@@ -70,9 +95,8 @@ const currentPath = Astro.url.pathname;
                             }
                             
                             // Update button appearance if it exists
-                            const btn = document.getElementById("themeToggleBtn");
-                            if (btn && typeof updateThemeButton === 'function') {
-                                updateThemeButton(e.matches);
+                            if (themeToggleBtn) {
+                                updateThemeDisplay(e.matches);
                             }
                         }
                     });
@@ -109,10 +133,6 @@ const currentPath = Astro.url.pathname;
                 const btn = document.getElementById("themeToggleBtn");
                 if (!btn) return;
                 const html = document.documentElement;
-                const isDark = html.classList.contains("dark");
-                
-                // Update button appearance based on current theme
-                updateThemeButton(isDark);
                 
                 btn.addEventListener("click", () => {
                     const isDarkMode = html.classList.contains("dark");
@@ -127,16 +147,35 @@ const currentPath = Astro.url.pathname;
                         if (isDarkMode) {
                             html.classList.remove("dark");
                             localStorage.setItem("theme", "light");
-                            updateThemeButton(false);
                         } else {
                             html.classList.add("dark");
                             localStorage.setItem("theme", "dark");
-                            updateThemeButton(true);
+                        }
+                        
+                        // Update icons visibility
+                        const darkIcon = btn.querySelector(".dark-icon");
+                        const lightIcon = btn.querySelector(".light-icon");
+                        const newIsDarkMode = html.classList.contains("dark");
+                        
+                        if (newIsDarkMode) {
+                            darkIcon.style.display = "block";
+                            lightIcon.style.display = "none";
+                            btn.setAttribute('aria-label', 'Currently in dark mode. Switch to light mode');
+                            btn.setAttribute('title', 'Switch to light mode');
+                            btn.setAttribute('aria-pressed', 'true');
+                            btn.classList.add('theme-toggle-dark');
+                        } else {
+                            darkIcon.style.display = "none";
+                            lightIcon.style.display = "block";
+                            btn.setAttribute('aria-label', 'Currently in light mode. Switch to dark mode');
+                            btn.setAttribute('title', 'Switch to dark mode');
+                            btn.setAttribute('aria-pressed', 'false');
+                            btn.classList.remove('theme-toggle-dark');
                         }
                         
                         // Dispatch theme change event for other components
                         document.dispatchEvent(new CustomEvent('themeChanged', {
-                            detail: { isDark: !isDarkMode }
+                            detail: { isDark: newIsDarkMode }
                         }));
                         
                         // Remove the transition element
@@ -146,61 +185,64 @@ const currentPath = Astro.url.pathname;
                         }, 100);
                     }, 50);
                 });
-                
-                // Function to update theme button appearance
-                function updateThemeButton(isDark) {
-                    // Update icon
-                    btn.innerHTML = isDark 
-                        ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>'
-                        : '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>';
-                    
-                    // Update tooltip
-                    btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
-                    btn.setAttribute('title', isDark ? 'Switch to light mode' : 'Switch to dark mode');
-                    
-                    // Update visual style
-                    if (isDark) {
-                        btn.classList.add('theme-toggle-dark');
-                    } else {
-                        btn.classList.remove('theme-toggle-dark');
-                    }
-                }
             });
         </script>
         
         <style is:inline>
-            /* Theme transition effect */
+            /* Theme transition effect - gentler for accessibility */
             .theme-transition {
                 position: fixed;
                 top: 0;
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background-color: rgba(0, 0, 0, 0.3);
+                background-color: rgba(0, 0, 0, 0.15); /* Reduced opacity for better visibility */
                 z-index: 9999;
                 pointer-events: none;
-                opacity: 0.5;
-                transition: opacity 0.3s ease;
-                backdrop-filter: blur(4px);
+                opacity: 0.3; /* Reduced opacity */
+                transition: opacity 0.2s ease; /* Faster transition */
+                backdrop-filter: blur(2px); /* Reduced blur */
+            }
+            
+            /* Disable transition effect for users who prefer reduced motion or if prefers-reduced-transparency is supported */
+            @media (prefers-reduced-motion: reduce), (prefers-reduced-transparency: reduce) {
+                .theme-transition {
+                    background-color: transparent;
+                    backdrop-filter: none;
+                    opacity: 0;
+                }
             }
             
             /* Theme toggle button animations */
-            #themeToggleBtn svg {
+            #themeToggleBtn .dark-icon,
+            #themeToggleBtn .light-icon {
                 transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
             }
             
-            #themeToggleBtn:hover svg {
+            #themeToggleBtn:hover .dark-icon,
+            #themeToggleBtn:hover .light-icon {
                 transform: rotate(12deg) scale(1.1);
             }
             
-            #themeToggleBtn:active svg {
+            #themeToggleBtn:active .dark-icon,
+            #themeToggleBtn:active .light-icon {
                 transform: scale(0.9);
                 transition-duration: 0.1s;
             }
             
+            /* Light/dark mode specific styles */
+            .dark-icon {
+                display: none;
+                color: #FFD700; /* Gold color for the sun icon */
+            }
+            
+            .light-icon {
+                display: block;
+                color: #6B7280; /* Gray color for the moon icon */
+            }
+            
             .theme-toggle-dark {
                 background-color: rgba(255, 255, 255, 0.1) !important;
-                color: #FFD700 !important; /* Gold color for the sun icon */
                 box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
             }
             

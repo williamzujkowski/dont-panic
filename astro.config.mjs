@@ -2,6 +2,14 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite'; // Import the Vite plugin
 import pagefind from 'astro-pagefind'; // Import the Pagefind integration
+import sitemap from '@astrojs/sitemap';
+import robotsTxt from 'astro-robots-txt';
+// RSS feed generation will be handled in a dedicated route using @astrojs/rss helper
+// import rss from '@astrojs/rss';
+import mdx from '@astrojs/mdx';
+import remarkReadingTime from 'remark-reading-time';
+import remarkSlug from 'remark-slug';
+import remarkAutolinkHeadings from 'remark-autolink-headings';
 
 // Determine base path and site URL based on environment
 // Fallback for local development
@@ -47,7 +55,7 @@ export default defineConfig({
   outDir: 'dist',
 
   integrations: [
-    // Add Pagefind integration
+    // Pagefind integration
     pagefind({
       // Pagefind configuration options
       searchPagePath: '/search',  // Optional: path to a dedicated search page
@@ -64,6 +72,19 @@ export default defineConfig({
         "nav", 
         "footer",
         "[data-pagefind-ignore]"
+      ]
+    }),
+    // SEO: generate sitemap.xml
+    sitemap(),
+    // robots.txt
+    robotsTxt(),
+    // RSS feed will be generated via a custom route using @astrojs/rss
+    // MDX support with remark plugins: reading time, slug, autolinks
+    mdx({
+      remarkPlugins: [
+        remarkReadingTime,
+        remarkSlug,
+        remarkAutolinkHeadings
       ]
     })
   ],

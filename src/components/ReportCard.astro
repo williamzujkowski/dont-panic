@@ -1,0 +1,121 @@
+---
+// src/components/ReportCard.astro
+import type { CollectionEntry } from 'astro:content';
+import SeverityTag from './SeverityTag.astro';
+import ZeroDayTag from './ZeroDayTag.astro';
+import Button from './Button.astro';
+import ScoreDisplay from './ScoreDisplay.astro';
+
+interface Props {
+  report: CollectionEntry<'reports'>;
+  isHighlighted?: boolean; // For new reports
+}
+
+const { report, isHighlighted = false } = Astro.props;
+
+// Format the date
+const formattedDate = report.data.publishDate.toLocaleDateString('en-US', { 
+  year: 'numeric', 
+  month: 'short', 
+  day: 'numeric' 
+});
+
+// Get severity color
+let severityColor = "bg-gray-100 dark:bg-gray-800";
+if (report.data.severity === 'Critical' || report.data.cvssSeverity === 'Critical') {
+  severityColor = "bg-red-50 dark:bg-red-900/20";
+} else if (report.data.severity === 'High' || report.data.cvssSeverity === 'High') {
+  severityColor = "bg-orange-50 dark:bg-orange-900/20";
+} else if (report.data.severity === 'Medium' || report.data.cvssSeverity === 'Medium') {
+  severityColor = "bg-amber-50 dark:bg-amber-900/20";
+}
+
+// CSS classes for the card
+const cardClasses = [
+  "rounded-lg overflow-hidden bg-surface border border-border shadow-md hover:shadow-lg transition-all duration-300 h-full flex flex-col",
+  isHighlighted ? "border-l-4 border-l-emerald-500 animate-[fadeOutHighlight_3s_ease-out_forwards]" : ""
+].join(" ");
+
+// Badge for new reports
+const isNew = report.data.publishDate > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+---
+
+<div class={cardClasses} data-cve={report.slug}>
+  <!-- Card Banner with severity color-->
+  <div class={`${severityColor} py-1 px-4 flex justify-between items-center`}>
+    <p class="text-xs font-medium text-text-secondary">
+      {formattedDate}
+    </p>
+    {isNew && <span class="text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 px-2 py-0.5 rounded-full">New</span>}
+  </div>
+  
+  <div class="p-4 flex flex-col h-full">
+    <!-- CVE ID and Tags -->
+    <div class="flex justify-between items-start gap-2 mb-2">
+      <a href={`/reports/${report.slug}`} class="text-base font-semibold text-primary hover:text-primary-dark hover:underline transition-colors">
+        {report.data.cveId}
+      </a>
+      
+      <div class="flex flex-wrap gap-1">
+        {report.data.isZeroDay ? <ZeroDayTag isZeroDay={report.data.isZeroDay} /> : null}
+        {report.data.kev ? 
+          <span class="text-xs px-2 py-0.5 bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 rounded-full">
+            KEV
+          </span>
+        : null}
+      </div>
+    </div>
+    
+    <!-- Severity -->
+    <div class="mb-2">
+      {(report.data.severity || report.data.cvssSeverity) ? 
+        <SeverityTag severity={report.data.severity || report.data.cvssSeverity} />
+      : null}
+    </div>
+    
+    <!-- Title with Truncation -->
+    <h3 class="text-sm font-medium text-text mb-3 line-clamp-2 min-h-[2.5rem]">{report.data.title}</h3>
+    
+    <!-- Scores in Card Form - more compact -->
+    <div class="grid grid-cols-2 gap-2 mb-3">
+      <div class="p-2 bg-surface-accent rounded-md border border-border">
+        <div class="text-xs text-text-secondary">CVSS Score</div>
+        <div class={`text-base font-bold ${report.data.cvssScore >= 7.0 ? 'text-red-600 dark:text-red-400' : (report.data.cvssScore >= 4.0 ? 'text-amber-600 dark:text-amber-400' : 'text-text')}`}>
+          {report.data.cvssScore !== undefined ? report.data.cvssScore.toFixed(1) : 'N/A'}
+        </div>
+      </div>
+      <div class="p-2 bg-surface-accent rounded-md border border-border">
+        <div class="text-xs text-text-secondary">EPSS Score</div>
+        <div class="text-base font-bold">
+          {report.data.epssScore !== undefined ? `${(report.data.epssScore * 100).toFixed(1)}%` : 'N/A'}
+        </div>
+      </div>
+    </div>
+    
+    <!-- Metadata Pills -->
+    <div class="flex flex-wrap gap-1 mb-4">
+      {report.data.vendor ? 
+        <span class="text-xs px-2 py-0.5 bg-surface-accent border border-border rounded-full truncate max-w-full">
+          {report.data.vendor}
+        </span>
+      : null}
+      {report.data.product ? 
+        <span class="text-xs px-2 py-0.5 bg-surface-accent border border-border rounded-full truncate max-w-full">
+          {report.data.product}
+        </span>
+      : null}
+      {report.data.patchAvailable ? 
+        <span class="text-xs px-2 py-0.5 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-full">
+          Patch Available
+        </span>
+      : null}
+    </div>
+    
+    <!-- Action Button - pushed to bottom with mt-auto -->
+    <div class="mt-auto">
+      <Button href={`/reports/${report.slug}`} variant="primary" size="sm" fullWidth={true}>
+        View Details
+      </Button>
+    </div>
+  </div>
+</div>

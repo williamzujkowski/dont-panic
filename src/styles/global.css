@@ -39,14 +39,14 @@
   --dark-color-secondary-dark: #3bb359; /* Medium green */
   --dark-color-accent: #ff5252; /* Brighter red */
 
-  --dark-color-text: #e0e0e0; /* Very light gray */
-  --dark-color-text-muted: #a0a0a0; /* Medium gray */
-  --dark-color-text-secondary: #c0c0c0; /* Light gray */
+  --dark-color-text: #f0f0f0; /* Brighter white for better contrast */
+  --dark-color-text-muted: #b0b0b0; /* Lighter gray for better contrast */
+  --dark-color-text-secondary: #d0d0d0; /* Almost white for better contrast */
 
-  --dark-color-background: #222222; /* Very dark gray */
-  --dark-color-surface: #333333; /* Dark gray */
-  --dark-color-surface-accent: #3a3a3a; /* Slightly lighter dark gray */
-  --dark-color-border: #444444; /* Medium dark gray */
+  --dark-color-background: #1a1a1a; /* Darker background for more contrast */
+  --dark-color-surface: #2b2b2b; /* Dark gray, slightly adjusted for contrast */
+  --dark-color-surface-accent: #363636; /* Slightly lighter dark gray */
+  --dark-color-border: #4a4a4a; /* Brighter border for better visibility */
 
   /* Dark Mode Status Colors */
   --dark-color-success: #4eca6f; /* Brighter green */
@@ -282,12 +282,24 @@ body {
     z-index: 1; /* Ensure focused elements are above others */
   }
   
+  /* Special high contrast focus for dark mode */
+  html.dark *:focus-visible {
+    box-shadow: 0 0 0 2px var(--color-background), 0 0 0 4px #7dd3fc; /* Use higher contrast light blue in dark mode */
+  }
+  
   /* Enhanced button focus states */
   button:focus-visible, 
   [role="button"]:focus-visible,
   a:focus-visible {
     box-shadow: 0 0 0 3px var(--color-background), 0 0 0 6px var(--color-primary);
     outline: none;
+  }
+  
+  /* Special high contrast button focus for dark mode */
+  html.dark button:focus-visible,
+  html.dark [role="button"]:focus-visible,
+  html.dark a:focus-visible {
+    box-shadow: 0 0 0 3px var(--color-background), 0 0 0 6px #7dd3fc; /* Use higher contrast light blue in dark mode */
   }
   
   /* Improved keyboard navigation for input elements */
@@ -298,6 +310,14 @@ body {
     box-shadow: 0 0 0 3px var(--color-background), 0 0 0 4px var(--color-primary);
   }
   
+  /* Higher contrast form element focus for dark mode */
+  html.dark input:focus-visible,
+  html.dark select:focus-visible,
+  html.dark textarea:focus-visible {
+    border-color: #7dd3fc; /* Use higher contrast light blue in dark mode */
+    box-shadow: 0 0 0 3px var(--color-background), 0 0 0 4px #7dd3fc;
+  }
+  
   /* Table and list item focus states for keyboard navigation */
   tr:focus-visible,
   li:focus-visible,
@@ -305,6 +325,16 @@ body {
   [role="listitem"]:focus-visible {
     background-color: rgba(var(--color-primary-rgb), 0.1);
     outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
+  }
+  
+  /* Higher contrast row and list item focus for dark mode */
+  html.dark tr:focus-visible,
+  html.dark li:focus-visible,
+  html.dark [role="row"]:focus-visible,
+  html.dark [role="listitem"]:focus-visible {
+    background-color: rgba(125, 211, 252, 0.2); /* Light blue with opacity */
+    outline: 2px solid #7dd3fc; /* Brighter outline for dark mode */
     outline-offset: -2px;
   }
 
@@ -369,6 +399,24 @@ body {
   /* Ensure active table rows are distinguishable */
   tr:hover, tr:focus-within {
     border: 1px solid;
+  }
+  
+  /* Ensure tags are visible */
+  .bg-red-100, .bg-orange-100, .bg-amber-100, .bg-blue-100,
+  .dark\:bg-red-900\/70, .dark\:bg-orange-900\/70, .dark\:bg-amber-900\/70, .dark\:bg-blue-900\/70 {
+    forced-color-adjust: none; /* Allow browser to handle contrast */
+    border: 1px solid;
+  }
+  
+  /* Improve color indicators in dark mode */
+  .dark .score-display span,
+  .dark [class*="text-red-"], 
+  .dark [class*="text-orange-"],
+  .dark [class*="text-yellow-"],
+  .dark [class*="text-amber-"],
+  .dark [class*="text-blue-"],
+  .dark [class*="text-purple-"] {
+    forced-color-adjust: none;
   }
 }
 

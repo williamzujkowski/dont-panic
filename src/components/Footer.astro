@@ -3,12 +3,12 @@
 const currentYear = new Date().getFullYear();
 const repoUrl = "https://github.com/williamzujkowski/dont-panic"; // Link to repo
 ---
-{/* Apply Tailwind classes directly */}
-<footer role="contentinfo" class="mt-xl py-lg text-center text-text-muted text-sm border-t border-border bg-surface"> {/* Use spacing vars */}
-  <div class="container mx-auto px-md"> {/* Added container */}
+<!-- Apply Tailwind classes directly -->
+<footer role="contentinfo" class="mt-xl py-lg text-center text-text-muted text-sm border-t border-border bg-surface"> <!-- Use spacing vars -->
+  <div class="w-full mx-auto px-4"> <!-- Full width container -->
     <p>
       &copy; {currentYear} Don't Panic.
-      <a href={repoUrl} target="_blank" rel="noopener noreferrer" class="hover:text-primary hover:underline ml-sm transition-colors"> {/* Use spacing var */}
+      <a href={repoUrl} target="_blank" rel="noopener noreferrer" class="hover:text-primary hover:underline ml-sm transition-colors"> <!-- Use spacing var -->
         View Source on GitHub
       </a>
     </p>

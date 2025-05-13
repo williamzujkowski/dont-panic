@@ -161,14 +161,29 @@ The homepage features a data-dense table view of vulnerability reports with adva
 
 All filtering and sorting is performed client-side, ensuring fast response times and no server requirements.
 
+## Accessibility Features
+
+Don't Panic is designed with accessibility in mind and includes the following features:
+
+- **Keyboard Navigation:** Full keyboard navigation support including a skip-to-content link
+- **ARIA Attributes:** Proper ARIA roles, labels, and landmarks throughout the site
+- **Semantic HTML:** Use of semantic HTML elements for better screen reader compatibility
+- **Color Contrast:** Adherence to WCAG AA contrast requirements
+- **Focus Management:** Visible focus indicators for keyboard users
+- **Responsive Design:** Content remains accessible across different screen sizes
+- **Reduced Motion:** Respects user preferences for reduced motion
+- **Screen Reader Testing:** Comprehensive testing with popular screen readers
+
+For more information on screen reader testing, see the [Screen Reader Testing Guide](./docs/screen-reader-testing.md).
+
 ## Future Work and Known Issues
 
 ### Future Enhancements
 
-- **Accessibility Improvements:** Conduct a thorough accessibility audit and implement improvements
 - **Enhanced Report Visualization:** Add visual charts for CVSS components and timeline visualization
 - **Performance Optimization:** Conduct Lighthouse audit and optimize image loading and CSS/JS bundles
 - **Test Coverage:** Expand test coverage and improve test reliability
+- **Continuous Accessibility Improvements:** Ongoing testing and refinement of accessibility features
 
 ### Known Issues
 

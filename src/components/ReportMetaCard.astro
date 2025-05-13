@@ -1,0 +1,79 @@
+---
+// src/components/ReportMetaCard.astro
+import type { CollectionEntry } from 'astro:content';
+import SeverityTag from './SeverityTag.astro';
+import ZeroDayTag from './ZeroDayTag.astro';
+import ScoreDisplay from './ScoreDisplay.astro';
+import Card from './Card.astro';
+
+interface Props {
+  report: CollectionEntry<'reports'>;
+}
+
+const { report } = Astro.props;
+
+// Format the date
+const formattedDate = report.data.publishDate.toLocaleDateString('en-US', { 
+  year: 'numeric', 
+  month: 'long', 
+  day: 'numeric' 
+});
+
+// Check for product and vendor data
+const hasProductInfo = report.data.product || report.data.vendor;
+---
+
+<Card>
+  <div slot="title">Vulnerability Details</div>
+  
+  <div class="space-y-4">
+    <!-- Scores -->
+    <div class="flex flex-wrap gap-3">
+      <ScoreDisplay type="CVSS" score={report.data.cvssScore} link={`https://nvd.nist.gov/vuln/detail/${report.data.cveId}`} />
+      <ScoreDisplay type="EPSS" score={report.data.epssScore} link="https://www.first.org/epss/" />
+    </div>
+    
+    <!-- Status Information -->
+    <div class="space-y-2">
+      <h3 class="text-sm font-medium text-text-secondary">Status</h3>
+      <div class="flex flex-wrap gap-2">
+        {(report.data.severity || report.data.cvssSeverity) ? 
+          <SeverityTag severity={report.data.severity || report.data.cvssSeverity} />
+        : null}
+        {report.data.isZeroDay ? <ZeroDayTag isZeroDay={report.data.isZeroDay} /> : null}
+        {report.data.kev ? 
+          <span class="text-xs px-2 py-0.5 rounded bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800">
+            Known Exploited
+          </span>
+        : null}
+        {report.data.patchAvailable ? 
+          <span class="text-xs px-2 py-0.5 rounded bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800">
+            Patch Available
+          </span>
+        : null}
+      </div>
+    </div>
+    
+    <!-- Published Date -->
+    <div class="space-y-1">
+      <h3 class="text-sm font-medium text-text-secondary">Published</h3>
+      <time datetime={report.data.publishDate.toISOString()} class="text-sm">
+        {formattedDate}
+      </time>
+    </div>
+    
+    <!-- Product Information - Only shown if available -->
+    {hasProductInfo ? 
+      <div class="space-y-2">
+        <h3 class="text-sm font-medium text-text-secondary">Affected Product</h3>
+        <div class="space-y-1">
+          {report.data.vendor ? <p class="text-sm"><span class="font-medium">Vendor:</span> {report.data.vendor}</p> : null}
+          {report.data.product ? <p class="text-sm"><span class="font-medium">Product:</span> {report.data.product}</p> : null}
+        </div>
+      </div>
+    : null}
+    
+    <!-- Tags -->
+    {(report.data.tags && report.data.tags.length > 0) ? <div class="space-y-2"><h3 class="text-sm font-medium text-text-secondary">Tags</h3><div class="flex flex-wrap gap-1">{report.data.tags.map(tag => (<span class="inline-block bg-secondary/10 text-secondary rounded px-2 py-0.5 text-xs">#{tag}</span>))}</div></div> : null}
+  </div>
+</Card>

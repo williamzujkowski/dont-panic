@@ -4,9 +4,10 @@ interface Props {
   type: 'CVSS' | 'EPSS';
   score: number | null | undefined;
   link?: string | null; // Optional link (e.g., to NVD/FIRST)
+  compact?: boolean; // Compact mode for card display
 }
 
-const { type, score, link } = Astro.props;
+const { type, score, link, compact = false } = Astro.props;
 
 let scoreText: string | null = null;
 let scoreClass = 'text-text'; // Default to base text color
@@ -15,29 +16,27 @@ let label = `${type} Score:`;
 if (score !== null && score !== undefined) {
   if (type === 'CVSS') {
     scoreText = score.toFixed(1);
-    if (score >= 9.0) scoreClass = 'text-red-700 dark:text-red-400 font-bold';
-    else if (score >= 7.0) scoreClass = 'text-orange-600 dark:text-orange-400 font-semibold';
-    else if (score >= 4.0) scoreClass = 'text-yellow-600 dark:text-yellow-400'; // Use yellow for medium
-    else scoreClass = 'text-text-muted'; // Use muted for low
+    if (score >= 9.0) scoreClass = 'text-red-700 dark:text-red-300 font-bold';
+    else if (score >= 7.0) scoreClass = 'text-orange-600 dark:text-orange-300 font-semibold';
+    else if (score >= 4.0) scoreClass = 'text-yellow-600 dark:text-yellow-200'; // Use yellow for medium with higher contrast
+    else scoreClass = 'text-text-muted dark:text-gray-300'; // Use brighter muted for low in dark mode
     label = 'CVSS Score:';
   } else if (type === 'EPSS') {
     scoreText = `${(score * 100).toFixed(1)}%`;
-     if (score >= 0.7) scoreClass = 'text-purple-700 dark:text-purple-400 font-semibold'; // High likelihood
-     else if (score >= 0.3) scoreClass = 'text-orange-600 dark:text-orange-400'; // Medium likelihood
-     else scoreClass = 'text-text-muted'; // Use muted for low
+     if (score >= 0.7) scoreClass = 'text-purple-700 dark:text-purple-300 font-semibold'; // High likelihood with enhanced contrast
+     else if (score >= 0.3) scoreClass = 'text-orange-600 dark:text-orange-300'; // Medium likelihood with enhanced contrast
+     else scoreClass = 'text-text-muted dark:text-gray-300'; // Use brighter muted for low in dark mode
     label = 'EPSS Score:';
   }
 }
 ---
-{scoreText && (
-  <div class="score-display flex items-center gap-xs text-sm"> {/* Use flex and gap */}
-    <span class="font-medium text-text-secondary">{label}</span> {/* Style label */}
-    {link ? (
-      <a href={link} target="_blank" rel="noopener noreferrer" class:list={[scoreClass, "hover:underline"]} title={`View ${type} details`}>
-        {scoreText}
-      </a>
-    ) : (
-      <span class:list={[scoreClass]}>{scoreText}</span>
-    )}
+{scoreText ? 
+  <div class:list={[
+    "score-display", 
+    compact ? "inline-flex items-center gap-1 px-2 py-1 bg-surface border border-border rounded text-xs" : "flex items-center gap-xs text-sm"
+  ]}>
+    {compact ? <span class="font-medium text-text-secondary">{type}:</span> : <span class="font-medium text-text-secondary">{label}</span>}
+    
+    {link ? <a href={link} target="_blank" rel="noopener noreferrer" class:list={[scoreClass, "hover:underline", compact ? "font-semibold" : ""]} title={`View ${type} details`}>{scoreText}</a> : <span class:list={[scoreClass, compact ? "font-semibold" : ""]}>{scoreText}</span>}
   </div>
-)}
+: null}

@@ -1,0 +1,68 @@
+name: Lighthouse CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build site
+        run: npm run build
+      
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+          configPath: './.github/lighthouserc.json'
+          
+      - name: Format lighthouse score
+        id: format_lighthouse_score
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const results = JSON.parse(fs.readFileSync('./lhci_reports/manifest.json'));
+            
+            let comments = '';
+            const baseUrl = 'https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports';
+            
+            results.forEach(result => {
+              const { summary, url } = result;
+              const reportUrl = `${baseUrl}/${result.htmlPath}`;
+              
+              comments += `## Lighthouse Report: ${url.replace(/^https?:\/\//, '')}\n`;
+              comments += '| Category | Score |\n';
+              comments += '| --- | --- |\n';
+              comments += `| 🏎️ Performance | ${Math.round(summary.performance * 100)} |\n`;
+              comments += `| ♿ Accessibility | ${Math.round(summary.accessibility * 100)} |\n`;
+              comments += `| 👍 Best Practices | ${Math.round(summary['best-practices'] * 100)} |\n`;
+              comments += `| 🔍 SEO | ${Math.round(summary.seo * 100)} |\n`;
+              comments += `\n[View Full Report](${reportUrl})\n\n`;
+            });
+            
+            core.setOutput('comments', comments);
+      
+      - name: Comment PR
+        uses: unsplash/comment-on-pr@master
+        if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          msg: ${{ steps.format_lighthouse_score.outputs.comments }}

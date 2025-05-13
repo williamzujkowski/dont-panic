@@ -2,6 +2,7 @@
 // src/components/Header.astro
 import type { NavItem } from '../data/navItems'; // Import the NavItem type
 import Search from 'astro-pagefind/components/Search'; // Use plugin-provided Search component
+import Icon from './Icon.astro'; // Import the Icon component
 
 interface Props {
   siteTitle: string;
@@ -62,21 +63,19 @@ const base = Astro.config?.base ?? '/'; // Get base path
         </ul>
       </nav>
       
-      <!-- Enhanced Filter Toggle - Visible on all screens with fixed SVG size -->
+      <!-- Enhanced Filter Toggle - Using Icon component -->
       <button
         id="sidebarToggleBtn"
         aria-label="Toggle filters"
         aria-expanded="true"
         class="px-2 py-1 text-xs border border-border rounded bg-surface text-text-secondary hover:bg-surface-accent active:bg-surface-accent transition-colors flex items-center"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="min-width: 14px; min-height: 14px; max-width: 14px; max-height: 14px;">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-        </svg>
+        <Icon name="filter" size={14} class="mr-1" />
         <span class="hidden md:inline-block">Toggle Filters</span>
         <span class="md:hidden">Filters</span>
       </button>
       
-      <!-- Enhanced Mobile menu button with better touch target -->
+      <!-- Enhanced Mobile menu button with better touch target using Icon component -->
       <button
         id="mobileMenuBtn"
         aria-label="Open menu"
@@ -84,19 +83,23 @@ const base = Astro.config?.base ?? '/'; // Get base path
         aria-controls="mobileMenu"
         class="md:hidden flex items-center justify-center w-10 h-10 rounded-md text-text-secondary hover:text-primary hover:bg-surface-accent transition-colors"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
+        <Icon name="menu" size={20} />
       </button>
       
-      <!-- Enhanced Theme Toggle -->
+      <!-- Enhanced Theme Toggle using Icon component -->
       <button
         id="themeToggleBtn"
         aria-label="Toggle theme"
+        aria-pressed="false"
         class="w-8 h-8 flex items-center justify-center rounded-md bg-surface hover:bg-surface-accent border border-border text-text-secondary hover:text-primary transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50"
         title="Toggle dark/light mode"
       >
-        <!-- Icon will be inserted by script -->
+        <span class="dark-icon">
+          <Icon name="sun" size={18} aria-hidden="true" />
+        </span>
+        <span class="light-icon">
+          <Icon name="moon" size={18} aria-hidden="true" />
+        </span>
       </button>
     </div>
   </div>
@@ -145,9 +148,17 @@ const base = Astro.config?.base ?? '/'; // Get base path
           <span class="text-xs font-medium text-text-muted">Display Settings</span>
         </div>
         <!-- Mobile theme toggle with label -->
-        <button id="mobileThemeToggle" class="w-full flex items-center justify-between px-4 py-3 rounded-md bg-surface-accent/50 text-text hover:bg-surface-accent transition-colors">
-          <span class="text-base">Toggle dark mode</span>
-          <span id="mobileThemeIcon" class="w-6 h-6 flex items-center justify-center">
+        <button 
+          id="mobileThemeToggle" 
+          class="w-full flex items-center justify-between px-4 py-3 rounded-md bg-surface-accent/50 text-text hover:bg-surface-accent transition-colors"
+          aria-pressed="false"
+          aria-label="Toggle dark mode"
+        >
+          <span class="text-base">
+            <span class="dark-mode-text">Switch to light mode</span>
+            <span class="light-mode-text">Switch to dark mode</span>
+          </span>
+          <span id="mobileThemeIcon" class="w-6 h-6 flex items-center justify-center" aria-hidden="true">
             <!-- Icon inserted by script -->
           </span>
         </button>
@@ -155,6 +166,17 @@ const base = Astro.config?.base ?? '/'; // Get base path
     </nav>
   </div>
 </header>
+
+<style>
+  /* Dark mode text toggle in mobile menu */
+  html:not(.dark) .dark-mode-text {
+    display: none;
+  }
+  
+  html.dark .light-mode-text {
+    display: none;
+  }
+</style>
 
 <script>
   // Enhanced mobile menu and responsive navigation handling
@@ -185,11 +207,21 @@ const base = Astro.config?.base ?? '/'; // Get base path
     
     // Handle mobile theme toggle
     if (mobileThemeToggle) {
+      // Set initial state
+      const isDarkMode = document.documentElement.classList.contains('dark');
+      mobileThemeToggle.setAttribute('aria-pressed', isDarkMode ? 'true' : 'false');
+      
       mobileThemeToggle.addEventListener('click', () => {
         // Click the main theme toggle button to maintain consistent behavior
         if (themeToggleBtn) {
           themeToggleBtn.click();
         }
+        
+        // Update aria-pressed after theme change
+        setTimeout(() => {
+          const isDark = document.documentElement.classList.contains('dark');
+          mobileThemeToggle.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+        }, 50);
       });
     }
     

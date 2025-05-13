@@ -1,27 +1,35 @@
-```markdown
 # CLAUDE.md (Consolidated Project Guidance for Claude)
 
-This file provides comprehensive guidance for Claude AI when working with code in this repository, specifically for the **Astro Reusable Homepage Template** project. It consolidates project-specific setup, coding standards, testing methodologies, and overall project principles.
+This file provides comprehensive guidance for Claude AI when working with code in this repository, specifically for the **"Don't Panic" Vulnerability Intelligence Platform** project. It centralizes references to all project-specific documentation, coding standards, testing methodologies, and overall project principles. This frontend repository is part of the broader Automated Vulnerability Intelligence Platform (AVIP) described in [AVIP_HIGH_LEVEL_PLAN.md](/AVIP_HIGH_LEVEL_PLAN.md).
 
-**Purpose:** Use this file as a primary reference for understanding project conventions, requirements, and best practices when generating or modifying Astro components, TypeScript/JavaScript code, and related configurations.
+**Purpose:** Use this file as the primary entry point for understanding project conventions, requirements, and best practices when generating or modifying Astro components, TypeScript/JavaScript code, and related configurations.
 
-**Important Notes:**
-1. While this file provides general guidance, all prompt templates and LLM-specific configurations should be stored in the `.llmconfig/` directory to ensure consistent AI agent behavior across the project.
+## Quick Reference
+
+- **Project:** "Don't Panic" Vulnerability Intelligence Website (part of the Automated Vulnerability Intelligence Platform - AVIP)
+- **Stack:** Astro.js, Tailwind CSS, TypeScript (Strict mode), Node.js, npm
+- **Standards:** See [Coding Standards](#detailed-coding-standards) and [Testing](#detailed-testing-manifesto)
+- **Directory Structure:** See [Repository Structure](#repository-structure-for-llm-code-agents)
+- **Project Overview:** See [AVIP_HIGH_LEVEL_PLAN.md](/AVIP_HIGH_LEVEL_PLAN.md) for the multi-repository architecture
+
+## Content Index
+
+1. [Quick Start Commands](#quick-start-build-setup-lint--test-commands)
+2. [Project Code Style Summary](#project-code-style-summary)
+3. [Detailed Coding Standards](#detailed-coding-standards)
+4. [Detailed Testing Manifesto](#detailed-testing-manifesto)
+5. [Project Standards Framework](#overall-project-standards-framework)
+6. [Repository Structure](#repository-structure-for-llm-code-agents)
+7. [Master Prompts](#master-prompts-for-llm-interaction)
+8. [Additional Resources](#additional-resources)
+
+## Important Notes
+
+1. All prompt templates and LLM-specific configurations are stored in the `.llmconfig/` directory to ensure consistent AI agent behavior across the project.
 2. The `FILE_TREE.md` document MUST be kept updated whenever the repository structure changes to ensure AI agents can effectively navigate the codebase.
-3. This project utilizes **Astro**, **TypeScript**, **Node.js**, and **npm**.
+3. Refer to the additional resources for specific guidance on complex aspects of the project.
 
-**Content Overview:**
-1.  **Quick Start:** Build, setup, lint, and test commands.
-2.  **Project Code Style Summary:** Key style guidelines for this specific project.
-3.  **Detailed Coding Standards:** Comprehensive rules covering style, documentation, architecture, security, performance, and more for Astro/TS/JS.
-4.  **Detailed Testing Manifesto:** In-depth testing principles and quality assurance standards for Astro/TS/JS.
-5.  **Overall Project Standards Framework:** High-level view integrating development lifecycle, AI ethics, technical quality, and operations.
-6.  **Repository Structure for LLM Code Agents:** Guidelines for organizing repositories to optimize for LLM-based development.
-7.  **Master Prompts:** Pre-defined prompts for guiding LLM code generation based on these standards.
-
----
-
-## 1. Quick Start: Build, Setup, Lint & Test Commands
+## Quick Start: Build, Setup, Lint & Test Commands
 
 ### Build & Setup
 ```bash
@@ -65,9 +73,7 @@ npm run test -- tests/components/Header.test.ts
 npm run test -- --coverage
 ```
 
----
-
-## 2. Project Code Style Summary
+## Project Code Style Summary
 
 * **Base Standard:** Industry-standard JavaScript/TypeScript practices enforced by ESLint (e.g., configuration based on Airbnb, StandardJS, or project-specific rules) and formatted by Prettier.
 * **Formatting:** Handled automatically by Prettier. Default settings apply unless overridden in `.prettierrc`.
@@ -82,9 +88,7 @@ npm run test -- --coverage
 * **Error Handling:** Prefer custom `Error` classes for specific, recoverable error conditions. Use standard error handling for unexpected issues.
 * **Imports:** Organize imports logically: Node built-ins, external packages, internal modules/components. Let ESLint/Prettier handle sorting.
 
----
-
-## 3. Detailed Coding Standards
+## Detailed Coding Standards
 
 These standards provide comprehensive guidelines beyond the project summary, adapted for Astro/TypeScript/JavaScript.
 
@@ -200,9 +204,7 @@ These standards provide comprehensive guidelines beyond the project summary, ada
 4.  Design for hardware efficiency: Ensure reasonable performance on lower-end devices. Progressive enhancement. Minimize resource-intensive animations.
 5.  Consider environmental impact: Choose green hosting if possible. Track bundle sizes and Lighthouse performance scores as proxies for efficiency.
 
----
-
-## 4. Detailed Testing Manifesto
+## Detailed Testing Manifesto
 
 Follow these principles and standards for comprehensive testing of Astro components and TypeScript/JavaScript code. We will likely use **Vitest** integrated with Astro.
 
@@ -442,9 +444,7 @@ describe('Index Page', () => {
 * Avoid complex logic directly in the `.astro` template; extract it to functions in the frontmatter script or utility modules (`.ts`/`.js`) which are easier to unit test.
 * For client-side islands, ensure logic is testable independent of the UI framework if possible.
 
----
-
-## 5. Overall Project Standards Framework
+## Overall Project Standards Framework
 
 This outlines the high-level framework guiding the project:
 
@@ -455,9 +455,7 @@ This outlines the high-level framework guiding the project:
 
 *(This section provides context; detailed implementation is covered in Coding and Testing standards sections.)*
 
----
-
-## 6. Repository Structure for LLM Code Agents
+## Repository Structure for LLM Code Agents
 
 Designing a repository optimized for LLM-driven code agents involves establishing a structured, maintainable, and secure environment that facilitates high-quality code generation and adherence to established standards. **This structure aligns with typical Astro project layouts.**
 
@@ -493,15 +491,17 @@ Designing a repository optimized for LLM-driven code agents involves establishin
 
 **IMPORTANT:** All LLM-specific configurations, prompts, and context files MUST be stored in the `.llmconfig/` directory.
 
-The `.llmconfig/` directory should contain:
-- **`CLAUDE.md`**: This file.
-- **`PROJECT_PLAN.md`**: Overarching goals for this project.
-- **`todo.md`**: A checklist of steps to perform.
-- **`agent-rules.md`**: Specific coding rules for the LLM (potentially extracted from this file).
-- **`prompt-templates/`**: Reusable prompt templates (like those in Section 7).
-- **`context/`**: Files providing context (e.g., component examples, design system tokens).
-- **`examples/`**: Exemplary interactions for few-shot learning.
-- **`system-prompts/`**: System-level instructions.
+The `.llmconfig/` directory contains:
+- **`CLAUDE.md`**: Primary entry point for Claude AI (this file).
+- **`guides/`**: Topic-specific guides.
+  - **`styling.md`**: Styling standards and Tailwind CSS usage.
+  - **`ux-ui-guide.md`**: UX/UI principles and guidelines.
+  - **`responsive-mobile-guide.md`**: Responsive design requirements.
+- **`tasks/`**: Implementation task lists.
+  - **`CONSOLIDATED_TASKS.md`**: Master task list with progress tracking.
+- **`workflows/`**: Deployment and automation guides.
+  - **`publish.md`**: GitHub Actions workflow for deployment.
+- **`USAGE_GUIDE.md`**: How to use this template repository.
 
 ### 6.3. Maintaining FILE_TREE.md
 
@@ -544,9 +544,7 @@ The `.llmconfig/` directory should contain:
 - **Architecture:** Diagrams in `/docs` if complex.
 - **`FILE_TREE.md`**: **Keep updated!**
 
----
-
-## 7. Master Prompts for LLM Interaction
+## Master Prompts for LLM Interaction
 
 Use these prompts as starting points when requesting code generation or modification for this **Astro/TypeScript** project:
 
@@ -632,6 +630,28 @@ The test suite should be maintainable, provide fast feedback using Vitest, and v
 Place the generated test file at: `tests/[corresponding path]/[FileName].test.ts`
 ```
 
----
+## Additional Resources
+
+For more detailed guidance on specific aspects of the project, refer to the following resources:
+
+### Project Documentation
+
+- **High-Level Project Plan**: [AVIP_HIGH_LEVEL_PLAN.md](/AVIP_HIGH_LEVEL_PLAN.md) - Overview of the entire platform architecture
+- **Report Syncing**: [docs/report-syncing.md](/docs/report-syncing.md) - Documentation for automated report syncing
+- **Usage Guide**: [.llmconfig/USAGE_GUIDE.md](../USAGE_GUIDE.md) - How to use this template repository
+
+### Design & Implementation Guides
+
+- **Styling Guide**: [.llmconfig/guides/styling.md](guides/styling.md) - Detailed Tailwind CSS styling conventions
+- **UX/UI Guide**: [.llmconfig/guides/ux-ui-guide.md](guides/ux-ui-guide.md) - UX/UI principles and implementation details
+- **Responsive Design**: [.llmconfig/guides/responsive-mobile-guide.md](guides/responsive-mobile-guide.md) - Mobile-first responsive design requirements
+
+### Implementation Tracking
+
+- **Project Tasks**: [.llmconfig/tasks/CONSOLIDATED_TASKS.md](tasks/CONSOLIDATED_TASKS.md) - Implementation tasks with progress tracking
+
+### Workflows & CI/CD
+
+- **Deployment**: [.llmconfig/workflows/publish.md](workflows/publish.md) - GitHub Actions workflow for deployment
+
 **End of CLAUDE.md**
-```

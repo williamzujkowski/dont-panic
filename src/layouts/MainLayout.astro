@@ -1,0 +1,83 @@
+---
+import '../styles/global.css';
+import { navItems } from '../data/navItems';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+
+interface Props {
+    title: string;
+    description?: string;
+}
+
+const { title, description = "Don't Panic - Vulnerability Intelligence Reports" } = Astro.props;
+const pageTitle = `${title} | Don't Panic`;
+const base = import.meta.env.BASE_URL ?? '/';
+const site = Astro.site ?? new URL('http://localhost:4321');
+const canonicalURL = new URL(Astro.url.pathname, site);
+const faviconUrl = `${base}favicon.svg`;
+const currentPath = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <meta name="description" content={description} />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <base href={base} />
+        <link rel="icon" type="image/svg+xml" href={faviconUrl} />
+        <meta name="generator" content={Astro.generator} />
+        <title>{pageTitle}</title>
+        
+        <script is:inline>
+            !(function(){
+                try {
+                    var t = localStorage.getItem("theme");
+                    if (t === "dark" || (!t && window.matchMedia("(prefers-color-scheme: dark)").matches))
+                        document.documentElement.classList.add("dark");
+                    else document.documentElement.classList.remove("dark");
+                } catch (e) {}
+            })();
+        </script>
+
+        <link rel="canonical" href={canonicalURL.href} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalURL.href} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={description} />
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={canonicalURL.href} />
+        <meta property="twitter:title" content={pageTitle} />
+        <meta property="twitter:description" content={description} />
+    </head>
+    <body class="min-h-screen flex flex-col bg-background">
+        <Header siteTitle="Don't Panic" navItems={navItems} currentPath={currentPath} />
+        
+        <main class="flex-1">
+            <slot />
+        </main>
+
+        <Footer />
+        
+        <script is:inline type="module">
+            document.addEventListener("DOMContentLoaded", () => {
+                const btn = document.getElementById("themeToggleBtn");
+                if (!btn) return;
+                const html = document.documentElement;
+                btn.textContent = html.classList.contains("dark") ? "🌞" : "🌙";
+                btn.addEventListener("click", () => {
+                    if (html.classList.contains("dark")) {
+                        html.classList.remove("dark");
+                        localStorage.setItem("theme", "light");
+                        btn.textContent = "🌙";
+                    } else {
+                        html.classList.add("dark");
+                        localStorage.setItem("theme", "dark");
+                        btn.textContent = "🌞";
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>
