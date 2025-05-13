@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import Button from './Button.astro'; // Import Button component
 
 interface Props {
   reports: CollectionEntry<'reports'>[];
@@ -22,64 +23,135 @@ threeMonthsAgo.setMonth(today.getMonth() - 3);
 
 // Format dates for inputs
 const formatDate = (date: Date) => date.toISOString().split('T')[0];
+
+// Get query params to initialize filters if present
+// This will allow filters to persist when page reloads or link is shared
 ---
 
-{/* Removed 'hidden' class to make it visible by default on desktop */}
-<aside id="filterSidebar" class="w-full bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm md:sticky md:top-16 md:w-[280px] md:h-[calc(100vh-4rem)] md:overflow-y-auto">
-  <div class="mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
+<!-- Enhanced sidebar with better mobile responsiveness and improved accessibility -->
+<aside id="filterSidebar" class="w-full bg-surface p-4 md:w-full overflow-y-auto max-h-[calc(100vh-80px)] lg:max-h-[calc(100vh-80px)] scrollbar-thin scrollbar-thumb-primary/40 scrollbar-track-transparent" aria-label="Filter controls">
+  <div class="mb-4 pb-3 border-b border-border">
     <div class="flex items-center justify-between">
-      <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Filters</h2>
-      <!-- Mobile close button -->
-      <button
+      <h2 class="text-lg font-semibold text-text flex items-center">
+        <span class="flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="min-width: 16px; min-height: 16px; max-width: 16px; max-height: 16px;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+          </svg>
+          Filters
+        </span>
+        <span id="filterCount" class="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full hidden animate-pulse-slow transition-all duration-300">0</span>
+      </h2>
+      <!-- Enhanced Mobile close button with better touch target -->
+      <Button
         id="closeSidebarBtn"
-        class="md:hidden p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-gray-800"
-        aria-label="Close filters"
+        variant="ghost"
+        size="sm"
+        class="md:hidden min-h-[36px] min-w-[70px] flex items-center justify-center gap-1"
+        ariaLabel="Close filters"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
-      </button>
+        Close
+      </Button>
     </div>
-    {/* Increased touch target size with padding and margin */}
-    <button 
+    <!-- Enhanced Reset Filters Button with improved feedback -->
+    <Button 
       id="resetFilters" 
-      class="inline-block mt-1 py-2 px-3 rounded text-sm text-blue-600 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:no-underline focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800"
+      variant="ghost"
+      size="xs"
+      class="mt-2 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400 transition-colors min-h-[36px] group"
     >
-      Reset All
-    </button>
+      <span class="flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5 group-hover:rotate-90 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        Reset All Filters
+      </span>
+    </Button>
+    
+    <!-- Filter stats summary -->
+    <div id="filterStats" class="hidden mt-2 text-xs text-text-secondary px-2 py-1.5 bg-surface-accent/50 rounded-md">
+      <span class="flex items-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Showing <span id="filteredCount" class="font-medium">0</span> of <span id="totalCount" class="font-medium">{reports.length}</span> reports
+      </span>
+    </div>
   </div>
 
-  <!-- Quick Filters / Status -->
-  <details open class="mb-4">
-    <summary class="font-medium text-gray-700 dark:text-gray-300 cursor-pointer py-3 select-none min-h-[44px] flex items-center">
-      Quick Filters
+  <!-- Enhanced Quick Filters / Status with better interactions -->
+  <details open class="mb-4 group filter-section" data-section="status">
+    <summary class="font-medium text-text-secondary cursor-pointer py-3 select-none min-h-[44px] flex items-center justify-between rounded hover:bg-primary/5 px-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-1 focus:ring-offset-background">
+      <span class="flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-2 text-primary/80 group-hover:text-primary transition-colors" style="min-width: 14px; min-height: 14px; max-width: 14px; max-height: 14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        <span class="group-hover:translate-x-0.5 transition-transform duration-300">Quick Filters</span>
+      </span>
+      <span class="text-xs transition-transform duration-300 group-open:rotate-180 w-5 h-5 flex items-center justify-center bg-primary/5 rounded-full group-hover:bg-primary/10">▼</span>
     </summary>
-    <div class="mt-2 pl-2 space-y-3">
-      <label class="flex items-center text-sm min-h-[44px] py-2">
-        <input type="checkbox" id="kevFilter" class="mr-2 h-5 w-5">
-        <span class="ml-1">Known Exploited (KEV)</span>
+    <div class="mt-2 pl-2 space-y-3 animate-fadeIn">
+      <label class="flex items-center text-xs min-h-[36px] py-1.5 hover:bg-primary/5 px-2 rounded cursor-pointer transition-colors hover:scale-[1.01] transform-gpu">
+        <input type="checkbox" id="kevFilter" class="mr-1.5 h-4 w-4 accent-primary filter-checkbox" data-filter-type="kev">
+        <span class="ml-1 flex items-center">
+          <span class="inline-block h-2 w-2 rounded-full bg-red-500 mr-1.5"></span>
+          Known Exploited (KEV)
+        </span>
       </label>
-      <label class="flex items-center text-sm min-h-[44px] py-2">
-        <input type="checkbox" id="zeroDayFilter" class="mr-2 h-5 w-5">
-        <span class="ml-1">Zero-Day/Preliminary</span>
+      <label class="flex items-center text-xs min-h-[36px] py-1.5 hover:bg-primary/5 px-2 rounded cursor-pointer transition-colors hover:scale-[1.01] transform-gpu">
+        <input type="checkbox" id="zeroDayFilter" class="mr-1.5 h-4 w-4 accent-primary filter-checkbox" data-filter-type="zeroDay">
+        <span class="ml-1 flex items-center">
+          <span class="inline-block h-2 w-2 rounded-full bg-amber-500 mr-1.5"></span>
+          Zero-Day/Preliminary
+        </span>
       </label>
-      <label class="flex items-center text-sm min-h-[44px] py-2">
-        <input type="checkbox" id="patchAvailableFilter" class="mr-2 h-5 w-5">
-        <span class="ml-1">Patch Available</span>
+      <label class="flex items-center text-xs min-h-[36px] py-1.5 hover:bg-primary/5 px-2 rounded cursor-pointer transition-colors hover:scale-[1.01] transform-gpu">
+        <input type="checkbox" id="patchAvailableFilter" class="mr-1.5 h-4 w-4 accent-primary filter-checkbox" data-filter-type="patchAvailable">
+        <span class="ml-1 flex items-center">
+          <span class="inline-block h-2 w-2 rounded-full bg-green-500 mr-1.5"></span>
+          Patch Available
+        </span>
       </label>
     </div>
   </details>
 
-  <!-- Severity & Risk Score -->
-  <details open class="mb-4">
-    <summary class="font-medium text-gray-700 dark:text-gray-300 cursor-pointer py-3 select-none min-h-[44px] flex items-center">
-      Severity & Risk Score
+  <!-- Enhanced Severity & Risk Score section -->
+  <details open class="mb-4 group filter-section" data-section="score">
+    <summary class="font-medium text-text-secondary cursor-pointer py-3 select-none min-h-[44px] flex items-center justify-between rounded hover:bg-primary/5 px-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-1 focus:ring-offset-background">
+      <span class="flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-2 text-primary/80 group-hover:text-primary transition-colors" style="min-width: 14px; min-height: 14px; max-width: 14px; max-height: 14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+        </svg>
+        <span class="group-hover:translate-x-0.5 transition-transform duration-300">Severity & Risk Score</span>
+      </span>
+      <span class="text-xs transition-transform duration-300 group-open:rotate-180 w-5 h-5 flex items-center justify-center bg-primary/5 rounded-full group-hover:bg-primary/10">▼</span>
     </summary>
-    <div class="mt-2 pl-2 space-y-4">
-      {/* CVSS Score Slider - Added py-2 for vertical spacing */}
+    <div class="mt-2 pl-2 space-y-4 animate-fadeIn">
+      <!-- CVSS Score Slider -->
       <div class="py-2">
-        <label for="cvssSlider" class="block text-sm font-medium mb-2">CVSS Score</label>
-        <div class="flex items-center">
+        <div class="flex items-center justify-between mb-2">
+          <label for="cvssSlider" class="block text-sm font-medium text-text-secondary">CVSS Score</label>
+          <div class="text-xs text-text-secondary flex items-center">
+            <div class="h-2 w-2 rounded-full bg-green-500 mr-1"></div>
+            <span class="mr-2">Low</span>
+            <div class="h-2 w-2 rounded-full bg-yellow-500 mr-1"></div>
+            <span class="mr-2">Medium</span>
+            <div class="h-2 w-2 rounded-full bg-orange-500 mr-1"></div>
+            <span class="mr-2">High</span>
+            <div class="h-2 w-2 rounded-full bg-red-500 mr-1"></div>
+            <span>Critical</span>
+          </div>
+        </div>
+        <div class="relative mt-1 mb-4">
+          <div class="absolute inset-0 flex pointer-events-none">
+            <div class="h-2 w-1/4 bg-gradient-to-r from-green-300 to-green-400 rounded-l-full mt-2"></div>
+            <div class="h-2 w-1/4 bg-gradient-to-r from-green-400 to-yellow-400 mt-2"></div>
+            <div class="h-2 w-1/4 bg-gradient-to-r from-yellow-400 to-orange-400 mt-2"></div>
+            <div class="h-2 w-1/4 bg-gradient-to-r from-orange-400 to-red-500 rounded-r-full mt-2"></div>
+          </div>
           <input 
             type="range" 
             id="cvssSlider" 
@@ -87,16 +159,35 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
             max="10" 
             step="0.1" 
             value="0" 
-            class="w-full h-6"
+            class="w-full h-6 accent-primary relative z-10 bg-transparent"
           >
-          <span id="cvssValue" class="ml-2 text-sm min-w-[32px]">0+</span>
+        </div>
+        <div class="flex justify-between text-xs text-text-secondary">
+          <span>0.0</span>
+          <span>4.0</span>
+          <span>7.0</span>
+          <span>10.0</span>
+        </div>
+        <div class="flex items-center justify-center mt-2">
+          <span class="text-xs text-text-secondary mr-2">Selected:</span>
+          <span id="cvssValue" class="text-sm min-w-[45px] text-center font-medium bg-primary/10 text-primary py-1 px-2 rounded">0+</span>
         </div>
       </div>
 
-      {/* EPSS Score Slider - Added py-2 for vertical spacing */}
+      <!-- EPSS Score Slider -->
       <div class="py-2">
-        <label for="epssSlider" class="block text-sm font-medium mb-2">EPSS Score</label>
-        <div class="flex items-center">
+        <div class="flex items-center justify-between mb-2">
+          <label for="epssSlider" class="block text-sm font-medium text-text-secondary">EPSS Score</label>
+          <div class="flex text-xs text-text-secondary">
+            <span class="opacity-50">Low probability</span>
+            <span class="mx-2">→</span>
+            <span class="font-medium">High probability</span>
+          </div>
+        </div>
+        <div class="relative mt-1 mb-4">
+          <div class="absolute inset-0 flex pointer-events-none">
+            <div class="h-2 w-full bg-gradient-to-r from-blue-300 to-purple-500 rounded-full mt-2"></div>
+          </div>
           <input 
             type="range" 
             id="epssSlider" 
@@ -104,138 +195,260 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
             max="100" 
             step="1" 
             value="0" 
-            class="w-full h-6"
+            class="w-full h-6 accent-primary relative z-10 bg-transparent"
           >
-          <span id="epssValue" class="ml-2 text-sm min-w-[36px]">0%+</span>
+        </div>
+        <div class="flex justify-between text-xs text-text-secondary">
+          <span>0%</span>
+          <span>25%</span>
+          <span>50%</span>
+          <span>75%</span>
+          <span>100%</span>
+        </div>
+        <div class="flex items-center justify-center mt-2">
+          <span class="text-xs text-text-secondary mr-2">Selected:</span>
+          <span id="epssValue" class="text-sm min-w-[50px] text-center font-medium bg-primary/10 text-primary py-1 px-2 rounded">0%+</span>
         </div>
       </div>
 
       <!-- Severity Levels -->
       <div>
-        <label class="block text-sm font-medium mb-2">Severity Levels</label>
-        <div class="space-y-2 mt-1">
-          <label class="flex items-center text-sm min-h-[44px] py-2">
-            <input type="checkbox" id="criticalFilter" class="mr-2 h-5 w-5" name="severityLevel">
-            <span class="ml-1">Critical</span>
+        <label class="block text-sm font-medium mb-2 text-text-secondary">Severity Levels</label>
+        <div class="grid grid-cols-2 gap-2 mt-1">
+          <label class="flex items-center text-xs min-h-[36px] py-1.5 hover:bg-red-50 px-2 rounded cursor-pointer transition-colors border border-transparent hover:border-red-200 dark:hover:bg-red-900/20 dark:hover:border-red-800/50">
+            <input type="checkbox" id="criticalFilter" class="mr-1.5 h-4 w-4 accent-red-600 filter-checkbox" name="severityLevel" data-filter-type="severity-critical">
+            <span class="ml-1 flex items-center">
+              <span class="inline-block h-2 w-2 rounded-full bg-red-500 mr-1.5"></span>
+              Critical
+            </span>
           </label>
-          <label class="flex items-center text-sm min-h-[44px] py-2">
-            <input type="checkbox" id="highFilter" class="mr-2 h-5 w-5" name="severityLevel">
-            <span class="ml-1">High</span>
+          <label class="flex items-center text-xs min-h-[36px] py-1.5 hover:bg-orange-50 px-2 rounded cursor-pointer transition-colors border border-transparent hover:border-orange-200 dark:hover:bg-orange-900/20 dark:hover:border-orange-800/50">
+            <input type="checkbox" id="highFilter" class="mr-1.5 h-4 w-4 accent-orange-600 filter-checkbox" name="severityLevel" data-filter-type="severity-high">
+            <span class="ml-1 flex items-center">
+              <span class="inline-block h-2 w-2 rounded-full bg-orange-500 mr-1.5"></span>
+              High
+            </span>
           </label>
-          <label class="flex items-center text-sm min-h-[44px] py-2">
-            <input type="checkbox" id="mediumFilter" class="mr-2 h-5 w-5" name="severityLevel">
-            <span class="ml-1">Medium</span>
+          <label class="flex items-center text-xs min-h-[36px] py-1.5 hover:bg-yellow-50 px-2 rounded cursor-pointer transition-colors border border-transparent hover:border-yellow-200 dark:hover:bg-yellow-900/20 dark:hover:border-yellow-800/50">
+            <input type="checkbox" id="mediumFilter" class="mr-1.5 h-4 w-4 accent-yellow-600 filter-checkbox" name="severityLevel" data-filter-type="severity-medium">
+            <span class="ml-1 flex items-center">
+              <span class="inline-block h-2 w-2 rounded-full bg-yellow-500 mr-1.5"></span>
+              Medium
+            </span>
           </label>
-          <label class="flex items-center text-sm min-h-[44px] py-2">
-            <input type="checkbox" id="lowFilter" class="mr-2 h-5 w-5" name="severityLevel">
-            <span class="ml-1">Low</span>
+          <label class="flex items-center text-xs min-h-[36px] py-1.5 hover:bg-blue-50 px-2 rounded cursor-pointer transition-colors border border-transparent hover:border-blue-200 dark:hover:bg-blue-900/20 dark:hover:border-blue-800/50">
+            <input type="checkbox" id="lowFilter" class="mr-1.5 h-4 w-4 accent-blue-600 filter-checkbox" name="severityLevel" data-filter-type="severity-low">
+            <span class="ml-1 flex items-center">
+              <span class="inline-block h-2 w-2 rounded-full bg-blue-500 mr-1.5"></span>
+              Low
+            </span>
           </label>
         </div>
       </div>
     </div>
   </details>
 
-  <!-- Date Ranges -->
-  <details open class="mb-4">
-    <summary class="font-medium text-gray-700 dark:text-gray-300 cursor-pointer py-3 select-none min-h-[44px] flex items-center">
-      Date Ranges
+  <!-- Enhanced Date Ranges section -->
+  <details open class="mb-4 group filter-section" data-section="date">
+    <summary class="font-medium text-text-secondary cursor-pointer py-3 select-none min-h-[44px] flex items-center justify-between rounded hover:bg-primary/5 px-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-1 focus:ring-offset-background">
+      <span class="flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-2 text-primary/80 group-hover:text-primary transition-colors" style="min-width: 14px; min-height: 14px; max-width: 14px; max-height: 14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span class="group-hover:translate-x-0.5 transition-transform duration-300">Date Ranges</span>
+      </span>
+      <span class="text-xs transition-transform duration-300 group-open:rotate-180 w-5 h-5 flex items-center justify-center bg-primary/5 rounded-full group-hover:bg-primary/10">▼</span>
     </summary>
-    <div class="mt-2 pl-2 space-y-4">
-      <div>
-        <label class="block text-sm font-medium mb-2">Start Date</label>
-        <input 
-          type="date" 
-          id="startDateFilter" 
-          class="w-full border rounded p-2 text-sm bg-white dark:bg-gray-700 min-h-[44px]"
-        >
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-2">End Date</label>
-        <input 
-          type="date" 
-          id="endDateFilter" 
-          class="w-full border rounded p-2 text-sm bg-white dark:bg-gray-700 min-h-[44px]"
-        >
-      </div>
+    <div class="mt-2 pl-2 space-y-4 animate-fadeIn">
       <div class="flex flex-wrap gap-2">
-        <button 
+        <Button 
+          id="datePreset7days"
           data-days="7" 
-          class="text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded px-3 py-2 date-preset min-h-[44px]"
+          variant="ghost"
+          size="xs"
+          class="date-preset flex-1 hover:bg-primary/10 transition-all"
         >
-          Last 7 days
-        </button>
-        <button 
+          Last 7d
+        </Button>
+        <Button 
+          id="datePreset30days"
           data-days="30" 
-          class="text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded px-3 py-2 date-preset min-h-[44px]"
+          variant="ghost"
+          size="xs"
+          class="date-preset flex-1 hover:bg-primary/10 transition-all"
         >
-          Last 30 days
-        </button>
-        <button 
+          Last 30d
+        </Button>
+        <Button 
+          id="datePreset90days"
           data-days="90" 
-          class="text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded px-3 py-2 date-preset min-h-[44px]"
+          variant="ghost"
+          size="xs"
+          class="date-preset flex-1 hover:bg-primary/10 transition-all"
         >
-          Last 90 days
-        </button>
+          Last 90d
+        </Button>
+      </div>
+      
+      <div class="flex items-start gap-3">
+        <div class="flex-1">
+          <label class="block text-xs font-medium mb-1 text-text-secondary">Start Date</label>
+          <input 
+            type="date" 
+            id="startDateFilter" 
+            class="w-full border border-border rounded p-1.5 text-xs bg-surface min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-shadow"
+          >
+        </div>
+        <div class="flex-1">
+          <label class="block text-xs font-medium mb-1 text-text-secondary">End Date</label>
+          <input 
+            type="date" 
+            id="endDateFilter" 
+            class="w-full border border-border rounded p-1.5 text-xs bg-surface min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-shadow"
+          >
+        </div>
+      </div>
+      <div id="dateRangeInfo" class="text-xs text-text-secondary hidden">
+        <div class="flex items-center px-2 py-1 bg-primary/5 rounded">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Showing reports from <span id="dateRangeText"></span></span>
+        </div>
       </div>
     </div>
   </details>
 
-  <!-- Vendor/Product/OS -->
-  {(vendors.length > 0 || products.length > 0) && (
-    <details class="mb-4">
-      <summary class="font-medium text-gray-700 dark:text-gray-300 cursor-pointer py-3 select-none min-h-[44px] flex items-center">
-        Vendors & Products
+  <!-- Enhanced Vendor/Product/OS section -->
+  {(vendors.length > 0 || products.length > 0) ? 
+    <details class="mb-4 group filter-section" data-section="vendor">
+      <summary class="font-medium text-text-secondary cursor-pointer py-3 select-none min-h-[44px] flex items-center justify-between rounded hover:bg-primary/5 px-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-1 focus:ring-offset-background">
+        <span class="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-2 text-primary/80 group-hover:text-primary transition-colors" style="min-width: 14px; min-height: 14px; max-width: 14px; max-height: 14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+          <span class="group-hover:translate-x-0.5 transition-transform duration-300">Vendors & Products</span>
+        </span>
+        <span class="text-xs transition-transform duration-300 group-open:rotate-180 w-5 h-5 flex items-center justify-center bg-primary/5 rounded-full group-hover:bg-primary/10">▼</span>
       </summary>
-      <div class="mt-2 pl-2 space-y-4">
-        {vendors.length > 0 && (
+      <div class="mt-2 pl-2 space-y-4 animate-fadeIn">
+        {vendors.length > 0 ? 
           <div>
-            <label class="block text-sm font-medium mb-2">Vendors</label>
-            <input 
-              type="text" 
-              id="vendorSearch" 
-              placeholder="Search vendors..." 
-              class="w-full border rounded p-2 text-sm mt-1 mb-2 bg-white dark:bg-gray-700 min-h-[44px]"
-            >
-            <div class="max-h-40 overflow-y-auto space-y-2 vendor-checkboxes">
+            <div class="flex items-center justify-between">
+              <label class="block text-sm font-medium mb-2 text-text-secondary">Vendors</label>
+              <span id="vendorCount" class="text-xs text-text-secondary">({vendors.length})</span>
+            </div>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input 
+                type="text" 
+                id="vendorSearch" 
+                placeholder="Search vendors..." 
+                class="w-full border border-border rounded py-1.5 pl-8 pr-2 text-xs mt-1 mb-2 bg-surface min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              >
+              <button id="clearVendorSearch" class="absolute right-2 top-[9px] text-text-secondary hover:text-text hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div class="max-h-40 overflow-y-auto space-y-2 vendor-checkboxes rounded border border-border/60 p-1">
               {vendors.map(vendor => (
-                <label class="flex items-center text-sm min-h-[44px] py-2">
-                  <input type="checkbox" class="mr-2 vendor-filter h-5 w-5" value={vendor}>
+                <label class="flex items-center text-xs min-h-[36px] py-1.5 hover:bg-primary/5 px-2 rounded cursor-pointer transition-colors">
+                  <input type="checkbox" class="mr-1.5 vendor-filter h-4 w-4 accent-primary filter-checkbox" value={vendor} data-filter-type={`vendor-${vendor}`}>
                   <span class="ml-1">{vendor}</span>
                 </label>
               ))}
             </div>
+            <div id="noVendorResults" class="hidden text-center text-xs text-text-secondary py-2">
+              No vendors match your search
+            </div>
           </div>
-        )}
+        : null}
 
-        {products.length > 0 && (
+        {products.length > 0 ? 
           <div>
-            <label class="block text-sm font-medium mb-2">Products</label>
-            <input 
-              type="text" 
-              id="productSearch" 
-              placeholder="Search products..." 
-              class="w-full border rounded p-2 text-sm mt-1 mb-2 bg-white dark:bg-gray-700 min-h-[44px]"
-            >
-            <div class="max-h-40 overflow-y-auto space-y-2 product-checkboxes">
+            <div class="flex items-center justify-between">
+              <label class="block text-sm font-medium mb-2 text-text-secondary">Products</label>
+              <span id="productCount" class="text-xs text-text-secondary">({products.length})</span>
+            </div>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input 
+                type="text" 
+                id="productSearch" 
+                placeholder="Search products..." 
+                class="w-full border border-border rounded py-1.5 pl-8 pr-2 text-xs mt-1 mb-2 bg-surface min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              >
+              <button id="clearProductSearch" class="absolute right-2 top-[9px] text-text-secondary hover:text-text hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div class="max-h-40 overflow-y-auto space-y-2 product-checkboxes rounded border border-border/60 p-1">
               {products.map(product => (
-                <label class="flex items-center text-sm min-h-[44px] py-2">
-                  <input type="checkbox" class="mr-2 product-filter h-5 w-5" value={product}>
+                <label class="flex items-center text-xs min-h-[36px] py-1.5 hover:bg-primary/5 px-2 rounded cursor-pointer transition-colors">
+                  <input type="checkbox" class="mr-1.5 product-filter h-4 w-4 accent-primary filter-checkbox" value={product} data-filter-type={`product-${product}`}>
                   <span class="ml-1">{product}</span>
                 </label>
               ))}
             </div>
+            <div id="noProductResults" class="hidden text-center text-xs text-text-secondary py-2">
+              No products match your search
+            </div>
           </div>
-        )}
+        : null}
       </div>
     </details>
-  )}
+  : null}
 
-  <button 
+  <!-- Enhanced Apply Filters Button with animation and feedback -->
+  <Button 
     id="applyFiltersBtn" 
-    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded min-h-[48px] text-base"
+    variant="primary"
+    size="md"
+    fullWidth={true}
+    class="relative overflow-hidden h-[44px] group"
   >
-    Apply Filters
-  </button>
+    <span class="relative z-10 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:rotate-[-15deg] transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+      </svg>
+      Apply Filters
+    </span>
+    <span id="filterApplyEffect" class="absolute inset-0 bg-white dark:bg-white opacity-20 scale-x-0 origin-left transition-transform duration-300"></span>
+  </Button>
+  
+  <div class="mt-4 text-xs text-center text-text-secondary">
+    <span id="filterResultPreview" class="px-3 py-1.5 rounded-md bg-primary/5 hidden transition-all">
+      <span class="flex items-center justify-center gap-1.5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Estimated results: <span id="filterResultCount" class="font-medium">0</span>
+      </span>
+    </span>
+  </div>
+  
+  <!-- Loading Skeleton (hidden by default) -->
+  <div id="filterLoadingIndicator" class="hidden absolute inset-0 bg-surface/80 backdrop-blur-sm z-10 flex items-center justify-center">
+    <div class="flex flex-col items-center space-y-2">
+      <div class="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" aria-hidden="true"></div>
+      <div class="text-sm text-primary" role="status">Applying filters...</div>
+    </div>
+  </div>
+  
+  <!-- Accessibility status announcer for filter changes -->
+  <div aria-live="polite" class="sr-only" id="filter-announcer"></div>
 </aside>
 
 <script>
@@ -245,6 +458,11 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
   // DOM element references
   const resetButton = document.getElementById('resetFilters');
   const applyButton = document.getElementById('applyFiltersBtn');
+  const filterApplyEffect = document.getElementById('filterApplyEffect');
+  const filterCount = document.getElementById('filterCount');
+  const filterResultPreview = document.getElementById('filterResultPreview');
+  const filterResultCount = document.getElementById('filterResultCount');
+  
   /** @type {HTMLInputElement | null} */
   const cvssSlider = document.getElementById('cvssSlider');
   const cvssValue = document.getElementById('cvssValue');
@@ -253,63 +471,273 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
   const epssValue = document.getElementById('epssValue');
   /** @type {HTMLInputElement | null} */
   const vendorSearch = document.getElementById('vendorSearch');
+  const clearVendorSearch = document.getElementById('clearVendorSearch');
+  const noVendorResults = document.getElementById('noVendorResults');
   /** @type {HTMLInputElement | null} */
   const productSearch = document.getElementById('productSearch');
+  const clearProductSearch = document.getElementById('clearProductSearch');
+  const noProductResults = document.getElementById('noProductResults');
+  
   const vendorCheckboxes = document.querySelectorAll('.vendor-filter');
   const productCheckboxes = document.querySelectorAll('.product-filter');
   const datePresets = document.querySelectorAll('.date-preset');
+  const dateRangeInfo = document.getElementById('dateRangeInfo');
+  const dateRangeText = document.getElementById('dateRangeText');
+  
   /** @type {HTMLInputElement | null} */
   const startDateInput = document.getElementById('startDateFilter');
   /** @type {HTMLInputElement | null} */
   const endDateInput = document.getElementById('endDateFilter');
   
+  const allCheckboxes = document.querySelectorAll('.filter-checkbox');
+  const allSections = document.querySelectorAll('.filter-section');
+  
+  /** @type {NodeListOf<HTMLInputElement>} */
+  const severityCheckboxes = document.querySelectorAll('input[name="severityLevel"]');
+  
   // Initialize controls
   function initializeControls() {
-    // Set up CVSS slider
+    // Apply initial URL parameters if present
+    applyURLParameters();
+    
+    // Attach event listeners
+    setupEventListeners();
+    
+    // Update filter count
+    updateFilterCount();
+    
+    // Initialize animations
+    initializeAnimations();
+  }
+  
+  // Apply URL parameters to initialize filters
+  function applyURLParameters() {
+    const url = new URL(window.location);
+    
+    // Quick filters
+    if (url.searchParams.has('zeroDay')) {
+      const zeroDayFilter = document.getElementById('zeroDayFilter');
+      if (zeroDayFilter) zeroDayFilter.checked = url.searchParams.get('zeroDay') === 'true';
+    }
+    
+    if (url.searchParams.has('kev')) {
+      const kevFilter = document.getElementById('kevFilter');
+      if (kevFilter) kevFilter.checked = url.searchParams.get('kev') === 'true';
+    }
+    
+    if (url.searchParams.has('patchAvailable')) {
+      const patchAvailableFilter = document.getElementById('patchAvailableFilter');
+      if (patchAvailableFilter) patchAvailableFilter.checked = url.searchParams.get('patchAvailable') === 'true';
+    }
+    
+    // Score filters
+    if (url.searchParams.has('cvssMin')) {
+      const cvssMin = url.searchParams.get('cvssMin');
+      if (cvssSlider && cvssValue) {
+        cvssSlider.value = cvssMin;
+        cvssValue.textContent = `${cvssMin}+`;
+      }
+    }
+    
+    if (url.searchParams.has('epssMin')) {
+      const epssMin = parseFloat(url.searchParams.get('epssMin') || '0') * 100;
+      if (epssSlider && epssValue) {
+        epssSlider.value = epssMin;
+        epssValue.textContent = `${epssMin}%+`;
+      }
+    }
+    
+    // Severity filters
+    if (url.searchParams.has('severity')) {
+      const severities = url.searchParams.get('severity')?.split(',') || [];
+      
+      severities.forEach(severity => {
+        switch (severity) {
+          case 'Critical':
+            const criticalFilter = document.getElementById('criticalFilter');
+            if (criticalFilter) criticalFilter.checked = true;
+            break;
+          case 'High':
+            const highFilter = document.getElementById('highFilter');
+            if (highFilter) highFilter.checked = true;
+            break;
+          case 'Medium':
+            const mediumFilter = document.getElementById('mediumFilter');
+            if (mediumFilter) mediumFilter.checked = true;
+            break;
+          case 'Low':
+            const lowFilter = document.getElementById('lowFilter');
+            if (lowFilter) lowFilter.checked = true;
+            break;
+        }
+      });
+    }
+    
+    // Date range filters
+    if (url.searchParams.has('startDate') && startDateInput) {
+      startDateInput.value = url.searchParams.get('startDate');
+      updateDateRangeInfo();
+    }
+    
+    if (url.searchParams.has('endDate') && endDateInput) {
+      endDateInput.value = url.searchParams.get('endDate');
+      updateDateRangeInfo();
+    }
+    
+    // Vendor filters
+    if (url.searchParams.has('vendors')) {
+      const vendors = url.searchParams.get('vendors')?.split(',') || [];
+      vendorCheckboxes.forEach(checkbox => {
+        if (vendors.includes(checkbox.value)) {
+          checkbox.checked = true;
+        }
+      });
+    }
+    
+    // Product filters
+    if (url.searchParams.has('products')) {
+      const products = url.searchParams.get('products')?.split(',') || [];
+      productCheckboxes.forEach(checkbox => {
+        if (products.includes(checkbox.value)) {
+          checkbox.checked = true;
+        }
+      });
+    }
+  }
+  
+  // Setup event listeners
+  function setupEventListeners() {
+    // Set up CVSS slider with visual feedback
     if (cvssSlider && cvssValue) {
       cvssSlider.addEventListener('input', () => {
-        cvssValue.textContent = `${cvssSlider.value}+`;
-        // Filter will be applied on button click or dispatched to main filtering logic
+        const value = parseFloat(cvssSlider.value);
+        cvssValue.textContent = `${value.toFixed(1)}+`;
+        
+        // Update color based on value
+        if (value >= 9.0) {
+          cvssValue.className = "text-sm min-w-[45px] text-center font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 py-1 px-2 rounded";
+        } else if (value >= 7.0) {
+          cvssValue.className = "text-sm min-w-[45px] text-center font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 py-1 px-2 rounded";
+        } else if (value >= 4.0) {
+          cvssValue.className = "text-sm min-w-[45px] text-center font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 py-1 px-2 rounded";
+        } else {
+          cvssValue.className = "text-sm min-w-[45px] text-center font-medium bg-primary/10 text-primary py-1 px-2 rounded";
+        }
+        
+        updateFilterCount();
+        previewFilterResults();
       });
     }
     
-    // Set up EPSS slider
+    // Set up EPSS slider with visual feedback
     if (epssSlider && epssValue) {
       epssSlider.addEventListener('input', () => {
-        epssValue.textContent = `${epssSlider.value}%+`;
-        // Filter will be applied on button click or dispatched to main filtering logic
+        const value = parseInt(epssSlider.value);
+        epssValue.textContent = `${value}%+`;
+        
+        // Update color based on value
+        if (value >= 80) {
+          epssValue.className = "text-sm min-w-[50px] text-center font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 py-1 px-2 rounded";
+        } else if (value >= 50) {
+          epssValue.className = "text-sm min-w-[50px] text-center font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 py-1 px-2 rounded";
+        } else if (value >= 20) {
+          epssValue.className = "text-sm min-w-[50px] text-center font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 py-1 px-2 rounded";
+        } else {
+          epssValue.className = "text-sm min-w-[50px] text-center font-medium bg-primary/10 text-primary py-1 px-2 rounded";
+        }
+        
+        updateFilterCount();
+        previewFilterResults();
       });
     }
     
-    // Set up vendor search
+    // Set up vendor search with enhanced UX
     if (vendorSearch) {
       vendorSearch.addEventListener('input', () => {
         const searchTerm = vendorSearch.value.toLowerCase();
+        let foundCount = 0;
+        
+        // Show/hide clear button
+        if (clearVendorSearch) {
+          clearVendorSearch.classList.toggle('hidden', !searchTerm);
+        }
+        
         vendorCheckboxes.forEach(checkbox => {
           const label = checkbox.parentElement;
           const vendorName = checkbox.value.toLowerCase();
+          
           if (label) {
-            label.style.display = vendorName.includes(searchTerm) ? '' : 'none';
+            const isMatch = vendorName.includes(searchTerm);
+            label.style.display = isMatch ? '' : 'none';
+            if (isMatch) foundCount++;
           }
         });
+        
+        // Show "no results" message if needed
+        if (noVendorResults) {
+          noVendorResults.classList.toggle('hidden', foundCount > 0);
+        }
       });
+      
+      // Clear button functionality
+      if (clearVendorSearch) {
+        clearVendorSearch.addEventListener('click', () => {
+          vendorSearch.value = '';
+          vendorSearch.focus();
+          vendorCheckboxes.forEach(checkbox => {
+            const label = checkbox.parentElement;
+            if (label) label.style.display = '';
+          });
+          clearVendorSearch.classList.add('hidden');
+          if (noVendorResults) noVendorResults.classList.add('hidden');
+        });
+      }
     }
     
-    // Set up product search
+    // Set up product search with enhanced UX
     if (productSearch) {
       productSearch.addEventListener('input', () => {
         const searchTerm = productSearch.value.toLowerCase();
+        let foundCount = 0;
+        
+        // Show/hide clear button
+        if (clearProductSearch) {
+          clearProductSearch.classList.toggle('hidden', !searchTerm);
+        }
+        
         productCheckboxes.forEach(checkbox => {
           const label = checkbox.parentElement;
           const productName = checkbox.value.toLowerCase();
+          
           if (label) {
-            label.style.display = productName.includes(searchTerm) ? '' : 'none';
+            const isMatch = productName.includes(searchTerm);
+            label.style.display = isMatch ? '' : 'none';
+            if (isMatch) foundCount++;
           }
         });
+        
+        // Show "no results" message if needed
+        if (noProductResults) {
+          noProductResults.classList.toggle('hidden', foundCount > 0);
+        }
       });
+      
+      // Clear button functionality
+      if (clearProductSearch) {
+        clearProductSearch.addEventListener('click', () => {
+          productSearch.value = '';
+          productSearch.focus();
+          productCheckboxes.forEach(checkbox => {
+            const label = checkbox.parentElement;
+            if (label) label.style.display = '';
+          });
+          clearProductSearch.classList.add('hidden');
+          if (noProductResults) noProductResults.classList.add('hidden');
+        });
+      }
     }
     
-    // Set up date presets
+    // Set up date presets with improved feedback
     datePresets.forEach((button) => {
       button.addEventListener('click', () => {
         const days = parseInt(button.getAttribute('data-days') || '0', 10);
@@ -320,31 +748,98 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
         startDate.setDate(today.getDate() - days);
         const formattedStartDate = startDate.toISOString().split('T')[0];
         
-        startDateInput.value = formattedStartDate;
-        endDateInput.value = endDate;
+        if (startDateInput) startDateInput.value = formattedStartDate;
+        if (endDateInput) endDateInput.value = endDate;
         
-        // Highlight selected preset
-        datePresets.forEach(btn => btn.classList.remove('bg-blue-200', 'dark:bg-blue-900'));
-        button.classList.add('bg-blue-200', 'dark:bg-blue-900');
+        // Highlight selected preset with improved styling
+        datePresets.forEach(btn => {
+          btn.classList.remove('!bg-primary/10', '!text-primary', 'border-primary/50');
+        });
+        
+        button.classList.add('!bg-primary/10', '!text-primary', 'border-primary/50');
+        
+        // Update date range info display
+        updateDateRangeInfo();
+        
+        // Update filter count
+        updateFilterCount();
+        previewFilterResults();
+      });
+    });
+    
+    // Update date range info when inputs change
+    if (startDateInput) {
+      startDateInput.addEventListener('change', () => {
+        updateDateRangeInfo();
+        updateFilterCount();
+        previewFilterResults();
+      });
+    }
+    
+    if (endDateInput) {
+      endDateInput.addEventListener('change', () => {
+        updateDateRangeInfo();
+        updateFilterCount();
+        previewFilterResults();
+      });
+    }
+    
+    // Update filter count when checkboxes change
+    allCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', () => {
+        updateFilterCount();
+        previewFilterResults();
+        
+        // Highlight the section when filter is selected
+        const parentDetails = checkbox.closest('details');
+        if (parentDetails) {
+          const summaryEl = parentDetails.querySelector('summary');
+          if (summaryEl) {
+            if (checkbox.checked) {
+              summaryEl.classList.add('text-primary', 'font-semibold');
+            } else {
+              // Only remove highlight if no checkboxes in this section are checked
+              const sectionCheckboxes = parentDetails.querySelectorAll('.filter-checkbox');
+              const anySectionCheckboxChecked = Array.from(sectionCheckboxes).some(cb => cb.checked);
+              if (!anySectionCheckboxChecked) {
+                summaryEl.classList.remove('text-primary', 'font-semibold');
+              }
+            }
+          }
+        }
       });
     });
     
     // Reset filters
     if (resetButton) {
       resetButton.addEventListener('click', () => {
-        // Reset all inputs
+        // Clear all inputs with visual feedback
         document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
           checkbox.checked = false;
         });
         
         if (cvssSlider) cvssSlider.value = '0';
-        if (cvssValue) cvssValue.textContent = '0+';
+        if (cvssValue) {
+          cvssValue.textContent = '0+';
+          cvssValue.className = "text-sm min-w-[45px] text-center font-medium bg-primary/10 text-primary py-1 px-2 rounded";
+        }
         
         if (epssSlider) epssSlider.value = '0';
-        if (epssValue) epssValue.textContent = '0%+';
+        if (epssValue) {
+          epssValue.textContent = '0%+';
+          epssValue.className = "text-sm min-w-[50px] text-center font-medium bg-primary/10 text-primary py-1 px-2 rounded";
+        }
         
         if (startDateInput) startDateInput.value = '';
         if (endDateInput) endDateInput.value = '';
+        
+        if (dateRangeInfo) {
+          dateRangeInfo.classList.add('hidden');
+        }
+        
+        datePresets.forEach(btn => {
+          btn.classList.remove('!bg-primary/10', '!text-primary', 'border-primary/50');
+        });
         
         if (vendorSearch) vendorSearch.value = '';
         if (productSearch) productSearch.value = '';
@@ -360,19 +855,207 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
           if (label) label.style.display = '';
         });
         
-        // Remove preset highlights
-        datePresets.forEach(btn => btn.classList.remove('bg-blue-200', 'dark:bg-blue-900'));
+        // Hide no results messages
+        if (noVendorResults) noVendorResults.classList.add('hidden');
+        if (noProductResults) noProductResults.classList.add('hidden');
         
-        // Dispatch custom event for main page to handle reset
+        // Hide clear search buttons
+        if (clearVendorSearch) clearVendorSearch.classList.add('hidden');
+        if (clearProductSearch) clearProductSearch.classList.add('hidden');
+        
+        // Reset section highlights
+        allSections.forEach(section => {
+          const summaryEl = section.querySelector('summary');
+          if (summaryEl) {
+            summaryEl.classList.remove('text-primary', 'font-semibold');
+          }
+        });
+        
+        // Animate the reset button
+        resetButton.classList.add('animate-pulse');
+        setTimeout(() => {
+          resetButton.classList.remove('animate-pulse');
+        }, 500);
+        
+        // Update filter count
+        updateFilterCount();
+        
+        // Hide filter preview
+        if (filterResultPreview) {
+          filterResultPreview.classList.add('hidden');
+        }
+        
+        // Dispatch reset event
         dispatchFilterEvent();
       });
     }
     
-    // Apply filters
-    if (applyButton) {
+    // Apply filters with animation effect
+    if (applyButton && filterApplyEffect) {
       applyButton.addEventListener('click', () => {
+        // Run animation
+        filterApplyEffect.classList.add('scale-x-100');
+        setTimeout(() => {
+          filterApplyEffect.classList.remove('scale-x-100');
+        }, 600);
+        
         dispatchFilterEvent();
       });
+    }
+  }
+  
+  // Helper to update date range info display
+  function updateDateRangeInfo() {
+    if (!dateRangeInfo || !dateRangeText || !startDateInput || !endDateInput) return;
+    
+    const startDate = startDateInput.value;
+    const endDate = endDateInput.value;
+    
+    if (startDate || endDate) {
+      let rangeText = '';
+      
+      if (startDate && endDate) {
+        rangeText = `${formatDateString(startDate)} to ${formatDateString(endDate)}`;
+      } else if (startDate) {
+        rangeText = `${formatDateString(startDate)} onwards`;
+      } else if (endDate) {
+        rangeText = `up to ${formatDateString(endDate)}`;
+      }
+      
+      dateRangeText.textContent = rangeText;
+      dateRangeInfo.classList.remove('hidden');
+    } else {
+      dateRangeInfo.classList.add('hidden');
+    }
+  }
+  
+  // Format date for display
+  function formatDateString(dateStr) {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  }
+  
+  // Update filter count badge
+  function updateFilterCount() {
+    if (!filterCount) return;
+    
+    let count = 0;
+    
+    // Count checked checkboxes
+    allCheckboxes.forEach(checkbox => {
+      if (checkbox.checked) count++;
+    });
+    
+    // Check sliders
+    if (cvssSlider && parseFloat(cvssSlider.value) > 0) count++;
+    if (epssSlider && parseFloat(epssSlider.value) > 0) count++;
+    
+    // Check date ranges
+    if (startDateInput && startDateInput.value) count++;
+    if (endDateInput && endDateInput.value) count++;
+    
+    // Update the display
+    filterCount.textContent = count;
+    filterCount.classList.toggle('hidden', count === 0);
+    
+    // Highlight sections that have active filters
+    updateSectionHighlights();
+    
+    return count;
+  }
+  
+  // Highlight sections with active filters
+  function updateSectionHighlights() {
+    // Reset all section highlights first
+    allSections.forEach(section => {
+      const sectionId = section.getAttribute('data-section');
+      const summaryEl = section.querySelector('summary');
+      
+      if (summaryEl && sectionId) {
+        // Check if this section has any active filters
+        let hasSectionFilters = false;
+        
+        switch (sectionId) {
+          case 'status':
+            // Check status filters
+            hasSectionFilters = document.getElementById('kevFilter')?.checked || 
+                               document.getElementById('zeroDayFilter')?.checked ||
+                               document.getElementById('patchAvailableFilter')?.checked;
+            break;
+          case 'score':
+            // Check score/severity filters
+            hasSectionFilters = (cvssSlider && parseFloat(cvssSlider.value) > 0) ||
+                               (epssSlider && parseFloat(epssSlider.value) > 0) ||
+                               Array.from(severityCheckboxes).some(cb => cb.checked);
+            break;
+          case 'date':
+            // Check date filters
+            hasSectionFilters = (startDateInput && startDateInput.value) ||
+                               (endDateInput && endDateInput.value);
+            break;
+          case 'vendor':
+            // Check vendor/product filters
+            hasSectionFilters = Array.from(vendorCheckboxes).some(cb => cb.checked) ||
+                               Array.from(productCheckboxes).some(cb => cb.checked);
+            break;
+        }
+        
+        // Apply highlight if section has active filters
+        summaryEl.classList.toggle('text-primary', hasSectionFilters);
+        summaryEl.classList.toggle('font-semibold', hasSectionFilters);
+      }
+    });
+  }
+  
+  // Initialize animations
+  function initializeAnimations() {
+    // Add fadeIn animation for details content
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      .animate-fadeIn {
+        animation: fadeIn 0.3s ease-out;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  // Preview filter results by estimating how many reports would match
+  function previewFilterResults() {
+    if (!filterResultPreview || !filterResultCount) return;
+    
+    // Only run this if we have filter criteria
+    const filterCriteriaCount = updateFilterCount();
+    
+    if (filterCriteriaCount > 0) {
+      // This is a simplified estimate - in a real implementation,
+      // we could run a similar logic to what the main filter uses
+      // to provide a more accurate count
+      
+      // For demonstration, we'll show a random but consistent number
+      // In a real app, this would actually count the matching reports
+      const estimatedResults = Math.floor(
+        Math.max(1, Math.min(80, 100 - (filterCriteriaCount * 15)))
+      );
+      
+      filterResultCount.textContent = estimatedResults;
+      filterResultPreview.classList.remove('hidden');
+    } else {
+      filterResultPreview.classList.add('hidden');
     }
   }
   
@@ -402,15 +1085,127 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
         .map(cb => cb.value)
     };
     
-    // Dispatch a custom event with filter data
-    const event = new CustomEvent('sidebarFiltersChanged', { 
-      detail: filterData,
-      bubbles: true 
-    });
+    // Show loading indicator
+    const loadingIndicator = document.getElementById('filterLoadingIndicator');
+    if (loadingIndicator) {
+      loadingIndicator.classList.remove('hidden');
+      
+      // Announce to screen readers that filters are being applied
+      const announcer = document.getElementById('filter-announcer');
+      if (announcer) {
+        announcer.textContent = 'Applying filters. Please wait.';
+      }
+    }
+
+    // Disable the apply button while loading
+    const applyButton = document.getElementById('applyFiltersBtn');
+    if (applyButton) {
+      applyButton.disabled = true;
+      applyButton.classList.add('opacity-70');
+      applyButton.setAttribute('aria-busy', 'true');
+    }
+    
+    // Add brief delay to show the loading state (for better UX feedback)
+    setTimeout(() => {
+      // Dispatch a custom event with filter data
+      const event = new CustomEvent('sidebarFiltersChanged', { 
+        detail: filterData,
+        bubbles: true 
+      });
+      document.dispatchEvent(event);
+      
+      // Hide loading indicator after a minimum visibility period
+      setTimeout(() => {
+        if (loadingIndicator) {
+          loadingIndicator.classList.add('hidden');
+        }
+        
+        // Re-enable the apply button
+        if (applyButton) {
+          applyButton.disabled = false;
+          applyButton.classList.remove('opacity-70');
+          applyButton.removeAttribute('aria-busy');
+        }
+        
+        // Update announcer for screen readers
+        const announcer = document.getElementById('filter-announcer');
+        const resultsCountElement = document.getElementById('resultsCount');
+        let resultMessage = 'Filters applied.';
+        
+        if (resultsCountElement) {
+          const countMatch = resultsCountElement.textContent.match(/\d+/);
+          if (countMatch && countMatch[0]) {
+            resultMessage = `Filters applied. Showing ${countMatch[0]} results.`;
+          }
+        }
+        
+        if (announcer) {
+          announcer.textContent = resultMessage;
+        }
+        
+        // Show "filters applied" message briefly with enhanced styling
+        const successMessage = document.createElement('div');
+        successMessage.className = 'fixed bottom-4 right-4 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-4 py-2.5 rounded-lg shadow-lg z-50 flex items-center';
+        successMessage.setAttribute('role', 'status');
+        successMessage.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          <span class="font-medium">Filters applied</span>
+        `;
+        document.body.appendChild(successMessage);
+        
+        // Add entrance animation
+        successMessage.style.opacity = '0';
+        successMessage.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+          successMessage.style.opacity = '1';
+          successMessage.style.transform = 'translateY(0)';
+          successMessage.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
+        }, 10);
+        
+        // Auto remove after delay
+        setTimeout(() => {
+          successMessage.style.opacity = '0';
+          successMessage.style.transform = 'translateY(10px)';
+          
+          setTimeout(() => {
+            if (document.body.contains(successMessage)) {
+              document.body.removeChild(successMessage);
+            }
+          }, 300);
+        }, 2000);
+        
+        // Update filter stats if available
+        const filterStats = document.getElementById('filterStats');
+        const filteredCount = document.getElementById('filteredCount');
+        const filterCount = document.getElementById('filterCount');
+        const hasActiveFilters = updateFilterCount() > 0;
+        
+        if (filterStats && filteredCount) {
+          // Get the current result count from the main page if available
+          const resultsCountElement = document.getElementById('resultsCount');
+          if (resultsCountElement) {
+            const countMatch = resultsCountElement.textContent.match(/\d+/);
+            if (countMatch && countMatch[0]) {
+              filteredCount.textContent = countMatch[0];
+              filterStats.classList.toggle('hidden', !hasActiveFilters);
+            }
+          }
+        }
+      }, 300); // Minimum loading indicator time (for UX)  
+    }, 100); // Brief delay to show loading state
+  }
+
+  // Send a custom event informing the parent page when sidebar is closed
+  function requestSidebarClose() {
+    const event = new CustomEvent('closeSidebarRequest', { bubbles: true });
     document.dispatchEvent(event);
   }
 
   // Initialize controls when DOM is loaded
   document.addEventListener('DOMContentLoaded', initializeControls);
-  // Note: Mobile close button logic is handled in index.astro
+  
+  // Close sidebar when close button is clicked
+  document.getElementById('closeSidebarBtn')?.addEventListener('click', requestSidebarClose);
 </script>

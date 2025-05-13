@@ -1,59 +1,116 @@
 /* src/styles/global.css */
 
-/* Define CSS Variables for Theme */
+/* Define CSS Variables for Theme - Data-focused minimalist design */
 :root {
-  /* Color Palette (Neutral + Blue Accent) */
-  --color-primary: #3b82f6; /* blue-500 */
-  --color-primary-dark: #2563eb; /* blue-600 */
-  --color-secondary: #6366f1; /* indigo-500 - Keep for potential secondary elements */
-  --color-accent: #ec4899; /* pink-500 - Keep for potential accents */
+  /* Color Palette - Clean, data-focused colors */
+  --color-primary: #2271b3; /* Custom blue */
+  --color-primary-dark: #1a5a8e; /* Darker blue */
+  --color-primary-rgb: 34, 113, 179; /* Custom blue in RGB */
+  --color-secondary: #32a852; /* Green for positive indicators */
+  --color-secondary-dark: #238b3d; /* Darker green */
+  --color-accent: #f44336; /* Red for alerts/danger */
 
-  --color-text: #1f2937; /* gray-800 */
-  --color-text-muted: #6b7280; /* gray-500 */
-  --color-text-secondary: #4b5563; /* gray-600 */
+  --color-text: #333333; /* Almost black - Better for reading */
+  --color-text-muted: #777777; /* Medium gray */
+  --color-text-secondary: #555555; /* Dark gray */
 
-  --color-background: #f9fafb; /* gray-50 */
-  --color-surface: #ffffff; /* white */
-  --color-border: #e5e7eb; /* gray-200 */
+  --color-background: #f5f5f5; /* Light gray background */
+  --color-surface: #ffffff; /* White */
+  --color-surface-accent: #f9f9f9; /* Very light gray - For alternating rows */
+  --color-border: #e0e0e0; /* Light gray border */
+
+  /* Status Colors */
+  --color-success: #32a852; /* Green */
+  --color-warning: #ff9800; /* Orange */
+  --color-danger: #f44336; /* Red */
+  --color-info: #2271b3; /* Blue */
+
+  /* Critical Severity Specific */
+  --color-critical: #c9302c; /* Strong red */
+  --color-high: #ec971f; /* Orange */
+  --color-medium: #ffd54f; /* Amber */
+  --color-low: #31b0d5; /* Blue */
 
   /* Dark Mode Colors */
-  --dark-color-primary: #60a5fa; /* blue-400 */
-  --dark-color-primary-dark: #3b82f6; /* blue-500 */
-  --dark-color-secondary: #818cf8; /* indigo-400 */
-  --dark-color-accent: #f472b6; /* pink-400 */
+  --dark-color-primary: #4c9ed9; /* Lighter blue for dark mode */
+  --dark-color-primary-dark: #3a89c9; /* Medium blue */
+  --dark-color-primary-rgb: 76, 158, 217; /* Lighter blue in RGB */
+  --dark-color-secondary: #4eca6f; /* Lighter green */
+  --dark-color-secondary-dark: #3bb359; /* Medium green */
+  --dark-color-accent: #ff5252; /* Brighter red */
 
-  --dark-color-text: #f3f4f6; /* gray-100 */
-  --dark-color-text-muted: #9ca3af; /* gray-400 */
-  --dark-color-text-secondary: #d1d5db; /* gray-300 */
+  --dark-color-text: #e0e0e0; /* Very light gray */
+  --dark-color-text-muted: #a0a0a0; /* Medium gray */
+  --dark-color-text-secondary: #c0c0c0; /* Light gray */
 
-  --dark-color-background: #111827; /* gray-900 */
-  --dark-color-surface: #1f2937; /* gray-800 */
-  --dark-color-border: #374151; /* gray-700 */
+  --dark-color-background: #222222; /* Very dark gray */
+  --dark-color-surface: #333333; /* Dark gray */
+  --dark-color-surface-accent: #3a3a3a; /* Slightly lighter dark gray */
+  --dark-color-border: #444444; /* Medium dark gray */
+
+  /* Dark Mode Status Colors */
+  --dark-color-success: #4eca6f; /* Brighter green */
+  --dark-color-warning: #ffb74d; /* Brighter orange */
+  --dark-color-danger: #ff5252; /* Brighter red */
+  --dark-color-info: #64b5f6; /* Brighter blue */
+
   /* Highlight color for new reports */
-  --color-highlight: #fefcbf; /* Tailwind yellow-100 */
+  --color-highlight: #fff9c4; /* Very light yellow */
+  --dark-color-highlight: #5d4037; /* Brown */
 
-  /* Spacing Scale */
+  /* Spacing Scale - More compact for data-dense display */
   --spacing-xs: 0.25rem; /* 4px */
   --spacing-sm: 0.5rem;  /* 8px */
-  --spacing-md: 1rem;    /* 16px */
-  --spacing-lg: 1.5rem;  /* 24px */
-  --spacing-xl: 2.5rem;  /* 40px */
-  --spacing-xxl: 4rem;   /* 64px */
+  --spacing-md: 0.75rem; /* 12px - Reduced from typical 16px */
+  --spacing-lg: 1.25rem; /* 20px - Reduced for more compact display */
+  --spacing-xl: 2rem;    /* 32px */
+  --spacing-xxl: 3rem;   /* 48px */
 
-  /* Border Radius */
-  --border-radius: 0.375rem; /* rounded-md */
-  --border-radius-medium: 0.5rem; /* rounded-lg */
+  /* Border Radius - More squared for data display */
+  --border-radius: 0.25rem; /* 4px - Smaller rounded corners */
+  --border-radius-medium: 0.375rem; /* 6px */
+  --border-radius-large: 0.5rem; /* 8px */
+  --border-radius-full: 9999px; /* For pills and circles */
 
-  /* Shadows */
-  --shadow-small: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-medium: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  /* Shadows - More subtle */
+  --shadow-small: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+  --shadow-medium: 0 2px 4px -1px rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  --shadow-large: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+}
+
+/* Pagefind UI Search Bar Overrides to match the theme */
+.pagefind-ui__search-input {
+  padding: var(--spacing-sm);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  font-size: 0.875rem;
+  width: 100%;
+  min-height: 44px;
+  color: var(--color-text);
+}
+
+.pagefind-ui__search-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.pagefind-ui__search-input:focus {
+  outline: none;
+}
+
+/* Smooth theme transition class */
+.theme-transitions-enabled,
+.theme-transitions-enabled * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Apply Dark Mode Variables */
 html.dark {
   --color-primary: var(--dark-color-primary);
   --color-primary-dark: var(--dark-color-primary-dark);
+  --color-primary-rgb: var(--dark-color-primary-rgb);
   --color-secondary: var(--dark-color-secondary);
+  --color-secondary-dark: var(--dark-color-secondary-dark);
   --color-accent: var(--dark-color-accent);
 
   --color-text: var(--dark-color-text);
@@ -62,11 +119,38 @@ html.dark {
 
   --color-background: var(--dark-color-background);
   --color-surface: var(--dark-color-surface);
+  --color-surface-accent: var(--dark-color-surface-accent);
   --color-border: var(--dark-color-border);
+  
+  /* Status colors */
+  --color-success: var(--dark-color-success);
+  --color-warning: var(--dark-color-warning);
+  --color-danger: var(--dark-color-danger);
+  --color-info: var(--dark-color-info);
+  
   /* Highlight color for new reports in dark mode */
-  --dark-color-highlight: #92400e; /* Tailwind yellow-800 */
-  /* Use dark highlight variant */
   --color-highlight: var(--dark-color-highlight);
+  
+  /* Updated shadows for dark mode */
+  --shadow-small: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+  --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+  
+  /* Improved dark mode UI elements */
+  --scrollbar-track: rgba(255, 255, 255, 0.05);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+}
+
+/* Enhanced dark mode styles for better readability and contrast */
+html.dark {
+  color-scheme: dark; /* Signals to browser that dark scrollbars should be used */
+}
+
+/* Enhanced contrast for dark mode text */
+html.dark strong,
+html.dark .font-semibold,
+html.dark .font-bold {
+  font-weight: 600; /* Slightly reduce boldness for better readability in dark mode */
 }
 
 
@@ -77,6 +161,16 @@ html.dark {
 @layer components {
   tr.new-report {
     background-color: var(--color-highlight);
+  }
+  
+  /* Animation for card view transition */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 }
 @tailwind utilities;
@@ -91,11 +185,34 @@ body {
 }
 
 @layer base {
+  html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+    overscroll-behavior: none;
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    height: 100%;
+  }
+  
+  /* Prevent content from being hidden under notches or UI elements */
   body {
     /* Keep non-color base styles here */
     font-family: theme('fontFamily.sans'); /* Apply the sans font stack from config */
     @apply antialiased; /* Removed selection style from here */
-    /* font-family: 'Inter', sans-serif; */ /* Example: Use Inter font if added */
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+  }
+  
+  /* Ensure images don't overflow their containers */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Prevent text size adjustment on orientation change */
+  html {
+    -webkit-text-size-adjust: 100%;
   }
 
   /* Apply selection styles using standard CSS */
@@ -108,14 +225,271 @@ body {
     color: inherit;
   }
 
+  /* Skip to content link - visually hidden but accessible to keyboard and screen readers */
+  .skip-to-content {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+    z-index: 9999;
+  }
+
+  .skip-to-content:focus {
+    width: auto;
+    height: auto;
+    padding: 0.75rem 1.5rem;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    background-color: var(--color-primary);
+    color: white;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 0 0 var(--border-radius-medium) var(--border-radius-medium);
+    top: 0;
+    left: 1rem;
+    box-shadow: var(--shadow-medium);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: 3px solid white;
+    outline-offset: 2px;
+    transition: transform 0.2s ease-out;
+    transform: translateY(0);
+  }
+  
+  .skip-to-content:not(:focus) {
+    transform: translateY(-100%);
+  }
+  
+  .skip-to-content:focus:active {
+    transform: translateY(2px);
+  }
+
 
   /* Improve focus visibility globally */
   *:focus-visible {
     outline: none; /* Remove default outline */
     /* Replicate ring using box-shadow with CSS variables */
     box-shadow: 0 0 0 2px var(--color-background), 0 0 0 4px var(--color-primary);
+    position: relative;
+    z-index: 1; /* Ensure focused elements are above others */
+  }
+  
+  /* Enhanced button focus states */
+  button:focus-visible, 
+  [role="button"]:focus-visible,
+  a:focus-visible {
+    box-shadow: 0 0 0 3px var(--color-background), 0 0 0 6px var(--color-primary);
+    outline: none;
+  }
+  
+  /* Improved keyboard navigation for input elements */
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-background), 0 0 0 4px var(--color-primary);
+  }
+  
+  /* Table and list item focus states for keyboard navigation */
+  tr:focus-visible,
+  li:focus-visible,
+  [role="row"]:focus-visible,
+  [role="listitem"]:focus-visible {
+    background-color: rgba(var(--color-primary-rgb), 0.1);
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
   }
 
   /* Margins for prose elements are handled by the @tailwindcss/typography plugin
      and its configuration in tailwind.config.cjs. No need to reset here. */
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  /* Disable all animations and transitions for users who prefer reduced motion */
+  .animate-fade-in,
+  .animate-pulse,
+  .animate-scale-in,
+  .animate-slide-in-right,
+  .theme-transition,
+  .theme-transitions-enabled * {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+/* Screen reader only utilities */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Better keyboard focus indicators for interactive elements */
+[tabindex]:not([tabindex="-1"]):focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* High contrast mode improvements */
+@media (forced-colors: active) {
+  /* Ensure buttons have visible boundaries */
+  button, .filter-chip, [role="button"] {
+    border: 1px solid transparent;
+  }
+  
+  /* Ensure focus states are visible */
+  *:focus-visible {
+    outline: 3px solid;
+    outline-offset: 3px;
+  }
+  
+  /* Ensure active table rows are distinguishable */
+  tr:hover, tr:focus-within {
+    border: 1px solid;
+  }
+}
+
+/* Custom scrollbar styles (compatible with most modern browsers) */
+.scrollbar-thin {
+  scrollbar-width: thin; /* Firefox */
+}
+
+.scrollbar-thumb-primary\/40::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-thumb-primary\/40::-webkit-scrollbar-track {
+  background: var(--scrollbar-track, transparent);
+}
+
+.scrollbar-thumb-primary\/40::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--color-primary-rgb), 0.4);
+  border-radius: 20px;
+  border: 2px solid transparent;
+}
+
+.scrollbar-thumb-primary\/40::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(var(--color-primary-rgb), 0.6);
+}
+
+/* Enhanced scrollbars for all scrollable containers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track, transparent);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb, rgba(var(--color-primary-rgb), 0.3));
+  border-radius: 20px;
+  border: 2px solid transparent;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(var(--color-primary-rgb), 0.5);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-color: var(--scrollbar-thumb, rgba(var(--color-primary-rgb), 0.3)) var(--scrollbar-track, transparent);
+  scrollbar-width: thin;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  /* Optimize touch targets for mobile */
+  button, input[type="checkbox"], input[type="radio"], label, a,
+  [role="button"], .filter-chip {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Improve sidebar on mobile */
+  #filterSidebarWrapper.fixed {
+    height: 100vh;
+    max-height: -webkit-fill-available; /* iOS height fix */
+    width: 85% !important; /* Wider sidebar for better readability */
+    max-width: 320px !important;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  }
+  
+  /* Fix mobile header spacing */
+  header .site-title a {
+    font-size: 1rem;
+  }
+  
+  /* Improve mobile table interaction */
+  #reportTable th, #reportTable td {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  /* Fix content layout on small screens */
+  .flex-col.md\:flex-row {
+    gap: 0.5rem;
+  }
+  
+  /* Prevent text overflow in table cells */
+  #reportTable td {
+    max-width: 90vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Fix cards in card view */
+  #cardView > div {
+    display: flex;
+  }
+  
+  /* Improve spacing in card view */
+  #cardView {
+    gap: 0.75rem;
+    padding: 0.5rem;
+  }
+  
+  /* Prevent overflow issues */
+  body, .w-full {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  
+  /* Better filter chips display */
+  .filter-chip {
+    max-width: 95vw;
+  }
+  
+  .filter-chip span {
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }

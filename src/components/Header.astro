@@ -19,38 +19,39 @@ const {
 
 const base = Astro.config?.base ?? '/'; // Get base path
 ---
-<header role="banner" class="sticky top-0 z-50 backdrop-blur-md bg-surface/90 border-b border-border">
-  <div class="container mx-auto flex justify-between items-center px-md py-sm">
+<header role="banner" class="sticky top-0 z-50 bg-surface shadow-sm border-b border-border">
+  <div class="w-full mx-auto flex justify-between items-center px-4 py-2">
+    <!-- Site Title & Logo -->
     <div class="site-title flex items-center">
-      {/* Optional: Add SVG icon here */}
-      {/* Example Placeholder: Replace with actual SVG */}
-    <!-- <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-primary inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg> -->
-      <a href={base} class="text-xl font-bold text-text hover:text-primary transition-colors">{siteTitle}</a>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <a href={base} class="text-base sm:text-lg font-semibold text-text hover:text-primary transition-colors">{siteTitle}</a>
     </div>
     
-    <div class="flex items-center gap-md">
-      {/* Add search component */}
-      {showSearch && (
-        <div class="hidden md:block">
+    <div class="flex items-center gap-3">
+      <!-- Search component -->
+      {showSearch ? 
+        <div class="hidden md:block relative">
           <Search 
-            placeholder="Search reports..." 
-            className="w-64"
+            placeholder="Search CVEs..." 
+            className="w-60"
           />
         </div>
-      )}
+      : null}
       
-      <nav role="navigation" aria-label="Main navigation" class="flex items-center gap-sm md:gap-md">
-        <ul class="flex items-center gap-sm md:gap-md">
+      <!-- Main Navigation - Simplified with fewer items -->
+      <nav role="navigation" aria-label="Main navigation" class="hidden md:flex items-center">
+        <ul class="flex items-center">
           {navItems.map((item) => (
-            // Check if item should be shown on mobile
             <li class={item.showOnMobile === false ? 'hidden md:block' : ''}>
               <a
                 href={item.href}
                 class:list={[
-                  "block px-sm py-2 rounded hover:bg-primary/10 hover:text-primary transition-colors", // Base link styles, added py-2 and block
-                  { 'text-primary font-medium': item.href === currentPath } // Active styles
+                  "block px-3 py-1.5 font-medium text-sm hover:text-primary transition-colors",
+                  item.href === currentPath 
+                    ? 'text-primary font-semibold' 
+                    : 'text-text-secondary'
                 ]}
                 aria-current={item.href === currentPath ? "page" : false}
               >
@@ -60,21 +61,229 @@ const base = Astro.config?.base ?? '/'; // Get base path
           ))}
         </ul>
       </nav>
-      <!-- Theme Toggle -->
+      
+      <!-- Enhanced Filter Toggle - Visible on all screens with fixed SVG size -->
+      <button
+        id="sidebarToggleBtn"
+        aria-label="Toggle filters"
+        aria-expanded="true"
+        class="px-2 py-1 text-xs border border-border rounded bg-surface text-text-secondary hover:bg-surface-accent active:bg-surface-accent transition-colors flex items-center"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="min-width: 14px; min-height: 14px; max-width: 14px; max-height: 14px;">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+        </svg>
+        <span class="hidden md:inline-block">Toggle Filters</span>
+        <span class="md:hidden">Filters</span>
+      </button>
+      
+      <!-- Enhanced Mobile menu button with better touch target -->
+      <button
+        id="mobileMenuBtn"
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-controls="mobileMenu"
+        class="md:hidden flex items-center justify-center w-10 h-10 rounded-md text-text-secondary hover:text-primary hover:bg-surface-accent transition-colors"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+      
+      <!-- Enhanced Theme Toggle -->
       <button
         id="themeToggleBtn"
         aria-label="Toggle theme"
-        class="w-10 h-10 flex items-center justify-center bg-surface border border-border dark:bg-surface dark:border-border rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ml-sm"
+        class="w-8 h-8 flex items-center justify-center rounded-md bg-surface hover:bg-surface-accent border border-border text-text-secondary hover:text-primary transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50"
+        title="Toggle dark/light mode"
       >
-        🌙
+        <!-- Icon will be inserted by script -->
       </button>
     </div>
   </div>
   
-  {/* Mobile search - only shown on small screens */}
-  {showSearch && (
-    <div class="md:hidden px-md pb-sm">
-      <Search placeholder="Search reports..." />
+  <!-- Enhanced Mobile search - with improved accessibility -->
+  {showSearch ? 
+    <div class="md:hidden px-3 py-2 border-t border-border bg-surface-accent">
+      <Search placeholder="Search CVEs..." />
+      <!-- Mobile accessibility notice -->
+      <div class="text-xs text-text-secondary text-center mt-1 animate-fade-in">
+        <span class="flex items-center justify-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Swipe tables horizontally to see more data</span>
+        </span>
+      </div>
     </div>
-  )}
+  : null}
+  
+  <!-- Enhanced Mobile Navigation Menu with animations and better UX -->
+  <div id="mobileMenu" class="hidden md:hidden bg-surface border-t border-border">
+    <nav class="max-w-[1400px] mx-auto py-3 px-4">
+      <ul class="flex flex-col space-y-1">
+        {navItems.map((item) => (
+          <li>
+            <a
+              href={item.href}
+              class:list={[
+                "block px-4 py-3 text-base rounded-md transition-colors",
+                item.href === currentPath 
+                  ? 'text-primary font-medium bg-primary/10' 
+                  : 'text-text-secondary hover:bg-surface-accent/70'
+              ]}
+              aria-current={item.href === currentPath ? "page" : false}
+            >
+              {item.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+      
+      <!-- Mobile-specific actions -->
+      <div class="mt-4 pt-4 border-t border-border">
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-xs font-medium text-text-muted">Display Settings</span>
+        </div>
+        <!-- Mobile theme toggle with label -->
+        <button id="mobileThemeToggle" class="w-full flex items-center justify-between px-4 py-3 rounded-md bg-surface-accent/50 text-text hover:bg-surface-accent transition-colors">
+          <span class="text-base">Toggle dark mode</span>
+          <span id="mobileThemeIcon" class="w-6 h-6 flex items-center justify-center">
+            <!-- Icon inserted by script -->
+          </span>
+        </button>
+      </div>
+    </nav>
+  </div>
 </header>
+
+<script>
+  // Enhanced mobile menu and responsive navigation handling
+  document.addEventListener('DOMContentLoaded', () => {
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileThemeToggle = document.getElementById('mobileThemeToggle');
+    const mobileThemeIcon = document.getElementById('mobileThemeIcon');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    
+    // Update mobile theme icon to match desktop version
+    function updateMobileThemeIcon() {
+      if (!mobileThemeIcon) return;
+      
+      const isDark = document.documentElement.classList.contains('dark');
+      mobileThemeIcon.innerHTML = themeToggleBtn ? themeToggleBtn.innerHTML : (isDark 
+        ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>'
+        : '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>');
+    }
+    
+    // Initial update of mobile theme icon
+    updateMobileThemeIcon();
+    
+    // Listen for theme changes to update mobile icon
+    document.addEventListener('themeChanged', () => {
+      updateMobileThemeIcon();
+    });
+    
+    // Handle mobile theme toggle
+    if (mobileThemeToggle) {
+      mobileThemeToggle.addEventListener('click', () => {
+        // Click the main theme toggle button to maintain consistent behavior
+        if (themeToggleBtn) {
+          themeToggleBtn.click();
+        }
+      });
+    }
+    
+    // Enhanced mobile menu toggle with animation
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => {
+        const isHidden = mobileMenu.classList.contains('hidden');
+        
+        if (isHidden) {
+          // Show menu with animation
+          mobileMenu.classList.remove('hidden');
+          mobileMenu.style.maxHeight = '0';
+          mobileMenu.style.opacity = '0';
+          mobileMenu.style.transition = 'max-height 0.3s ease-out, opacity 0.2s ease-out';
+          
+          // Force reflow
+          void mobileMenu.offsetHeight;
+          
+          // Add animation
+          mobileMenu.style.maxHeight = '100vh';
+          mobileMenu.style.opacity = '1';
+          
+          // Update button
+          mobileMenuBtn.setAttribute('aria-expanded', 'true');
+          mobileMenuBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          `;
+          
+          // Lock scroll on body
+          document.body.classList.add('overflow-hidden', 'md:overflow-auto');
+        } else {
+          // Hide menu with animation
+          mobileMenu.style.maxHeight = '0';
+          mobileMenu.style.opacity = '0';
+          
+          // Clean up after animation
+          setTimeout(() => {
+            mobileMenu.classList.add('hidden');
+            mobileMenu.style.maxHeight = '';
+            mobileMenu.style.opacity = '';
+            document.body.classList.remove('overflow-hidden', 'md:overflow-auto');
+          }, 300);
+          
+          // Update button immediately
+          mobileMenuBtn.setAttribute('aria-expanded', 'false');
+          mobileMenuBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          `;
+        }
+      });
+    }
+    
+    // Wire up sidebar toggle button for mobile with enhanced feedback
+    const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+    const filterSidebarWrapper = document.getElementById('filterSidebarWrapper');
+    
+    if (sidebarToggleBtn && filterSidebarWrapper) {
+      sidebarToggleBtn.addEventListener('click', () => {
+        // Add haptic feedback for mobile if available
+        if ('vibrate' in navigator) {
+          try {
+            navigator.vibrate(5); // Light vibration (5ms)
+          } catch (e) {
+            // Ignore errors if vibration not available
+          }
+        }
+        
+        // Dispatch custom event for sidebar toggle
+        document.dispatchEvent(new CustomEvent('toggleSidebar'));
+      });
+    }
+    
+    // Check screen width on resize to adapt UI
+    window.addEventListener('resize', () => {
+      // Ensure mobile menu is hidden on larger screens
+      if (window.innerWidth >= 768 && mobileMenu && !mobileMenu.classList.contains('hidden')) {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.style.maxHeight = '';
+        mobileMenu.style.opacity = '';
+        document.body.classList.remove('overflow-hidden');
+        
+        if (mobileMenuBtn) {
+          mobileMenuBtn.setAttribute('aria-expanded', 'false');
+          mobileMenuBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          `;
+        }
+      }
+    });
+  });
+</script>

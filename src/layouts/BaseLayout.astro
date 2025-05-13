@@ -1,89 +1,220 @@
 ---
-// src/layouts/BaseLayout.astro
-import '../styles/global.css'; // Import global styles including Tailwind directives
-import Header from '../components/Header.astro'; // Import Header component
-import Footer from '../components/Footer.astro'; // Import Footer component
-// import Search from '../components/Search.astro'; // Removed unused Search import
+import '../styles/global.css';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { navItems } from '../data/navItems';
 
 interface Props {
-	title: string;
-	description?: string; // Optional description for meta tag
+    title: string;
+    description?: string;
 }
 
 const { title, description = "Don't Panic - Vulnerability Intelligence Reports" } = Astro.props;
-const pageTitle = `${title} | Don't Panic`; // Consistent page title format
-
-// Safely access config properties with fallbacks
+const pageTitle = `${title} | Don't Panic`;
 const base = Astro.config?.base ?? '/';
-const site = Astro.site ?? new URL('http://localhost:4321'); // Default to localhost if site is undefined
-
+const site = Astro.site ?? new URL('http://localhost:4321');
 const canonicalURL = new URL(Astro.url.pathname, site);
-const faviconUrl = `${base}favicon.svg`; // Construct base-aware favicon URL
+const faviconUrl = `${base}favicon.svg`;
+const currentPath = Astro.url.pathname;
 ---
+
 <!doctype html>
 <html lang="en">
-	<head>
-   <meta charset="UTF-8" />
-  <!-- Google Font: Inter -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-		<meta name="description" content={description} />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<base href={base} />
-   <link rel="icon" type="image/svg+xml" href={faviconUrl} />
-		<meta name="generator" content={Astro.generator} />
-   <title>{pageTitle}</title>
-  <!-- Theme initialization: set dark mode class early to prevent flash -->
-  <script>!function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');else document.documentElement.classList.remove('dark')}catch(e){}}();</script>
+    <head>
+        <meta charset="UTF-8" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <meta name="description" content={description} />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+        <base href={base} />
+        <link rel="icon" type="image/svg+xml" href={faviconUrl} />
+        <meta name="generator" content={Astro.generator} />
+        <meta name="theme-color" content="#2271b3" />
+        <meta name="color-scheme" content="light dark" />
+        
+        <!-- Preload key assets -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        
+        <!-- PWA capabilities -->
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <title>{pageTitle}</title>
+        
+        <script is:inline>
+            // Improved theme initialization script
+            (function() {
+                try {
+                    const savedTheme = localStorage.getItem("theme");
+                    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+                    
+                    // Set initial theme: saved preference or system preference
+                    if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+                        document.documentElement.classList.add("dark");
+                    } else {
+                        document.documentElement.classList.remove("dark");
+                    }
+                    
+                    // Add class to enable transitions (but only after initial theme is set)
+                    setTimeout(() => {
+                        document.documentElement.classList.add('theme-transitions-enabled');
+                    }, 100);
+                    
+                    // Listen for system preference changes
+                    window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', (e) => {
+                        // Only update if user hasn't set a preference
+                        if (!localStorage.getItem("theme")) {
+                            if (e.matches) {
+                                document.documentElement.classList.add("dark");
+                            } else {
+                                document.documentElement.classList.remove("dark");
+                            }
+                            
+                            // Update button appearance if it exists
+                            const btn = document.getElementById("themeToggleBtn");
+                            if (btn && typeof updateThemeButton === 'function') {
+                                updateThemeButton(e.matches);
+                            }
+                        }
+                    });
+                } catch (e) {
+                    console.error("Theme initialization error:", e);
+                }
+            })();
+        </script>
 
-		{/* Canonical URL */}
-		<link rel="canonical" href={canonicalURL.href} />
+        <link rel="canonical" href={canonicalURL.href} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalURL.href} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={description} />
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={canonicalURL.href} />
+        <meta property="twitter:title" content={pageTitle} />
+        <meta property="twitter:description" content={description} />
+    </head>
+    <body class="min-h-screen flex flex-col bg-background">
+        <!-- Skip to content link - enhanced with better focus styles for keyboard users -->
+        <a href="#main-content" class="skip-to-content focus:outline-none focus:ring-2 focus:ring-primary">Skip to content</a>
 
-		{/* Open Graph / Facebook */}
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content={canonicalURL.href} />
-		<meta property="og:title" content={pageTitle} />
-		<meta property="og:description" content={description} />
-		{/* <meta property="og:image" content={new URL(image, Astro.url)} /> */}
+        <Header siteTitle="Don't Panic" navItems={navItems} currentPath={currentPath} />
 
-		{/* Twitter */}
-		<meta property="twitter:card" content="summary_large_image" />
-		<meta property="twitter:url" content={canonicalURL.href} />
-		<meta property="twitter:title" content={pageTitle} />
-		<meta property="twitter:description" content={description} />
-		{/* <meta property="twitter:image" content={new URL(image, Astro.url)} /> */}
+        <main id="main-content" class="flex-1" tabindex="-1" aria-label="Main content">
+            <slot />
+        </main>
 
-	</head>
-	<body class="bg-background text-text min-h-screen flex flex-col antialiased font-sans"> 
-		{/* Use Header and Footer Components */}
-		<Header siteTitle="Don't Panic" navItems={[]} currentPath={Astro.url.pathname} />
-
-		{/* Main content container with proper responsive constraints */}
-		<main class="flex-grow container mx-auto px-2 sm:px-4 md:px-6 py-4 md:py-6 w-full max-w-7xl"> {/* Responsive padding with max-width for very large screens */}
-			<slot /> {/* Page content will be injected here */}
-		</main>
-
-  		<Footer />
-  <!-- Theme toggle handler -->
-  <script type="module">
-    document.addEventListener('DOMContentLoaded', () => {
-      const btn = document.getElementById('themeToggleBtn');
-      if (!btn) return;
-      const html = document.documentElement;
-      // Set initial icon
-      btn.textContent = html.classList.contains('dark') ? '🌞' : '🌙';
-      // Toggle on click
-      btn.addEventListener('click', () => {
-        if (html.classList.contains('dark')) {
-          html.classList.remove('dark');
-          localStorage.setItem('theme', 'light');
-          btn.textContent = '🌙';
-        } else {
-          html.classList.add('dark');
-          localStorage.setItem('theme', 'dark');
-          btn.textContent = '🌞';
-        }
-      });
-    });
-  </script>
-  </body>
+        <Footer />
+        
+        <script is:inline type="module">
+            document.addEventListener("DOMContentLoaded", () => {
+                const btn = document.getElementById("themeToggleBtn");
+                if (!btn) return;
+                const html = document.documentElement;
+                const isDark = html.classList.contains("dark");
+                
+                // Update button appearance based on current theme
+                updateThemeButton(isDark);
+                
+                btn.addEventListener("click", () => {
+                    const isDarkMode = html.classList.contains("dark");
+                    
+                    // Add transition effect to the theme change
+                    const transition = document.createElement('div');
+                    transition.className = 'theme-transition';
+                    document.body.appendChild(transition);
+                    
+                    // Toggle theme after a small delay for the animation
+                    setTimeout(() => {
+                        if (isDarkMode) {
+                            html.classList.remove("dark");
+                            localStorage.setItem("theme", "light");
+                            updateThemeButton(false);
+                        } else {
+                            html.classList.add("dark");
+                            localStorage.setItem("theme", "dark");
+                            updateThemeButton(true);
+                        }
+                        
+                        // Dispatch theme change event for other components
+                        document.dispatchEvent(new CustomEvent('themeChanged', {
+                            detail: { isDark: !isDarkMode }
+                        }));
+                        
+                        // Remove the transition element
+                        setTimeout(() => {
+                            transition.style.opacity = '0';
+                            setTimeout(() => transition.remove(), 300);
+                        }, 100);
+                    }, 50);
+                });
+                
+                // Function to update theme button appearance
+                function updateThemeButton(isDark) {
+                    // Update icon
+                    btn.innerHTML = isDark 
+                        ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>'
+                        : '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>';
+                    
+                    // Update tooltip
+                    btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+                    btn.setAttribute('title', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+                    
+                    // Update visual style
+                    if (isDark) {
+                        btn.classList.add('theme-toggle-dark');
+                    } else {
+                        btn.classList.remove('theme-toggle-dark');
+                    }
+                }
+            });
+        </script>
+        
+        <style is:inline>
+            /* Theme transition effect */
+            .theme-transition {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.3);
+                z-index: 9999;
+                pointer-events: none;
+                opacity: 0.5;
+                transition: opacity 0.3s ease;
+                backdrop-filter: blur(4px);
+            }
+            
+            /* Theme toggle button animations */
+            #themeToggleBtn svg {
+                transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            }
+            
+            #themeToggleBtn:hover svg {
+                transform: rotate(12deg) scale(1.1);
+            }
+            
+            #themeToggleBtn:active svg {
+                transform: scale(0.9);
+                transition-duration: 0.1s;
+            }
+            
+            .theme-toggle-dark {
+                background-color: rgba(255, 255, 255, 0.1) !important;
+                color: #FFD700 !important; /* Gold color for the sun icon */
+                box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+            }
+            
+            /* Improve page transitions */
+            @media (prefers-reduced-motion: no-preference) {
+                main {
+                    animation: fadeIn 0.3s ease-out;
+                }
+                
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(6px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            }
+        </style>
+    </body>
 </html>

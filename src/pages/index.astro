@@ -24,27 +24,27 @@ const recentReports = reports.filter(r => r.data.publishDate > new Date(Date.now
 ---
 
 <BaseLayout title="Vulnerability Reports">
-  <!-- Compact Stats Header - Full Width -->
+  <!-- Enhanced Stats Header with improved mobile responsiveness -->
   <div class="bg-surface border-b border-border">
-    <div class="w-full mx-auto px-3 py-2 flex flex-wrap justify-center sm:justify-between items-center text-sm">
-      <h1 class="text-lg font-medium mb-2 sm:mb-0 text-text w-full sm:w-auto text-center sm:text-left">
+    <div class="w-full mx-auto px-3 py-3 flex flex-wrap justify-center sm:justify-between items-center text-sm">
+      <h1 class="text-lg font-medium mb-3 sm:mb-0 text-text w-full sm:w-auto text-center sm:text-left">
         <span class="text-primary font-semibold">Don't Panic</span> - Vulnerability Intelligence
       </h1>
       
-      <div class="flex flex-wrap justify-center gap-3 sm:gap-4">
-        <div class="flex items-center">
+      <div class="flex flex-wrap justify-center gap-4 sm:gap-5">
+        <div class="flex items-center px-2 py-1 rounded-md bg-primary/5 transition-colors hover:bg-primary/10">
           <span class="text-primary font-bold text-base">{reports.length}</span>
           <span class="ml-1 text-text-secondary">Reports</span>
         </div>
-        <div class="flex items-center">
+        <div class="flex items-center px-2 py-1 rounded-md bg-red-50 dark:bg-red-900/20 transition-colors hover:bg-red-100 dark:hover:bg-red-900/30">
           <span class="text-red-600 dark:text-red-400 font-bold text-base">{criticalCount}</span>
           <span class="ml-1 text-text-secondary">Critical</span>
         </div>
-        <div class="flex items-center">
+        <div class="flex items-center px-2 py-1 rounded-md bg-amber-50 dark:bg-amber-900/20 transition-colors hover:bg-amber-100 dark:hover:bg-amber-900/30">
           <span class="text-amber-600 dark:text-amber-400 font-bold text-base">{zerodays}</span>
           <span class="ml-1 text-text-secondary">Zero-Days</span>
         </div>
-        <div class="flex items-center">
+        <div class="flex items-center px-2 py-1 rounded-md bg-green-50 dark:bg-green-900/20 transition-colors hover:bg-green-100 dark:hover:bg-green-900/30">
           <span class="text-green-600 dark:text-green-400 font-bold text-base">{recentReports}</span>
           <span class="ml-1 text-text-secondary">New</span>
         </div>
@@ -52,8 +52,8 @@ const recentReports = reports.filter(r => r.data.publishDate > new Date(Date.now
     </div>
   </div>
   
-  <!-- Responsive Layout Container - Full Width -->
-  <div class="w-full max-w-[1800px] mx-auto px-2 sm:px-4 py-0 sm:py-6 flex flex-col md:flex-row md:gap-6">
+  <!-- Enhanced Responsive Layout Container with better spacing -->
+  <div class="w-full max-w-[1800px] mx-auto px-2 sm:px-4 py-2 sm:py-6 flex flex-col md:flex-row md:gap-6 relative">
     <!-- Sidebar - Visible on desktop, off-canvas on mobile -->
     <aside 
       id="filterSidebarWrapper" 
@@ -78,8 +78,8 @@ const recentReports = reports.filter(r => r.data.publishDate > new Date(Date.now
     <!-- Mobile Overlay for Sidebar -->
     <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden opacity-0 transition-opacity duration-300 ease-out"></div>
 
-    <!-- Main Content Area - Full Width -->
-    <main class="flex-1 md:pr-4 flex flex-col min-h-screen w-full order-1 md:order-2">
+    <!-- Enhanced Main Content Area with better mobile spacing -->
+    <main class="flex-1 md:pr-4 flex flex-col min-h-[calc(100vh-140px)] w-full order-1 md:order-2 pb-12 md:pb-0">
       <!-- Page Header and View Controls -->
       <header class="mb-6 pb-4 border-b border-border">
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
@@ -96,16 +96,18 @@ const recentReports = reports.filter(r => r.data.publishDate > new Date(Date.now
               <span id="mobileFilterCount" class="hidden ml-0.5 bg-primary text-white text-xs px-1 py-px rounded-full text-[10px] min-w-[16px] flex items-center justify-center">0</span>
             </div>
             
-            <!-- Enhanced View Toggle -->
-            <div class="inline-flex rounded-md border border-border overflow-hidden shadow-sm" role="group">
+            <!-- Enhanced View Toggle with improved accessibility -->
+            <div class="inline-flex rounded-md border border-border overflow-hidden shadow-sm" role="radiogroup" aria-label="View mode selection">
               <button 
                 type="button" 
                 id="tableViewBtn"
-                class="px-3 py-1.5 text-xs font-medium bg-surface text-text-secondary hover:bg-surface-accent/50 active:bg-surface-accent/70 focus:z-10 transition-colors min-h-[32px] flex items-center gap-1.5"
+                class="px-3 py-1.5 text-xs font-medium bg-surface text-text-secondary hover:bg-surface-accent/50 active:bg-surface-accent/70 focus:z-10 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-inset transition-colors min-h-[32px] flex items-center gap-1.5"
                 aria-current="true"
+                role="radio"
+                aria-checked="true"
                 aria-label="Switch to table view"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18M3 18h18M3 6h18" />
                 </svg>
                 <span>Table</span>
@@ -113,10 +115,12 @@ const recentReports = reports.filter(r => r.data.publishDate > new Date(Date.now
               <button 
                 type="button" 
                 id="cardViewBtn"
-                class="px-3 py-1.5 text-xs font-medium bg-surface text-text-secondary hover:bg-surface-accent/50 active:bg-surface-accent/70 transition-colors min-h-[32px] flex items-center gap-1.5"
+                class="px-3 py-1.5 text-xs font-medium bg-surface text-text-secondary hover:bg-surface-accent/50 active:bg-surface-accent/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-inset transition-colors min-h-[32px] flex items-center gap-1.5"
+                role="radio"
+                aria-checked="false"
                 aria-label="Switch to card view"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                 </svg>
                 <span>Cards</span>
@@ -149,24 +153,34 @@ const recentReports = reports.filter(r => r.data.publishDate > new Date(Date.now
         </div>
       </header>
 
-      <!-- Table View -->
-      <div id="tableContainer" class="bg-surface overflow-x-auto rounded-lg border border-border shadow-md flex-1 relative w-full max-w-full">
-        <table id="reportTable" class="w-full text-left text-sm border-collapse table-fixed sm:table-auto">
-          <thead class="bg-surface-accent border-b border-border sticky top-[0] z-10">
+      <!-- Enhanced Table View with better accessibility and loading state -->
+      <div id="tableContainer" class="bg-surface overflow-x-auto rounded-lg border border-border shadow-md flex-1 relative w-full max-w-full scrollbar-thin scrollbar-thumb-primary/40 scrollbar-track-transparent" role="region" aria-label="Vulnerability reports table" tabindex="0">
+        <!-- Loading state (hidden by default) -->
+        <div id="tableLoadingState" class="absolute inset-0 bg-surface/80 backdrop-blur-sm z-10 items-center justify-center hidden">
+          <div class="flex flex-col items-center space-y-3">
+            <div class="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+            <div class="text-sm text-primary font-medium" role="status">Loading data...</div>
+          </div>
+        </div>
+        <table id="reportTable" class="w-full text-left text-sm border-collapse table-fixed sm:table-auto" aria-describedby="resultsCount">
+          <thead class="bg-surface-accent border-b border-border sticky top-[0] z-10" aria-label="Column headers">
             <tr>
-              <th scope="col" data-sort-key="cve" class="px-4 py-3 font-medium text-text-secondary text-xs cursor-pointer hover:bg-surface-accent/80 whitespace-nowrap w-[100px]">
+              <th scope="col" data-sort-key="cve" class="px-4 py-3 font-medium text-text-secondary text-xs cursor-pointer hover:bg-surface-accent/80 whitespace-nowrap w-[100px]" aria-sort="none" role="columnheader">
                 <div class="flex items-center">
-                  CVE ID
+                  <span class="sr-only">Sort by </span>CVE ID
+                  <span class="sr-only"> (click to sort)</span>
                 </div>
               </th>
-              <th scope="col" data-sort-key="title" class="hidden sm:table-cell px-4 py-3 font-medium text-text-secondary text-xs cursor-pointer hover:bg-surface-accent/80 w-auto">
+              <th scope="col" data-sort-key="title" class="hidden sm:table-cell px-4 py-3 font-medium text-text-secondary text-xs cursor-pointer hover:bg-surface-accent/80 w-auto" aria-sort="none" role="columnheader">
                 <div class="flex items-center">
-                  Title <span class="ml-1 text-text-muted text-xs">↕</span>
+                  <span class="sr-only">Sort by </span>Title <span class="ml-1 text-text-muted text-xs" aria-hidden="true">↕</span>
+                  <span class="sr-only"> (click to sort)</span>
                 </div>
               </th>
-              <th scope="col" data-sort-key="cvss" class="px-4 py-3 font-medium text-text-secondary text-xs cursor-pointer hover:bg-surface-accent/80 whitespace-nowrap w-[70px]">
+              <th scope="col" data-sort-key="cvss" class="px-4 py-3 font-medium text-text-secondary text-xs cursor-pointer hover:bg-surface-accent/80 whitespace-nowrap w-[70px]" aria-sort="none" role="columnheader">
                 <div class="flex items-center">
-                  CVSS <span class="ml-1 text-text-muted text-xs">↕</span>
+                  <span class="sr-only">Sort by </span>CVSS <span class="ml-1 text-text-muted text-xs" aria-hidden="true">↕</span>
+                  <span class="sr-only"> (click to sort)</span>
                 </div>
               </th>
               <th scope="col" data-sort-key="epss" class="hidden md:table-cell px-4 py-3 font-medium text-text-secondary text-xs cursor-pointer hover:bg-surface-accent/80 whitespace-nowrap w-[70px]">
@@ -191,10 +205,10 @@ const recentReports = reports.filter(r => r.data.publishDate > new Date(Date.now
               </th>
             </tr>
           </thead>
-          <tbody id="reportTableBody" class="divide-y divide-border">
+          <tbody id="reportTableBody" class="divide-y divide-border" aria-live="polite">
             {reports.map((report, index) => (
               <tr 
-                class="hover:bg-surface-accent/30 transition-colors"
+                class="hover:bg-surface-accent/30 focus-within:bg-surface-accent/50 transition-colors group"
                 data-cve={report.slug}
                 data-severity={report.data.severity || report.data.cvssSeverity}
                 data-date={report.data.publishDate.toISOString().split('T')[0]}
@@ -205,11 +219,14 @@ const recentReports = reports.filter(r => r.data.publishDate > new Date(Date.now
                 data-product={report.data.product}
                 data-patch-available={report.data.patchAvailable.toString()}
                 data-kev={report.data.kev ? 'true' : 'false'}
+                tabindex="0"
+                aria-label={`Vulnerability report: ${report.data.cveId}, severity: ${report.data.severity || report.data.cvssSeverity}, CVSS: ${report.data.cvssScore !== undefined ? report.data.cvssScore.toFixed(1) : 'Not available'}`}
               >
                 <td class="px-4 py-3 whitespace-nowrap w-[100px]">
                   <a 
                     href={`/reports/${report.slug}`} 
-                    class="text-primary font-medium hover:underline inline-block text-sm"
+                    class="text-primary font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-1 rounded px-1 -mx-1 inline-block text-sm group-hover:text-primary-dark group-hover:font-semibold transition-all"
+                    aria-label={`View details for ${report.data.cveId}`}
                   >
                     {report.data.cveId}
                   </a>
@@ -244,8 +261,15 @@ const recentReports = reports.filter(r => r.data.publishDate > new Date(Date.now
         </table>
       </div>
       
-      <!-- Card View - hidden by default, grid columns increase responsively -->
-      <div id="cardView" class="hidden grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 p-0 bg-background w-full">
+      <!-- Enhanced Card View with accessibility improvements and loading state -->
+      <div id="cardView" class="hidden grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-5 p-1 sm:p-0 bg-background w-full" role="region" aria-label="Vulnerability reports in card view" tabindex="0">
+        <!-- Card view loading state (hidden by default) -->
+        <div id="cardLoadingState" class="absolute inset-0 bg-surface/80 backdrop-blur-sm z-10 items-center justify-center hidden">
+          <div class="flex flex-col items-center space-y-3">
+            <div class="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+            <div class="text-sm text-primary font-medium" role="status">Loading cards...</div>
+          </div>
+        </div>
         {reports.map((report) => (
           <div 
             data-cve={report.slug}
@@ -973,7 +997,37 @@ const recentReports = reports.filter(r => r.data.publishDate > new Date(Date.now
 
   // This function will be replaced by our improved toggleSidebar() implementation
 
-  // Enhanced view toggle between table and card layout with animations
+  // Create an accessibility announcer element for screen readers
+  function createAccessibilityAnnouncer() {
+    const announcer = document.createElement('div');
+    announcer.id = 'view-change-announcer';
+    announcer.className = 'sr-only';
+    announcer.setAttribute('aria-live', 'polite');
+    announcer.setAttribute('aria-atomic', 'true');
+    document.body.appendChild(announcer);
+    return announcer;
+  }
+
+  // Add keyboard navigation for table rows
+  function setupTableKeyboardNavigation() {
+    const tableBody = document.getElementById('reportTableBody');
+    if (!tableBody) return;
+    
+    // Add keyboard event listeners to table rows
+    tableBody.addEventListener('keydown', (e) => {
+      const row = e.target.closest('tr');
+      if (!row) return;
+      
+      // Enter or Space to trigger click on the link in the row
+      if ((e.key === 'Enter' || e.key === ' ') && row) {
+        e.preventDefault();
+        const link = row.querySelector('a');
+        if (link) link.click();
+      }
+    });
+  }
+
+  // Enhanced view toggle between table and card layout with animations and accessibility
   function setupViewToggle() {
     const tableViewBtn = document.getElementById('tableViewBtn');
     const cardViewBtn = document.getElementById('cardViewBtn');
@@ -1044,11 +1098,13 @@ const recentReports = reports.filter(r => r.data.publishDate > new Date(Date.now
       `;
       document.head.appendChild(styleSheet);
       
-      // Set initial active state for table view
+      // Set initial active state for table view with proper accessibility
       tableViewBtn.classList.add('view-toggle-active');
-      tableViewBtn.setAttribute('aria-current', 'true');
-      tableViewBtn.setAttribute('aria-pressed', 'true');
-      cardViewBtn.setAttribute('aria-pressed', 'false');
+      tableViewBtn.setAttribute('aria-checked', 'true');
+      cardViewBtn.setAttribute('aria-checked', 'false');
+      
+      // Create an accessibility announcer if needed
+      createAccessibilityAnnouncer();
       
       // Show a brief help tooltip on first visit
       const isFirstVisit = !localStorage.getItem('viewToggleUsed');
@@ -1081,17 +1137,19 @@ const recentReports = reports.filter(r => r.data.publishDate > new Date(Date.now
         }
       }
       
-      // Function to toggle active state with enhanced animations
+      // Function to toggle active state with enhanced animations and accessibility
       const setActiveView = (view) => {
         // Update button states
         tableViewBtn.classList.toggle('view-toggle-active', view === 'table');
         cardViewBtn.classList.toggle('view-toggle-active', view === 'card');
-        tableViewBtn.setAttribute('aria-current', view === 'table');
-        cardViewBtn.setAttribute('aria-current', view === 'card');
         
-        // Update button accessibility attributes
-        tableViewBtn.setAttribute('aria-pressed', view === 'table');
-        cardViewBtn.setAttribute('aria-pressed', view === 'card');
+        // Update button accessibility attributes for radiogroup pattern
+        tableViewBtn.setAttribute('aria-checked', view === 'table');
+        cardViewBtn.setAttribute('aria-checked', view === 'card');
+        
+        // Announce view change for screen readers
+        const announcer = document.getElementById('view-change-announcer') || createAccessibilityAnnouncer();
+        announcer.textContent = `View changed to ${view} view. ${view === 'table' ? 'Showing data in tabular format.' : 'Showing data in card format.'}`;
         
         // Add haptic feedback on mobile if available
         if ('vibrate' in navigator) {
@@ -1255,6 +1313,8 @@ const recentReports = reports.filter(r => r.data.publishDate > new Date(Date.now
 
   // Initialize when DOM is loaded
   document.addEventListener('DOMContentLoaded', () => {
+    // Setup keyboard navigation for table
+    setupTableKeyboardNavigation();
     // Initialize layout based on screen size
     const sidebarWrapper = document.getElementById('filterSidebarWrapper');
     if (sidebarWrapper) {
